@@ -40,6 +40,12 @@ RegisterNetEvent('QBCore:Player:SetPlayerData', function(val)
     PlayerData = val
 end)
 
+AddEventHandler('onResourceStart', function(resourceName)
+    if GetCurrentResourceName() ~= resourceName then return end
+    Wait(2000)
+    PlayerData = QBCore.Functions.GetPlayerData()
+end)
+
 --====================================================================================
 ------------------------------------------
 --                Functions             --

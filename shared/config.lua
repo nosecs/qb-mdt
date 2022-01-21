@@ -227,6 +227,21 @@ Config.PoliceJobs = {
     ['pa'] = true -- yucky
 }
 
+Config.AmbulanceJobs = {
+    ['ambulance'] = true,
+    ['doctor'] = true
+}
+
+-- Leave my hacky code alone ya goblins
+Config.AllowedJobs = {}
+for index, value in pairs(Config.PoliceJobs) do
+    Config.AllowedJobs[index] = value
+end
+for index, value in pairs(Config.AmbulanceJobs) do
+    Config.AllowedJobs[index] = value
+end
+-- Leave my hacky code alone ya goblins
+
 Config.LogPerms = {
 	['ambulance'] = {
 		[7] = true,

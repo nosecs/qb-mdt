@@ -17,6 +17,7 @@ local tabletRot = vector3(10.0, 160.0, 0.0)
 -- Events from qbcore
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerData = QBCore.Functions.GetPlayerData()
+    callSign = PlayerData.metadata.callsign
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
@@ -94,7 +95,7 @@ end
 
 local function EnableGUI(enable)
     print("MDT Enable GUI", enable)
-    if enable then TriggerServerEvent('erp_mdt:opendashboard') end
+    if enable then TriggerServerEvent('mdt:server:opendashboard') end
     SetNuiFocus(enable, enable)
     SendNUIMessage({ type = "show", enable = enable, job = PlayerData['job']['name'] })
     isOpen = enable
@@ -122,7 +123,7 @@ end, false)
 
 RegisterNUICallback("deleteBulletin", function(data, cb)
     local id = data.id
-    TriggerServerEvent('erp_mdt:deleteBulletin', id)
+    TriggerServerEvent('mdt:server:deleteBulletin', id)
     cb(true)
 end)
 
@@ -130,7 +131,7 @@ RegisterNUICallback("newBulletin", function(data, cb)
     local title = data.title
     local info = data.info
     local time = data.time
-    TriggerServerEvent('erp_mdt:newBulletin', title, info, time)
+    TriggerServerEvent('mdt:server:newBulletin', title, info, time)
     cb(true)
 end)
 
@@ -141,7 +142,7 @@ end)
 
 RegisterNUICallback("searchProfiles", function(data, cb)
     local name = data.name
-    TriggerServerEvent('erp_mdt:searchProfile', name)
+    TriggerServerEvent('mdt:server:searchProfile', name)
     cb(true)
 end)
 
@@ -219,19 +220,19 @@ RegisterNUICallback("saveProfile", function(data, cb)
     local cid = data.id
     local fName = data.fName
     local sName = data.sName
-    TriggerServerEvent("erp_mdt:saveProfile", profilepic, information, cid, fName, sName)
+    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName)
     cb(true)
 end)
 
 RegisterNUICallback("getProfileData", function(data, cb)
     local id = data.id
-    TriggerServerEvent('erp_mdt:getProfileData', id)
+    TriggerServerEvent('mdt:server:getProfileData', id)
     cb(true)
 end)
 
 RegisterNUICallback("newTag", function(data, cb)
     if data.id ~= "" and data.tag ~= "" then
-        TriggerServerEvent('erp_mdt:newTag', data.id, data.tag)
+        TriggerServerEvent('mdt:server:newTag', data.id, data.tag)
     end
     cb(true)
 end)
@@ -239,7 +240,7 @@ end)
 RegisterNUICallback("removeProfileTag", function(data, cb)
     local cid = data.cid
     local tagtext = data.text
-    TriggerServerEvent('erp_mdt:removeProfileTag', cid, tagtext)
+    TriggerServerEvent('mdt:server:removeProfileTag', cid, tagtext)
     cb(removeProfileTag)
 end)
 
@@ -247,39 +248,39 @@ RegisterNUICallback("updateLicence", function(data, cb)
     local type = data.type
     local status = data.status
     local cid = data.cid
-    TriggerServerEvent('erp_mdt:updateLicense', cid, type, status)
+    TriggerServerEvent('mdt:server:updateLicense', cid, type, status)
     cb(true)
 end)
 
 RegisterNUICallback("addGalleryImg", function(data, cb)
     local cid = data.cid
     local url = data.URL
-    TriggerServerEvent('erp_mdt:addGalleryImg', cid, url)
+    TriggerServerEvent('mdt:server:addGalleryImg', cid, url)
     cb(true)
 end)
 
 RegisterNUICallback("removeGalleryImg", function(data, cb)
     local cid = data.cid
     local url = data.URL
-    TriggerServerEvent('erp_mdt:removeGalleryImg', cid, url)
+    TriggerServerEvent('mdt:server:removeGalleryImg', cid, url)
     cb(true)
 end)
 
 RegisterNUICallback("searchIncidents", function(data, cb)
     local incident = data.incident
-    TriggerServerEvent('erp_mdt:searchIncidents', incident)
+    TriggerServerEvent('mdt:server:searchIncidents', incident)
     cb(true)
 end)
 
 RegisterNUICallback("getIncidentData", function(data, cb)
     local id = data.id
-    TriggerServerEvent('erp_mdt:getIncidentData', id)
+    TriggerServerEvent('mdt:server:getIncidentData', id)
     cb(true)
 end)
 
 RegisterNUICallback("incidentSearchPerson", function(data, cb)
     local name = data.name
-    TriggerServerEvent('erp_mdt:incidentSearchPerson', name )
+    TriggerServerEvent('mdt:server:incidentSearchPerson', name )
     cb(true)
 end)
 
@@ -320,23 +321,23 @@ end)
 
 RegisterNUICallback("searchBolos", function(data, cb)
     local searchVal = data.searchVal
-    TriggerServerEvent('erp_mdt:searchBolos', searchVal)
+    TriggerServerEvent('mdt:server:searchBolos', searchVal)
     cb(true)
 end)
 
 RegisterNUICallback("getAllBolos", function(data, cb)
-    TriggerServerEvent('erp_mdt:getAllBolos')
+    TriggerServerEvent('mdt:server:getAllBolos')
     cb(true)
 end)
 
 RegisterNUICallback("getAllIncidents", function(data, cb)
-    TriggerServerEvent('erp_mdt:getAllIncidents')
+    TriggerServerEvent('mdt:server:getAllIncidents')
     cb(true)
 end)
 
 RegisterNUICallback("getBoloData", function(data, cb)
     local id = data.id
-    TriggerServerEvent('erp_mdt:getBoloData', id)
+    TriggerServerEvent('mdt:server:getBoloData', id)
     cb(true)
 end)
 
@@ -352,19 +353,19 @@ RegisterNUICallback("newBolo", function(data, cb)
     local gallery = data.gallery
     local officers = data.officers
     local time = data.time
-    TriggerServerEvent('erp_mdt:newBolo', existing, id, title, plate, owner, individual, detail, tags, gallery, officers, time)
+    TriggerServerEvent('mdt:server:newBolo', existing, id, title, plate, owner, individual, detail, tags, gallery, officers, time)
     cb(true)
 end)
 
 RegisterNUICallback("deleteBolo", function(data, cb)
     local id = data.id
-    TriggerServerEvent('erp_mdt:deleteBolo', id)
+    TriggerServerEvent('mdt:server:deleteBolo', id)
     cb(true)
 end)
 
 RegisterNUICallback("deleteICU", function(data, cb)
     local id = data.id
-    TriggerServerEvent('erp_mdt:deleteICU', id)
+    TriggerServerEvent('mdt:server:deleteICU', id)
     cb(true)
 end)
 
@@ -395,19 +396,19 @@ end)
 --====================================================================================
 
 RegisterNUICallback("getAllReports", function(data, cb)
-    TriggerServerEvent('erp_mdt:getAllReports')
+    TriggerServerEvent('mdt:server:getAllReports')
     cb(true)
 end)
 
 RegisterNUICallback("getReportData", function(data, cb)
     local id = data.id
-    TriggerServerEvent('erp_mdt:getReportData', id)
+    TriggerServerEvent('mdt:server:getReportData', id)
     cb(true)
 end)
 
 RegisterNUICallback("searchReports", function(data, cb)
     local name = data.name
-    TriggerServerEvent('erp_mdt:searchReports', name)
+    TriggerServerEvent('mdt:server:searchReports', name)
     cb(true)
 end)
 
@@ -422,7 +423,7 @@ RegisterNUICallback("newReport", function(data, cb)
     local officers = data.officers
     local civilians = data.civilians
     local time = data.time
-    TriggerServerEvent('erp_mdt:newReport', existing, id, title, reporttype, detail, tags, gallery, officers, civilians, time)
+    TriggerServerEvent('mdt:server:newReport', existing, id, title, reporttype, detail, tags, gallery, officers, civilians, time)
     cb(true)
 end)
 
@@ -445,72 +446,66 @@ end)
 --====================================================================================
 RegisterNUICallback("searchVehicles", function(data, cb)
     local name = data.name
-    TriggerServerEvent('erp_mdt:searchVehicles', name, GetHashKey(name))
+    TriggerServerEvent('mdt:server:searchVehicles', name, GetHashKey(name))
     cb(true)
 end)
-
-
 
 RegisterNUICallback("getVehicleData", function(data, cb)
     local plate = data.plate
-    TriggerServerEvent('erp_mdt:getVehicleData', plate)
+    TriggerServerEvent('mdt:server:getVehicleData', plate)
     cb(true)
 end)
-
-
 
 RegisterNUICallback("saveVehicleInfo", function(data, cb)
     local dbid = data.dbid
     local plate = data.plate
     local imageurl = data.imageurl
     local notes = data.notes
-    TriggerServerEvent('erp_mdt:saveVehicleInfo', dbid, plate, imageurl, notes)
+    TriggerServerEvent('mdt:server:saveVehicleInfo', dbid, plate, imageurl, notes)
     cb(true)
 end)
-
-
 
 RegisterNUICallback("knownInformation", function(data, cb)
     local dbid = data.dbid
     local type = data.type
     local status = data.status
     local plate = data.plate
-    TriggerServerEvent('erp_mdt:knownInformation', dbid, type, status, plate)
+    TriggerServerEvent('mdt:server:knownInformation', dbid, type, status, plate)
     cb(true)
 end)
 
 RegisterNUICallback("getAllLogs", function(data, cb)
-    TriggerServerEvent('erp_mdt:getAllLogs')
+    TriggerServerEvent('mdt:server:getAllLogs')
     cb(true)
 end)
 
 RegisterNUICallback("getPenalCode", function(data, cb)
-    TriggerServerEvent('erp_mdt:getPenalCode')
+    TriggerServerEvent('mdt:server:getPenalCode')
     cb(true)
 end)
 
 RegisterNUICallback("toggleDuty", function(data, cb)
-    TriggerServerEvent('erp_mdt:toggleDuty', data.cid, data.status)
+    TriggerServerEvent('mdt:server:toggleDuty', data.cid, data.status)
     cb(true)
 end)
 
 RegisterNUICallback("setCallsign", function(data, cb)
-    TriggerServerEvent('erp_mdt:setCallsign', data.cid, data.newcallsign)
+    TriggerServerEvent('mdt:server:setCallsign', data.cid, data.newcallsign)
     cb(true)
 end)
 
 RegisterNUICallback("setRadio", function(data, cb)
-    TriggerServerEvent('erp_mdt:setRadio', data.cid, data.newradio)
+    TriggerServerEvent('mdt:server:setRadio', data.cid, data.newradio)
     cb(true)
 end)
 
 RegisterNUICallback("saveIncident", function(data, cb)
-    TriggerServerEvent('erp_mdt:saveIncident', data.ID, data.title, data.information, data.tags, data.officers, data.civilians, data.evidence, data.associated, data.time)
+    TriggerServerEvent('mdt:server:saveIncident', data.ID, data.title, data.information, data.tags, data.officers, data.civilians, data.evidence, data.associated, data.time)
     cb(true)
 end)
 
 RegisterNUICallback("removeIncidentCriminal", function(data, cb)
-    TriggerServerEvent('erp_mdt:removeIncidentCriminal', data.cid, data.incidentId)
+    TriggerServerEvent('mdt:server:removeIncidentCriminal', data.cid, data.incidentId)
     cb(true)
 end)
 
@@ -595,52 +590,52 @@ end)
 --====================================================================================
 
 RegisterNUICallback("setWaypoint", function(data, cb)
-    TriggerServerEvent('erp_mdt:setWaypoint', data.callid)
+    TriggerServerEvent('mdt:server:setWaypoint', data.callid)
     cb(true)
 end)
 
 RegisterNUICallback("callDetach", function(data, cb)
-    TriggerServerEvent('erp_mdt:callDetach', data.callid)
+    TriggerServerEvent('mdt:server:callDetach', data.callid)
     cb(true)
 end)
 
 RegisterNUICallback("callAttach", function(data, cb)
-    TriggerServerEvent('erp_mdt:callAttach', data.callid)
+    TriggerServerEvent('mdt:server:callAttach', data.callid)
     cb(true)
 end)
 
 RegisterNUICallback("attachedUnits", function(data, cb)
-    TriggerServerEvent('erp_mdt:attachedUnits', data.callid)
+    TriggerServerEvent('mdt:server:attachedUnits', data.callid)
     cb(true)
 end)
 
 RegisterNUICallback("callDispatchDetach", function(data, cb)
-    TriggerServerEvent('erp_mdt:callDispatchDetach', data.callid, data.cid)
+    TriggerServerEvent('mdt:server:callDispatchDetach', data.callid, data.cid)
     cb(true)
 end)
 
 RegisterNUICallback("setDispatchWaypoint", function(data, cb)
-    TriggerServerEvent('erp_mdt:setDispatchWaypoint', data.callid, data.cid)
+    TriggerServerEvent('mdt:server:setDispatchWaypoint', data.callid, data.cid)
     cb(true)
 end)
 
 RegisterNUICallback("callDragAttach", function(data, cb)
-    TriggerServerEvent('erp_mdt:callDragAttach', data.callid, data.cid)
+    TriggerServerEvent('mdt:server:callDragAttach', data.callid, data.cid)
     cb(true)
 end)
 
 RegisterNUICallback("setWaypointU", function(data, cb)
-    TriggerServerEvent('erp_mdt:setWaypoint:unit', data.cid)
+    TriggerServerEvent('mdt:server:setWaypoint:unit', data.cid)
     cb(true)
 end)
 
 RegisterNUICallback("dispatchMessage", function(data, cb)
-    TriggerServerEvent('erp_mdt:sendMessage', data.message, data.time)
+    TriggerServerEvent('mdt:server:sendMessage', data.message, data.time)
     cb(true)
 end)
 
 RegisterNUICallback("refreshDispatchMsgs", function(data, cb)
-    TriggerServerEvent('erp_mdt:refreshDispatchMsgs')
+    TriggerServerEvent('mdt:server:refreshDispatchMsgs')
     cb(true)
 end)
 
@@ -662,12 +657,12 @@ RegisterNUICallback("dispatchNotif", function(data, cb)
 end)
 
 RegisterNUICallback("getCallResponses", function(data, cb)
-    TriggerServerEvent('erp_mdt:getCallResponses', data.callid)
+    TriggerServerEvent('mdt:server:getCallResponses', data.callid)
     cb(true)
 end)
 
 RegisterNUICallback("sendCallResponse", function(data, cb)
-    TriggerServerEvent('erp_mdt:sendCallResponse', data.message, data.time, data.callid)
+    TriggerServerEvent('mdt:server:sendCallResponse', data.message, data.time, data.callid)
     cb(true)
 end)
 
@@ -693,17 +688,17 @@ RegisterNUICallback("impoundVehicle", function(data, cb)
     end
 
     SendNUIMessage({ type = "greenShit" })
-    TriggerServerEvent('erp_mdt:impoundVehicle', data, found)
+    TriggerServerEvent('mdt:server:impoundVehicle', data, found)
     cb('okbb')
 end)
 
 RegisterNUICallback("removeImpound", function(data, cb)
-	TriggerServerEvent('erp_mdt:removeImpound', data['plate'])
+	TriggerServerEvent('mdt:server:removeImpound', data['plate'])
 	cb('ok')
 end)
 
 RegisterNUICallback("statusImpound", function(data, cb)
-	TriggerServerEvent('erp_mdt:statusImpound', data['plate'])
+	TriggerServerEvent('mdt:server:statusImpound', data['plate'])
 	cb('ok')
 end)
 

@@ -1,5 +1,3 @@
-local QBCore = exports['qb-core']:GetCoreObject()
-
 -- Maybe cache?
 local incidents = {}
 local convictions = {}
@@ -17,147 +15,8 @@ CreateThread(function()
 end)
 
 
--- (Start) Opening the MDT and sending data
-local function AddLog(text)
-	exports.oxmysql:executeSync('INSERT INTO `pd_logs` (`text`, `time`) VALUES (:text, :time)', { text = text, time = os.time() * 1000 })
-end
-
-local function GetNameFromId(cid)
-	-- Should be a scalar?
-	return MySQL.scalar.await('SELECT charinfo FROM `users` WHERE cid = ? LIMIT 1', { cid })
-	-- return exports.oxmysql:executeSync('SELECT firstname, lastname FROM `users` WHERE id = :id LIMIT 1', { id = cid })
-end
-
--- idk what this is used for either
-local function GetPersonInformation(cid, jobtype)
-	return MySQL.query.await('SELECT information, tags, gallery FROM mdtdata WHERE cid = ? and jobtype = ?', { cid, jobtype })
-	-- return exports.oxmysql:executeSync('SELECT information, tags, gallery FROM mdt WHERE cid= ? and type = ?', { cid, jobtype })
-end
-
--- idk but I guess sure?
-local function GetIncidentName(id)
-	-- Should also be a scalar
-	return MySQL.query.await('SELECT title FROM `pd_incidents` WHERE id = :id LIMIT 1', { id = id })
-	-- return exports.oxmysql:executeSync('SELECT title FROM `pd_incidents` WHERE id = :id LIMIT 1', { id = id })
-end
-
-local function GetConvictions(cids)
-	return MySQL.query.await('SELECT * FROM `pd_convictions` WHERE `cid` IN(?)', { cids })
-	-- return exports.oxmysql:executeSync('SELECT * FROM `pd_convictions` WHERE `cid` IN(?)', { cids })
-end
-
-local function GetLicenseInfo(cid)
-	return MySQL.query.await('SELECT * FROM `licenses` WHERE `cid` = ?', { cid })
-	-- return exports.oxmysql:executeSync('SELECT * FROM `licenses` WHERE `cid`=:cid', { cid = cid })
-end
-
-local function CreateUser(cid, tableName)
-	AddLog("A user was created with the CID: "..cid)
-	-- return exports.oxmysql:insert("INSERT INTO `"..dbname.."` (cid) VALUES (:cid)", { cid = cid })
-	return MySQL.insert.await("INSERT INTO `"..tableName.."` (cid) VALUES (:cid)", { cid = cid })
-end
-
-local function GetVehicleInformation(cid, cb)
-	return MySQL.query.await('SELECT id, plate, vehicle FROM owned_vehicles WHERE owner=:cid', { cid = cid })
-	-- return exports.oxmysql:executeSync('SELECT id, plate, vehicle FROM owned_vehicles WHERE owner=:cid', { cid = cid })
-end
-
-local function GetBulletins(JobType)
-	return MySQL.query.await('SELECT * FROM `mdt_bulletin` WHERE `jobtype` = ? LIMIT 10', { JobType })
-	-- return exports.oxmysql:executeSync('SELECT * FROM `mdt_bulletin` WHERE `type`= ? LIMIT 10', { JobType })
-end
-
-local function GetPlayerDataById(id)
-	return MySQL.query.await('SELECT citizenid, charinfo, job FROM players WHERE citizenid = ? LIMIT 1', { id })
-	-- return exports.oxmysql:executeSync('SELECT citizenid, charinfo, job FROM players WHERE citizenid = ? LIMIT 1', { id })
-end
-
-local function GetPlayerData(source)
-	local Player = QBCore.Functions.GetPlayer(source)
-	return Player.PlayerData
-end
-
-local function UnpackJob(data)
-	local job = {
-		name = data.name,
-		label =data.label
-	}
-	local grade = {
-		name = data.job.grade.name,
-	}
-
-	return job, grade
-end
-
--- There is probably a better way but mehhhhhhh
-local function GetJobType(PlayerData)
-	local JobTypes = {}
-	for key, value in pairs(Config.PoliceJobs) do
-		if value then
-			JobTypes[key] = 'police'
-		end
-	end
-
-	for key, value in pairs(Config.AmbulanceJobs) do
-		if value then
-			JobTypes[key] = 'ambulance'
-		end
-	end
-
-	for key, value in pairs(Config.DojJobs) do
-		if value then
-			JobTypes[key] = 'doj'
-		end
-	end
-
-	return JobTypes[PlayerData.job.name]
-end
-
--- Probs also best not to use
-local function GetImpoundStatus(vehicleid, cb)
-	cb( #(exports.oxmysql:executeSync('SELECT id FROM `impound` WHERE `vehicleid`=:vehicleid', {['vehicleid'] = vehicleid })) > 0 )
-end
-
-local function GetBoloStatus(plate, cb)
-	cb(exports.oxmysql:executeSync('SELECT id FROM `pd_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)}))
-end
-
-local function GetOwnerName(cid, cb)
-	cb(exports.oxmysql:executeSync('SELECT firstname, lastname FROM `users` WHERE id=:cid LIMIT 1', { cid = cid}))
-end
-
-local function GetVehicleInformation(plate, cb)
-	cb(exports.oxmysql:executeSync('SELECT id, information FROM `pd_vehicleinfo` WHERE plate=:plate', { plate = plate}))
-end
-
-
-local function GetNameFromPlayerData(PlayerData)
-	return ('%s %s'):format(PlayerData.charinfo.firstname, PlayerData.charinfo.lastname)
-end
-
--- Check if user has permission
-local function permCheck (src)
-	local PlayerData = GetPlayerData(src)
-	local result = true
-
-	-- if job is not in config
-	if not Config.AllowedJobs[PlayerData.job.name] then
-		-- idk if you have better log system or a notify system
-		print(("UserId: %s(%d) tried to access the mdt even though they are not authorised (server direct)"):format(GetPlayerName(src), src))
-		result = false
-	end
-
-	return result
-end
-
-local function ProfPic(gender, profilepic)
-	if profilepic then return profilepic end;
-	if gender == "f" then return "img/female.png" end;
-	return "img/male.png"
-end
-
 local function openMDT(src)
-	if not permCheck(src) then return end
+	if not PermCheck(src) then return end
 	local PlayerData = GetPlayerData(src)
 	local Radio = Player(src).state.radioChannel or 0
 	if Radio > 100 then
@@ -183,7 +42,7 @@ end)
 
 QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb, sentData)
 	if not sentData then  return cb({}) end
-	if not permCheck(src) then return cb({}) end
+	if not PermCheck(src) then return cb({}) end
 	local src = source
 	local PlayerData = GetPlayerData(src)
 	local JobName = PlayerData.job.name
@@ -233,7 +92,7 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 end)
 
 QBCore.Functions.CreateCallback('mdt:server:OpenDashboard', function(source, cb)
-	if not permCheck(source) then return end
+	if not PermCheck(source) then return end
 	local PlayerData = GetPlayerData(source)
 	local JobType = GetJobType(PlayerData)
 	local bulletin = GetBulletins(JobType)
@@ -242,7 +101,7 @@ end)
 
 RegisterNetEvent('mdt:server:NewBulletin', function(title, info, time)
 	local src = source
-	if not permCheck(src) then return end
+	if not PermCheck(src) then return end
 	local PlayerData = GetPlayerData(src)
 	local JobType = GetJobType(PlayerData)
 
@@ -261,7 +120,7 @@ end)
 RegisterNetEvent('mdt:server:DeleteBulletin', function(id)
 	if not id then return false end
 	local src = source
-	if not permCheck(src) then return end
+	if not PermCheck(src) then return end
 	local PlayerData = GetPlayerData(src)
 	local JobType = GetJobType(PlayerData)
 
@@ -276,7 +135,7 @@ end)
 QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb, sentId)
 	local src = source
 	if not sentId then return cb({}) end
-	if not permCheck(src) then return cb({}) end
+	if not PermCheck(src) then return cb({}) end
 	local PlayerData = GetPlayerData(src)
 	local JobType = GetJobType(PlayerData)
 	local target = GetPlayerDataById(sendId)
@@ -327,7 +186,7 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 end)
 
 RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName, sName)
-	if not permCheck(src) then return cb({}) end
+	if not PermCheck(src) then return cb({}) end
 	local PlayerData = GetPlayerData(src)
 	local JobType = GetJobType(PlayerData)
 	local target = GetPlayerDataById(sendId)

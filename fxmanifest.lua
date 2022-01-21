@@ -8,7 +8,11 @@ version '0.0.1'
 lua54 'yes'
 
 shared_script 'shared/config.lua'
-server_script 'server/main.lua'
+server_scripts {
+    'server/utils.lua',
+    'server/dbm.lua',
+    'server/main.lua'
+}
 client_script 'client/main.lua'
 
 ui_page 'ui/dashboard.html'

@@ -6,7 +6,16 @@ local convictions = {}
 local bolos = {}
 
 -- TODO make it departments compatible
-local ActiveUnits = {}
+local activeUnits = {}
+
+local impound = {}
+local dispatchMessages = {}
+
+CreateThread(function()
+	Wait(1800000)
+	dispatchMessages = {}
+end)
+
 
 -- (Start) Opening the MDT and sending data
 local function AddLog(text)
@@ -95,6 +104,12 @@ local function GetJobType(PlayerData)
 		end
 	end
 
+	for key, value in pairs(Config.DojJobs) do
+		if value then
+			JobTypes[key] = 'doj'
+		end
+	end
+
 	return JobTypes[PlayerData.job.name]
 end
 
@@ -149,7 +164,7 @@ local function openMDT(src)
 		Radio = 0
 	end
 
-	ActiveUnits[PlayerData.job.name][#ActiveUnits[PlayerData.job.name] + 1] = {
+	activeUnits[PlayerData.job.name][#activeUnits[PlayerData.job.name] + 1] = {
 		callSign = PlayerData.metadata['callsign'],
 		firstName = PlayerData.charinfo.firstname,
 		lastName = PlayerData.charinfo.lastname,
@@ -157,8 +172,8 @@ local function openMDT(src)
 	}
 
 
-	TriggerClientEvent('mdt:client:open', result.source)
-	TriggerClientEvent('mdt:client:GetActiveUnits', source, ActiveUnits)
+	TriggerClientEvent('mdt:client:open', src)
+	TriggerClientEvent('mdt:client:GetActiveUnits', source, activeUnits)
 end
 
 QBCore.Commands.Add("mdt", "Opens the mdt", {}, false, function(source)
@@ -167,8 +182,8 @@ QBCore.Commands.Add("mdt", "Opens the mdt", {}, false, function(source)
 end)
 
 QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb, sentData)
-	if not sentData then cb({}) return end
-	if not permCheck(src) then return end
+	if not sentData then  return cb({}) end
+	if not permCheck(src) then return cb({}) end
 	local src = source
 	local PlayerData = GetPlayerData(src)
 	local JobName = PlayerData.job.name
@@ -869,7 +884,7 @@ RegisterNetEvent('mdt:server:incidentSearchPerson', function(name)
             if result then
                 if result.job and (result.job.isPolice or result.job.name == 'doj') then
 
-                    local function PpPpPpic(gender, profilepic)
+                    local function ProfPic(gender, profilepic)
                         if profilepic then return profilepic end;
                         if gender == "f" then return "img/female.png" end;
                         return "img/male.png"
@@ -879,7 +894,7 @@ RegisterNetEvent('mdt:server:incidentSearchPerson', function(name)
                         query = string.lower('%'..name..'%') -- % wildcard, needed to search for all alike results
                     }, function(data)
                         for i=1, #data do
-                            data[i]['profilepic'] = PpPpPpic(data[i]['gender'], data[i]['profilepic'])
+                            data[i]['profilepic'] = ProfPic(data[i]['gender'], data[i]['profilepic'])
                         end
                         TriggerClientEvent('mdt:client:incidentSearchPerson', result.source, data)
                     end)
@@ -1336,8 +1351,6 @@ RegisterNetEvent('mdt:server:getPenalCode', function()
 	TriggerClientEvent('mdt:client:getPenalCode', source, PenalCodeTitles, PenalCode)
 end)
 
-
-
 RegisterNetEvent('mdt:server:toggleDuty', function(cid, status)
 	TriggerEvent('echorp:getplayerfromid', source, function(result)
 		local player = exports['echorp']:GetPlayerFromCid(tonumber(cid))
@@ -1585,7 +1598,7 @@ end)
 
 -- Dispatch chat
 
-local dispatchmessages = {}
+
 
 --[[
 	profilepic
@@ -1593,13 +1606,6 @@ local dispatchmessages = {}
 	message
 	time
 ]]
-
-local function PpPpPpic(gender, profilepic)
-	if profilepic then return profilepic end;
-	if gender == "f" then return "img/female.png" end;
-	return "img/male.png"
-end
-
 
 RegisterNetEvent('mdt:server:sendMessage', function(message, time)
 	if message and time then
@@ -1609,7 +1615,7 @@ RegisterNetEvent('mdt:server:sendMessage', function(message, time)
 					id = player['cid'] -- % wildcard, needed to search for all alike results
 				}, function(data)
 					if data and data[1] then
-						local ProfilePicture = PpPpPpic(data[1]['gender'], data[1]['profilepic'])
+						local ProfilePicture = ProfPic(data[1]['gender'], data[1]['profilepic'])
 						local callsign = GetResourceKvpString(player['cid']..'-callsign') or "000"
 						local Item = {
 							profilepic = ProfilePicture,
@@ -1620,7 +1626,7 @@ RegisterNetEvent('mdt:server:sendMessage', function(message, time)
 							time = time,
 							job = player['job']['name']
 						}
-						table.insert(dispatchmessages, Item)
+						table.insert(dispatchMessages, Item)
 						TriggerClientEvent('mdt:client:dashboardMessage', -1, Item)
 						-- Send to all clients, for auto updating stuff, ya dig.
 					end
@@ -1634,7 +1640,7 @@ RegisterNetEvent('mdt:server:refreshDispatchMsgs', function()
 	TriggerEvent('echorp:getplayerfromid', source, function(result)
 		if result then
 			if result.job and (result.job.isPolice or (result.job.name == 'ambulance' or result.job.name == 'doj')) then
-				TriggerClientEvent('mdt:client:dashboardMessages', result['source'], dispatchmessages)
+				TriggerClientEvent('mdt:client:dashboardMessages', result['source'], dispatchMessages)
 			end
 		end
 	end)
@@ -1651,7 +1657,6 @@ RegisterNetEvent('mdt:server:getCallResponses', function(callid)
 	end)
 end)
 
-
 RegisterNetEvent('mdt:server:sendCallResponse', function(message, time, callid)
 	TriggerEvent('echorp:getplayerfromid', source, function(result)
 		if result then
@@ -1666,10 +1671,6 @@ RegisterNetEvent('mdt:server:sendCallResponse', function(message, time, callid)
 	end)
 end)
 
-CreateThread(function()
-	Wait(1800000)
-	dispatchmessages = {}
-end)
 RegisterNetEvent('mdt:server:setRadio', function(cid, newcallsign)
 	TriggerEvent('echorp:getplayerfromid', source, function(result)
 		if result then
@@ -1684,14 +1685,12 @@ RegisterNetEvent('mdt:server:setRadio', function(cid, newcallsign)
 	end)
 end)
 
-local Impound = {}
-
 local function isRequestVehicle(vehId)
 	local found = false
-	for i=1, #Impound do
-		if Impound[i]['vehicle'] == vehId then
+	for i=1, #impound do
+		if impound[i]['vehicle'] == vehId then
 			found = true
-			Impound[i] = nil
+			impound[i] = nil
 			break
 		end
 	end
@@ -1728,7 +1727,7 @@ RegisterNetEvent('mdt:server:impoundVehicle', function(sentInfo, sentVehicle)
 									}
 									local vehicle = NetworkGetEntityFromNetworkId(sentVehicle)
 									FreezeEntityPosition(vehicle, true)
-									table.insert(Impound, data)
+									table.insert(impound, data)
 									TriggerClientEvent('mdt:client:notifyMechanics', -1, data)
 								end)
 							end
@@ -1744,30 +1743,30 @@ end)
 
 
 RegisterNetEvent('mdt:server:getImpoundVehicles', function()
-	TriggerClientEvent('mdt:client:getImpoundVehicles', source, Impound)
+	TriggerClientEvent('mdt:client:getImpoundVehicles', source, impound)
 end)
 
 RegisterNetEvent('mdt:server:collectVehicle', function(sentId)
 	TriggerEvent('echorp:getplayerfromid', source, function(player)
 		if player then
 			local source = source
-			for i=1, #Impound do
-				local id = Impound[i]['vehicleid']
+			for i=1, #impound do
+				local id = impound[i]['vehicleid']
 				if tostring(id) == tostring(sentId) then
-					local vehicle = NetworkGetEntityFromNetworkId(Impound[i]['vehicle'])
+					local vehicle = NetworkGetEntityFromNetworkId(impound[i]['vehicle'])
 					if not DoesEntityExist(vehicle) then
 						TriggerClientEvent('erp_phone:sendNotification', source, {img = 'vehiclenotif.png', title = "Impound", content = "This vehicle has already been impounded.", time = 5000 })
-						Impound[i] = nil
+						impound[i] = nil
 						return
 					end
-					local collector = Impound[i]['beingcollected']
+					local collector = impound[i]['beingcollected']
 					if collector ~= 0 and GetPlayerPing(collector) >= 0 then
 						TriggerClientEvent('erp_phone:sendNotification', source, {img = 'vehiclenotif.png', title = "Impound", content = "This vehicle is being collected.", time = 5000 })
 						return
 					end
-					Impound[i]['beingcollected'] = source
+					impound[i]['beingcollected'] = source
 					TriggerClientEvent('mdt:client:collectVehicle', source, GetEntityCoords(vehicle))
-					TriggerClientEvent('erp_phone:sendNotification', Impound[i]['src'], {img = 'vehiclenotif.png', title = "Impound", content = player['fullname'].." is collecing the vehicle with plate "..Impound[i]['plate'].."!", time = 5000 })
+					TriggerClientEvent('erp_phone:sendNotification', impound[i]['src'], {img = 'vehiclenotif.png', title = "Impound", content = player['fullname'].." is collecing the vehicle with plate "..impound[i]['plate'].."!", time = 5000 })
 					break
 				end
 			end

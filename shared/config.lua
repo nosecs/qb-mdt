@@ -218,6 +218,7 @@ Config.PenalCode = {
 }
 
 Config.PoliceJobs = {
+    ['police'] = true,
     ['lspd'] = true,
     ['bcso'] = true,
     ['sast'] = true,
@@ -232,12 +233,17 @@ Config.AmbulanceJobs = {
     ['doctor'] = true
 }
 
+Config.DojJobs = {}
+
 -- Leave my hacky code alone ya goblins
 Config.AllowedJobs = {}
 for index, value in pairs(Config.PoliceJobs) do
     Config.AllowedJobs[index] = value
 end
 for index, value in pairs(Config.AmbulanceJobs) do
+    Config.AllowedJobs[index] = value
+end
+for index, value in pairs(Config.DojJobs) do
     Config.AllowedJobs[index] = value
 end
 -- Leave my hacky code alone ya goblins

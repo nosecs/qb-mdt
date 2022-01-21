@@ -44,6 +44,7 @@ AddEventHandler('onResourceStart', function(resourceName)
     if GetCurrentResourceName() ~= resourceName then return end
     Wait(2000)
     PlayerData = QBCore.Functions.GetPlayerData()
+    callSign = PlayerData.metadata.callsign
 end)
 
 --====================================================================================
@@ -186,7 +187,7 @@ RegisterNetEvent('mdt:client:deleteBulletin', function(ignoreId, sentData, job)
     end
 end)
 
-RegisterNetEvent('mdt:client:open', function(job, jobLabel, lastname, firstname)
+RegisterNetEvent('mdt:client:open', function()
     EnableGUI(true)
     local x, y, z = table.unpack(GetEntityCoords(PlayerPedId()))
 
@@ -203,7 +204,7 @@ RegisterNetEvent('mdt:client:open', function(job, jobLabel, lastname, firstname)
     elseif currentStreetName ~= nil and currentStreetName ~= "" then playerStreetsLocation = currentStreetName .. ", " .. area
     else playerStreetsLocation = area end
 
-    SendNUIMessage({ type = "data", name = "Welcome, " ..jobLabel..' '..lastname, location = playerStreetsLocation, fullname = firstname..' '..lastname })
+    SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.name..' '..PlayerData.charinfo.lastname, location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname })
 end)
 
 RegisterNetEvent('mdt:client:exitMDT', function()

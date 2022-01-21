@@ -1,4 +1,5 @@
----@diagnostic disable: unused-function
+local QBCore = exports['qb-core']:GetCoreObject()
+
 -- (Start) Opening the MDT and sending data
 function AddLog(text)
     return MySQL.insert.await('INSERT INTO `pd_logs` (`text`, `time`) VALUES (?,?)', {text = text, time = os.time() * 1000})

@@ -120,7 +120,7 @@ $(document).ready(() => {
     $(".profile-items").on("click", ".profile-item", function () {
         let id = $(this).data("id");
         $.post(
-            "https://erp_mdt/getProfileData",
+            "https://qbcore_erp_mdt/getProfileData",
             JSON.stringify({
                 id: id,
             })
@@ -160,7 +160,7 @@ $(document).ready(() => {
             let info = $(this).find(".bulletin-item-info").text();
             let time = new Date();
             $.post(
-                "https://erp_mdt/newBulletin",
+                "https://qbcore_erp_mdt/newBulletin",
                 JSON.stringify({
                     title: title,
                     info: info,
@@ -206,7 +206,7 @@ $(document).ready(() => {
             .find("[data-id='" + BulletinId + "']")
             .remove();
         $.post(
-            "https://erp_mdt/deleteBulletin",
+            "https://qbcore_erp_mdt/deleteBulletin",
             JSON.stringify({
                 id: BulletinId,
             })
@@ -252,7 +252,7 @@ $(document).ready(() => {
                 setTimeout(() => {
                     URL = $("." + randomNum).attr("src");
                     $.post(
-                        "https://erp_mdt/addGalleryImg",
+                        "https://qbcore_erp_mdt/addGalleryImg",
                         JSON.stringify({
                             cid: cid,
                             URL: URL,
@@ -297,7 +297,7 @@ $(document).ready(() => {
                 const sName = $(".manage-profile-name-input-2").val();
 
                 $.post(
-                    "https://erp_mdt/saveProfile",
+                    "https://qbcore_erp_mdt/saveProfile",
                     JSON.stringify({
                         pfp: pfp,
                         description: description,
@@ -450,7 +450,7 @@ $(document).ready(() => {
                 });
 
                 $.post(
-                    "https://erp_mdt/saveIncident",
+                    "https://qbcore_erp_mdt/saveIncident",
                     JSON.stringify({
                         ID: dbid,
                         title: title,
@@ -476,7 +476,7 @@ $(document).ready(() => {
                             $(".incidents-search-refresh").html("Refresh");
                             canRefreshIncidents = true;
                             $.post(
-                                "https://erp_mdt/getAllIncidents",
+                                "https://qbcore_erp_mdt/getAllIncidents",
                                 JSON.stringify({})
                             );
                         }, 1500);
@@ -579,7 +579,7 @@ $(document).ready(() => {
             setTimeout(() => {
                 $("#dmv-search-input:text").val(plate.toString());
                 $.post(
-                    "https://erp_mdt/searchVehicles",
+                    "https://qbcore_erp_mdt/searchVehicles",
                     JSON.stringify({
                         name: plate.toString(),
                     })
@@ -588,7 +588,7 @@ $(document).ready(() => {
                 $(".dmv-items").prepend(`<div class="profile-loader"></div>`);
                 setTimeout(() => {
                     $.post(
-                        "https://erp_mdt/getVehicleData",
+                        "https://qbcore_erp_mdt/getVehicleData",
                         JSON.stringify({
                             plate: plate.toString(),
                         })
@@ -698,7 +698,7 @@ $(document).ready(() => {
 
     $(".contextmenu").on("click", ".revoke-licence", function () {
         $.post(
-            "https://erp_mdt/updateLicence",
+            "https://qbcore_erp_mdt/updateLicence",
             JSON.stringify({
                 cid: $(".manage-profile-citizenid-input").val(),
                 type: $(this).data("info"),
@@ -717,7 +717,7 @@ $(document).ready(() => {
 
     $(".contextmenu").on("click", ".give-licence", function () {
         $.post(
-            "https://erp_mdt/updateLicence",
+            "https://qbcore_erp_mdt/updateLicence",
             JSON.stringify({
                 cid: $(".manage-profile-citizenid-input").val(),
                 type: $(this).data("info"),
@@ -753,7 +753,7 @@ $(document).ready(() => {
             if (name !== "") {
                 canSearchForProfiles = false;
                 $.post(
-                    "https://erp_mdt/searchProfiles",
+                    "https://qbcore_erp_mdt/searchProfiles",
                     JSON.stringify({
                         name: name,
                     })
@@ -784,7 +784,7 @@ $(document).ready(() => {
             if (incident !== "") {
                 canSearchForProfiles = false;
                 $.post(
-                    "https://erp_mdt/searchIncidents",
+                    "https://qbcore_erp_mdt/searchIncidents",
                     JSON.stringify({
                         incident: incident,
                     })
@@ -803,7 +803,7 @@ $(document).ready(() => {
             e.preventDefault();
             const time = new Date();
             $.post(
-                "https://erp_mdt/dispatchMessage",
+                "https://qbcore_erp_mdt/dispatchMessage",
                 JSON.stringify({
                     message: $(this).val(),
                     time: time.getTime(),
@@ -816,7 +816,7 @@ $(document).ready(() => {
     $(".incidents-items").on("click", ".incidents-item", function () {
         const id = $(this).data("id");
         $.post(
-            "https://erp_mdt/getIncidentData",
+            "https://qbcore_erp_mdt/getIncidentData",
             JSON.stringify({
                 id: id,
             })
@@ -836,7 +836,7 @@ $(document).ready(() => {
                     $("#profile-search-input:text").val(name);
                     canSearchForProfiles = false;
                     $.post(
-                        "https://erp_mdt/searchProfiles",
+                        "https://qbcore_erp_mdt/searchProfiles",
                         JSON.stringify({
                             name: name,
                         })
@@ -847,7 +847,7 @@ $(document).ready(() => {
                     );
                     setTimeout(() => {
                         $.post(
-                            "https://erp_mdt/getProfileData",
+                            "https://qbcore_erp_mdt/getProfileData",
                             JSON.stringify({
                                 id: name,
                             })
@@ -918,7 +918,7 @@ $(document).ready(() => {
             }
 
             if (shouldClose == true) {
-                $.post("https://erp_mdt/escape", JSON.stringify({}));
+                $.post("https://qbcore_erp_mdt/escape", JSON.stringify({}));
             }
         }
     };
@@ -938,7 +938,7 @@ $(document).ready(() => {
         if (e.keyCode === 13) {
             let name = $(".icidents-person-search-name-input").val();
             $.post(
-                "https://erp_mdt/incidentSearchPerson",
+                "https://qbcore_erp_mdt/incidentSearchPerson",
                 JSON.stringify({
                     name: name,
                 })
@@ -1183,7 +1183,7 @@ $(document).ready(() => {
             let time = new Date();
 
             $.post(
-                "https://erp_mdt/newBolo",
+                "https://qbcore_erp_mdt/newBolo",
                 JSON.stringify({
                     existing: existing,
                     id: id,
@@ -1245,7 +1245,7 @@ $(document).ready(() => {
             if (searchVal !== "") {
                 canSearchForProfiles = false;
                 $.post(
-                    "https://erp_mdt/searchBolos",
+                    "https://qbcore_erp_mdt/searchBolos",
                     JSON.stringify({
                         searchVal: searchVal,
                     })
@@ -1267,7 +1267,7 @@ $(document).ready(() => {
                 $(".bolos-search-refresh").empty();
                 $(".bolos-search-refresh").html("Refresh");
                 canRefreshBolo = true;
-                $.post("https://erp_mdt/getAllBolos", JSON.stringify({}));
+                $.post("https://qbcore_erp_mdt/getAllBolos", JSON.stringify({}));
             }, 1500);
         }
     });
@@ -1372,7 +1372,7 @@ $(document).ready(() => {
         canInputBoloOfficerTag = true;
         let id = $(this).data("id");
         $.post(
-            "https://erp_mdt/getBoloData",
+            "https://qbcore_erp_mdt/getBoloData",
             JSON.stringify({
                 id: id,
             })
@@ -1386,7 +1386,7 @@ $(document).ready(() => {
                     .find("[data-id='" + $(this).data("info") + "']")
                     .remove();
                 $.post(
-                    "https://erp_mdt/deleteICU",
+                    "https://qbcore_erp_mdt/deleteICU",
                     JSON.stringify({
                         id: $(this).data("info"),
                     })
@@ -1396,7 +1396,7 @@ $(document).ready(() => {
                 .find("[data-id='" + $(this).data("info") + "']")
                 .remove();
             $.post(
-                "https://erp_mdt/deleteBolo",
+                "https://qbcore_erp_mdt/deleteBolo",
                 JSON.stringify({
                     id: $(this).data("info"),
                 })
@@ -1475,7 +1475,7 @@ $(document).ready(() => {
         setTimeout(() => {
             $(".close-all").css("filter", "brightness(30%)");
         }, 250);
-        $.post("https://erp_mdt/getPenalCode", JSON.stringify({}));
+        $.post("https://qbcore_erp_mdt/getPenalCode", JSON.stringify({}));
     });
 
     var shiftPressed = false;
@@ -1726,7 +1726,7 @@ $(document).ready(() => {
             const incidentId = $(".manage-incidents-editing-title").data("id");
             if (incidentId != 0) {
                 $.post(
-                    "https://erp_mdt/removeIncidentCriminal",
+                    "https://qbcore_erp_mdt/removeIncidentCriminal",
                     JSON.stringify({
                         cid: $(this).data("status"),
                         incidentId: incidentId,
@@ -1906,7 +1906,7 @@ $(document).ready(() => {
                 $(".incidents-search-refresh").empty();
                 $(".incidents-search-refresh").html("Refresh");
                 canRefreshIncidents = true;
-                $.post("https://erp_mdt/getAllIncidents", JSON.stringify({}));
+                $.post("https://qbcore_erp_mdt/getAllIncidents", JSON.stringify({}));
             }, 1500);
         }
     });
@@ -1916,7 +1916,7 @@ $(document).ready(() => {
         let cid = $(".manage-profile-citizenid-input").val();
         if (cid) {
             $.post(
-                "https://erp_mdt/removeProfileTag",
+                "https://qbcore_erp_mdt/removeProfileTag",
                 JSON.stringify({
                     cid: cid,
                     text: $(this).data("info"),
@@ -1968,7 +1968,7 @@ $(document).ready(() => {
                 $(".reports-search-refresh").empty();
                 $(".reports-search-refresh").html("Refresh");
                 canRefreshReports = true;
-                $.post("https://erp_mdt/getAllReports", JSON.stringify({}));
+                $.post("https://qbcore_erp_mdt/getAllReports", JSON.stringify({}));
             }, 1500);
         }
     });
@@ -1981,7 +1981,7 @@ $(document).ready(() => {
             $(".dispatch-comms-refresh").empty();
             $(".dispatch-comms-refresh").html("Refresh");
             canRefreshReports = true;
-            $.post("https://erp_mdt/refreshDispatchMsgs", JSON.stringify({}));
+            $.post("https://qbcore_erp_mdt/refreshDispatchMsgs", JSON.stringify({}));
         }, 1500);
     });
     $(".reports-items").on("click", ".reports-item", function () {
@@ -2018,7 +2018,7 @@ $(document).ready(() => {
         canInputReportOfficerTag = true;
         let id = $(this).data("id");
         $.post(
-            "https://erp_mdt/getReportData",
+            "https://qbcore_erp_mdt/getReportData",
             JSON.stringify({
                 id: id,
             })
@@ -2274,7 +2274,7 @@ $(document).ready(() => {
             if (name !== "") {
                 canSearchForReports = false;
                 $.post(
-                    "https://erp_mdt/searchReports",
+                    "https://qbcore_erp_mdt/searchReports",
                     JSON.stringify({
                         name: name,
                     })
@@ -2339,7 +2339,7 @@ $(document).ready(() => {
             let time = new Date();
 
             $.post(
-                "https://erp_mdt/newReport",
+                "https://qbcore_erp_mdt/newReport",
                 JSON.stringify({
                     existing: existing,
                     id: id,
@@ -2376,7 +2376,7 @@ $(document).ready(() => {
             if (name !== "") {
                 canSearchForVehicles = false;
                 $.post(
-                    "https://erp_mdt/searchVehicles",
+                    "https://qbcore_erp_mdt/searchVehicles",
                     JSON.stringify({
                         name: name,
                     })
@@ -2389,7 +2389,7 @@ $(document).ready(() => {
 
     $(".dmv-items").on("click", ".dmv-item", function () {
         $.post(
-            "https://erp_mdt/getVehicleData",
+            "https://qbcore_erp_mdt/getVehicleData",
             JSON.stringify({
                 plate: $(this).data("plate"),
             })
@@ -2427,7 +2427,7 @@ $(document).ready(() => {
                     }
 
                     $.post(
-                        "https://erp_mdt/saveVehicleInfo",
+                        "https://qbcore_erp_mdt/saveVehicleInfo",
                         JSON.stringify({
                             dbid: dbid,
                             plate: plate,
@@ -2447,7 +2447,7 @@ $(document).ready(() => {
         if (tag.hasClass("red-tag")) {
             tag.removeClass("red-tag").addClass("green-tag");
             $.post(
-                "https://erp_mdt/knownInformation",
+                "https://qbcore_erp_mdt/knownInformation",
                 JSON.stringify({
                     dbid: $(".vehicle-information-title-holder").data("dbid"),
                     type: "code5",
@@ -2463,7 +2463,7 @@ $(document).ready(() => {
         if (tag.hasClass("green-tag")) {
             tag.removeClass("green-tag").addClass("red-tag");
             $.post(
-                "https://erp_mdt/knownInformation",
+                "https://qbcore_erp_mdt/knownInformation",
                 JSON.stringify({
                     dbid: $(".vehicle-information-title-holder").data("dbid"),
                     type: "code5",
@@ -2509,7 +2509,7 @@ $(document).ready(() => {
         if (tag.hasClass("red-tag")) {
             tag.removeClass("red-tag").addClass("green-tag");
             $.post(
-                "https://erp_mdt/knownInformation",
+                "https://qbcore_erp_mdt/knownInformation",
                 JSON.stringify({
                     dbid: $(".vehicle-information-title-holder").data("dbid"),
                     type: "stolen",
@@ -2525,7 +2525,7 @@ $(document).ready(() => {
         if (tag.hasClass("green-tag")) {
             tag.removeClass("green-tag").addClass("red-tag");
             $.post(
-                "https://erp_mdt/knownInformation",
+                "https://qbcore_erp_mdt/knownInformation",
                 JSON.stringify({
                     dbid: $(".vehicle-information-title-holder").data("dbid"),
                     type: "stolen",
@@ -2631,7 +2631,7 @@ $(document).ready(() => {
         }
 
         $.post(
-            "https://erp_mdt/impoundVehicle",
+            "https://qbcore_erp_mdt/impoundVehicle",
             JSON.stringify({
                 plate: plate,
                 linkedreport: linkedreport,
@@ -2664,7 +2664,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".remove-impound", function () {
         const plate = $(this).data("info");
         $.post(
-            "https://erp_mdt/removeImpound",
+            "https://qbcore_erp_mdt/removeImpound",
             JSON.stringify({
                 plate: plate,
             })
@@ -2679,7 +2679,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".status-impound", function () {
         const plate = $(this).data("info");
         $.post(
-            "https://erp_mdt/statusImpound",
+            "https://qbcore_erp_mdt/statusImpound",
             JSON.stringify({
                 plate: plate,
             })
@@ -2733,7 +2733,7 @@ $(document).ready(() => {
                 $("#profile-search-input:text").val(cid.toString());
                 canSearchForProfiles = false;
                 $.post(
-                    "https://erp_mdt/searchProfiles",
+                    "https://qbcore_erp_mdt/searchProfiles",
                     JSON.stringify({
                         name: cid.toString(),
                     })
@@ -2744,7 +2744,7 @@ $(document).ready(() => {
                 );
                 setTimeout(() => {
                     $.post(
-                        "https://erp_mdt/getProfileData",
+                        "https://qbcore_erp_mdt/getProfileData",
                         JSON.stringify({
                             id: cid.toString(),
                         })
@@ -2765,7 +2765,7 @@ $(document).ready(() => {
                 $("#incidents-search-input:text").val(incidentId.toString());
                 canSearchForProfiles = false;
                 $.post(
-                    "https://erp_mdt/searchIncidents",
+                    "https://qbcore_erp_mdt/searchIncidents",
                     JSON.stringify({
                         incident: incidentId.toString(),
                     })
@@ -2776,7 +2776,7 @@ $(document).ready(() => {
                 );
                 setTimeout(() => {
                     $.post(
-                        "https://erp_mdt/getIncidentData",
+                        "https://qbcore_erp_mdt/getIncidentData",
                         JSON.stringify({
                             id: incidentId.toString(),
                         })
@@ -2821,7 +2821,7 @@ $(document).ready(() => {
                 .removeClass("green-status")
                 .addClass("yellow-status");
             $.post(
-                "https://erp_mdt/toggleDuty",
+                "https://qbcore_erp_mdt/toggleDuty",
                 JSON.stringify({
                     cid: info,
                     status: 0,
@@ -2834,7 +2834,7 @@ $(document).ready(() => {
                 .removeClass("yellow-status")
                 .addClass("green-status");
             $.post(
-                "https://erp_mdt/toggleDuty",
+                "https://qbcore_erp_mdt/toggleDuty",
                 JSON.stringify({
                     cid: info,
                     status: 1,
@@ -2862,7 +2862,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".set-waypoint", function () {
         let info = $(this).data("info");
         $.post(
-            "https://erp_mdt/setWaypointU",
+            "https://qbcore_erp_mdt/setWaypointU",
             JSON.stringify({
                 cid: info,
             })
@@ -2909,7 +2909,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".Set-Waypoint", function () {
         const callId = $(this).data("info");
         $.post(
-            "https://erp_mdt/setWaypoint",
+            "https://qbcore_erp_mdt/setWaypoint",
             JSON.stringify({
                 callid: callId,
             })
@@ -2919,7 +2919,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".call-attach", function () {
         const callId = $(this).data("info");
         $.post(
-            "https://erp_mdt/callAttach",
+            "https://qbcore_erp_mdt/callAttach",
             JSON.stringify({
                 callid: callId,
             })
@@ -2929,7 +2929,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".call-detach", function () {
         const callId = $(this).data("info");
         $.post(
-            "https://erp_mdt/callDetach",
+            "https://qbcore_erp_mdt/callDetach",
             JSON.stringify({
                 callid: callId,
             })
@@ -2939,7 +2939,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".attached-units", function () {
         const callId = $(this).data("info");
         $.post(
-            "https://erp_mdt/attachedUnits",
+            "https://qbcore_erp_mdt/attachedUnits",
             JSON.stringify({
                 callid: callId,
             })
@@ -2953,7 +2953,7 @@ $(document).ready(() => {
             e.preventDefault();
             const time = new Date();
             $.post(
-                "https://erp_mdt/sendCallResponse",
+                "https://qbcore_erp_mdt/sendCallResponse",
                 JSON.stringify({
                     message: $(this).val(),
                     time: time.getTime(),
@@ -2967,7 +2967,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".respond-call", function () {
         const callId = $(this).data("info");
         $.post(
-            "https://erp_mdt/getCallResponses",
+            "https://qbcore_erp_mdt/getCallResponses",
             JSON.stringify({
                 callid: callId,
             })
@@ -3064,7 +3064,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".call-dispatch-detach", function () {
         const cid = $(this).data("info");
         $.post(
-            "https://erp_mdt/callDispatchDetach",
+            "https://qbcore_erp_mdt/callDispatchDetach",
             JSON.stringify({
                 callid: $(".dispatch-attached-units-container").attr("id"),
                 cid: cid,
@@ -3076,7 +3076,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".Set-Dispatch-Waypoint", function () {
         const cid = $(this).data("info");
         $.post(
-            "https://erp_mdt/setDispatchWaypoint",
+            "https://qbcore_erp_mdt/setDispatchWaypoint",
             JSON.stringify({
                 callid: $(".dispatch-attached-units-container").attr("id"),
                 cid: cid,
@@ -3169,7 +3169,7 @@ $(document).ready(() => {
                 .find(".unit-name")
                 .html(newunitname);
             $.post(
-                "https://erp_mdt/setCallsign",
+                "https://qbcore_erp_mdt/setCallsign",
                 JSON.stringify({
                     cid: editingcallsign,
                     newcallsign: callsign,
@@ -3205,7 +3205,7 @@ $(document).ready(() => {
                 .find(".unit-radio")
                 .html(newunitname);
             $.post(
-                "https://erp_mdt/setRadio",
+                "https://qbcore_erp_mdt/setRadio",
                 JSON.stringify({
                     cid: editingradio,
                     newradio: radio,
@@ -3278,7 +3278,7 @@ $(document).ready(() => {
         dragging = false;
         if (callId && draggedElement) {
             $.post(
-                "https://erp_mdt/callDragAttach",
+                "https://qbcore_erp_mdt/callDragAttach",
                 JSON.stringify({
                     callid: callId,
                     cid: draggedElement,
@@ -3935,7 +3935,7 @@ $(document).ready(() => {
                 LastName = value.name;
             } else if (BodyDisplay == "none") {
                 $.post(
-                    "https://erp_mdt/dispatchNotif",
+                    "https://qbcore_erp_mdt/dispatchNotif",
                     JSON.stringify({
                         data: value,
                     })
@@ -4455,7 +4455,7 @@ $(document).ready(() => {
                     $(".bolos-search-refresh").empty();
                     $(".bolos-search-refresh").html("Refresh");
                     canRefreshBolo = true;
-                    $.post("https://erp_mdt/getAllBolos", JSON.stringify({}));
+                    $.post("https://qbcore_erp_mdt/getAllBolos", JSON.stringify({}));
                 }, 1500);
             }
             $(".manage-bolos-editing-title").html(
@@ -4474,7 +4474,7 @@ $(document).ready(() => {
                     $(".reports-search-refresh").empty();
                     $(".reports-search-refresh").html("Refresh");
                     canRefreshReports = true;
-                    $.post("https://erp_mdt/getAllReports", JSON.stringify({}));
+                    $.post("https://qbcore_erp_mdt/getAllReports", JSON.stringify({}));
                 }, 1500);
             }
             $(".manage-reports-editing-title").html(
@@ -5012,16 +5012,16 @@ function fidgetSpinner(page) {
     $(".close-all").fadeOut(0);
     $(".container-load").fadeIn(0);
     if (page == ".bolos-page-container") {
-        $.post("https://erp_mdt/getAllBolos", JSON.stringify({}));
+        $.post("https://qbcore_erp_mdt/getAllBolos", JSON.stringify({}));
     }
     if (page == ".reports-page-container") {
-        $.post("https://erp_mdt/getAllReports", JSON.stringify({}));
+        $.post("https://qbcore_erp_mdt/getAllReports", JSON.stringify({}));
     }
     if (page == ".stafflogs-page-container") {
-        $.post("https://erp_mdt/getAllLogs", JSON.stringify({}));
+        $.post("https://qbcore_erp_mdt/getAllLogs", JSON.stringify({}));
     }
     if (page == ".incidents-page-container") {
-        $.post("https://erp_mdt/getAllIncidents", JSON.stringify({}));
+        $.post("https://qbcore_erp_mdt/getAllIncidents", JSON.stringify({}));
     }
     setTimeout(() => {
         $(".container-load").fadeOut(0);
@@ -5047,7 +5047,7 @@ function addTag(tagInput) {
     $(".tags-holder").prepend(`<div class="tag">${tagInput}</div>`);
 
     $.post(
-        "https://erp_mdt/newTag",
+        "https://qbcore_erp_mdt/newTag",
         JSON.stringify({
             id: $(".manage-profile-citizenid-input").val(),
             tag: tagInput,
@@ -5108,7 +5108,7 @@ function removeImage(url) {
         .filter("[src='" + url + "']")
         .remove();
     $.post(
-        "https://erp_mdt/removeGalleryImg",
+        "https://qbcore_erp_mdt/removeGalleryImg",
         JSON.stringify({
             cid: cid,
             URL: url,

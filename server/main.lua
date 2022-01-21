@@ -1,3 +1,4 @@
+local QBCore = exports['qb-core']:GetCoreObject()
 -- Maybe cache?
 local incidents = {}
 local convictions = {}
@@ -13,7 +14,6 @@ CreateThread(function()
 	Wait(1800000)
 	dispatchMessages = {}
 end)
-
 
 local function openMDT(src)
 	if not PermCheck(src) then return end
@@ -1457,15 +1457,6 @@ end)
 
 -- Dispatch chat
 
-
-
---[[
-	profilepic
-	name
-	message
-	time
-]]
-
 RegisterNetEvent('mdt:server:sendMessage', function(message, time)
 	if message and time then
 		TriggerEvent('echorp:getplayerfromid', source, function(player)
@@ -1666,4 +1657,3 @@ RegisterNetEvent('mdt:server:statusImpound', function(plate)
 		end
 	end)
 end)
-

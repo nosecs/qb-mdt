@@ -18,7 +18,7 @@ function UnpackJob(data)
 end
 
 -- Do Perm Check
-function PermCheck (src)
+function PermCheck(src)
 	local PlayerData = GetPlayerData(src)
 	local result = true
 

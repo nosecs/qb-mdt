@@ -10,6 +10,15 @@ local activeUnits = {}
 local impound = {}
 local dispatchMessages = {}
 
+AddEventHandler("onResourceStart", function(resourceName)
+	if (resourceName == 'qbcore_erp_mdt') then
+        activeUnits = {}
+		for index, _ in pairs(Config.AllowedJobs) do
+			activeUnits[index] = {}
+		end
+    end
+end)
+
 CreateThread(function()
 	Wait(1800000)
 	dispatchMessages = {}

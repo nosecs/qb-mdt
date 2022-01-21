@@ -11,7 +11,7 @@ local ActiveUnits = {}
 -- (Start) Opening the MDT and sending data
 local function AddLog(text)
 	exports.oxmysql:executeSync('INSERT INTO `pd_logs` (`text`, `time`) VALUES (:text, :time)', { text = text, time = os.time() * 1000 })
-end)
+end
 
 local function GetNameFromId(cid)
 	-- Should be a scalar?
@@ -21,7 +21,7 @@ end
 
 -- idk what this is used for either
 local function GetPersonInformation(cid, jobtype)
-	return MySQL.query.await('SELECT information, tags, gallery FROM mdtdata WHERE cid = ? and type = ?', { cid, jobtype })
+	return MySQL.query.await('SELECT information, tags, gallery FROM mdtdata WHERE cid = ? and jobtype = ?', { cid, jobtype })
 	-- return exports.oxmysql:executeSync('SELECT information, tags, gallery FROM mdt WHERE cid= ? and type = ?', { cid, jobtype })
 end
 
@@ -54,7 +54,7 @@ local function GetVehicleInformation(cid, cb)
 end
 
 local function GetBulletins(JobType)
-	return MySQL.query.await('SELECT * FROM `mdt_bulletin` WHERE `type` = ? LIMIT 10', { JobType })
+	return MySQL.query.await('SELECT * FROM `mdt_bulletin` WHERE `jobtype` = ? LIMIT 10', { JobType })
 	-- return exports.oxmysql:executeSync('SELECT * FROM `mdt_bulletin` WHERE `type`= ? LIMIT 10', { JobType })
 end
 

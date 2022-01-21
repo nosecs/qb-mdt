@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `mdt_data` (
   `information` MEDIUMTEXT DEFAULT NULL,
   `tags` TEXT DEFAULT '[]',
   `gallery` TEXT DEFAULT '[]',
-  `type` VARCHAR(11) DEFAULT 'police',
+  `jobtype` VARCHAR(11) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `mdt_bulletin` (
   `desc` TEXT NOT NULL,
   `author` varchar(50) NOT NULL,
   `time` varchar(255)  NOT NULL,
-  `type` VARCHAR(11) DEFAULT 'police',
+  `jobtype` VARCHAR(11) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `mdt_reports` (
   `civsinvolved` text DEFAULT NULL,
   `gallery` text DEFAULT NULL,
   `time` varchar(50) DEFAULT NULL,
-  `type` varchar(255) DEFAULT 'police',
+  `jobtype` varchar(255) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `pd_convictions` (
   `recsentence` int(11) DEFAULT 0,
   `time` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `pd_incidents` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

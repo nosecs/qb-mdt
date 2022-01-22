@@ -2,8 +2,9 @@ local QBCore = exports['qb-core']:GetCoreObject()
 
 -- (Start) Opening the MDT and sending data
 function AddLog(text)
-    return MySQL.insert.await('INSERT INTO `pd_logs` (`text`, `time`) VALUES (?,?)', {text = text, time = os.time() * 1000})
-	-- return exports.oxmysql:execute('INSERT INTO `pd_logs` (`text`, `time`) VALUES (:text, :time)', { text = text, time = os.time() * 1000 })
+	print(text)
+    return MySQL.insert.await('INSERT INTO `mdt_logs` (`text`, `time`) VALUES (?,?)', {text, os.time() * 1000})
+	-- return exports.oxmysql:execute('INSERT INTO `mdt_logs` (`text`, `time`) VALUES (:text, :time)', { text = text, time = os.time() * 1000 })
 end
 
 function GetNameFromId(cid)
@@ -14,20 +15,20 @@ end
 
 -- idk what this is used for either
 function GetPersonInformation(cid, jobtype)
-	return MySQL.query.await('SELECT information, tags, gallery FROM mdtdata WHERE cid = ? and jobtype = ?', { cid, jobtype })
+	return MySQL.query.await('SELECT information, tags, gallery FROM mdt_data WHERE cid = ? and jobtype = ?', { cid, jobtype })
 	-- return exports.oxmysql:executeSync('SELECT information, tags, gallery FROM mdt WHERE cid= ? and type = ?', { cid, jobtype })
 end
 
 -- idk but I guess sure?
 function GetIncidentName(id)
 	-- Should also be a scalar
-	return MySQL.query.await('SELECT title FROM `pd_incidents` WHERE id = :id LIMIT 1', { id = id })
-	-- return exports.oxmysql:executeSync('SELECT title FROM `pd_incidents` WHERE id = :id LIMIT 1', { id = id })
+	return MySQL.query.await('SELECT title FROM `mdt_incidents` WHERE id = :id LIMIT 1', { id = id })
+	-- return exports.oxmysql:executeSync('SELECT title FROM `mdt_incidents` WHERE id = :id LIMIT 1', { id = id })
 end
 
 function GetConvictions(cids)
-	return MySQL.query.await('SELECT * FROM `pd_convictions` WHERE `cid` IN(?)', { cids })
-	-- return exports.oxmysql:executeSync('SELECT * FROM `pd_convictions` WHERE `cid` IN(?)', { cids })
+	return MySQL.query.await('SELECT * FROM `mdt_convictions` WHERE `cid` IN(?)', { cids })
+	-- return exports.oxmysql:executeSync('SELECT * FROM `mdt_convictions` WHERE `cid` IN(?)', { cids })
 end
 
 function GetLicenseInfo(cid)
@@ -62,7 +63,7 @@ function GetImpoundStatus(vehicleid, cb)
 end
 
 function GetBoloStatus(plate, cb)
-	cb(exports.oxmysql:executeSync('SELECT id FROM `pd_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)}))
+	cb(exports.oxmysql:executeSync('SELECT id FROM `mdt_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)}))
 end
 
 function GetOwnerName(cid, cb)
@@ -70,5 +71,5 @@ function GetOwnerName(cid, cb)
 end
 
 function GetVehicleInformation(plate, cb)
-	cb(exports.oxmysql:executeSync('SELECT id, information FROM `pd_vehicleinfo` WHERE plate=:plate', { plate = plate}))
+	cb(exports.oxmysql:executeSync('SELECT id, information FROM `mdt_vehicleinfo` WHERE plate=:plate', { plate = plate}))
 end

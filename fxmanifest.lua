@@ -9,6 +9,7 @@ lua54 'yes'
 
 shared_script 'shared/config.lua'
 server_scripts {
+    '@oxmysql/lib/MySQL.lua',
     'server/utils.lua',
     'server/dbm.lua',
     'server/main.lua'

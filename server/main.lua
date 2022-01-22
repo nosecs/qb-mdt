@@ -49,7 +49,7 @@ end)
 
 QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb, sentData)
 	if not sentData then  return cb({}) end
-	if not PermCheck(src) then return cb({}) end
+	if not PermCheck(source) then return cb({}) end
 	local src = source
 	local PlayerData = GetPlayerData(src)
 	local JobName = PlayerData.job.name
@@ -58,7 +58,6 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 		local people = MySQL.query.await("SELECT * FROM `players` WHERE LOWER(`charinfo`) LIKE :query OR LOWER(`metadata`) LIKE :query LIMIT 20", { query = string.lower('%'..sentData..'%') })
 		local citizenIds = {}
 		local citizenIdIndexMap = {}
-
 		if not next(people) then cb({}) return end
 
 		for index, data in pairs(people) do
@@ -66,7 +65,7 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 			people[index]['convictions'] = 0
 			people[index]['pp'] = ProfPic(data.gender)
 			citizenIds[#citizenIds+1] = data.citizenid
-			citizenIdIndexMap[citizenId] = index
+			citizenIdIndexMap[data.citizenid] = index
 		end
 
 		local convictions = GetConvictions(citizenIds)
@@ -111,16 +110,16 @@ RegisterNetEvent('mdt:server:NewBulletin', function(title, info, time)
 	if not PermCheck(src) then return end
 	local PlayerData = GetPlayerData(src)
 	local JobType = GetJobType(PlayerData)
-
-	local newBulletin = MySQL.insert.await('INSERT INTO `mdt_bulletin` (`title`, `desc`, `author`, `time`, `type`) VALUES (:title, :desc, :author, :time, :jt)', {
+	local playerName = GetNameFromPlayerData(PlayerData)
+	local newBulletin = MySQL.insert.await('INSERT INTO `mdt_bulletin` (`title`, `desc`, `author`, `time`, `jobtype`) VALUES (:title, :desc, :author, :time, :jt)', {
 		title = title,
 		desc = info,
-		author = result.fullname,
+		author = playerName,
 		time = tostring(time),
 		jt = JobType
 	})
 
-	AddLog(("A new bulletin was added by %s %s with the title: %s!"):format(PlayerData.charinfo.firstname, Playerdata.charinfo.lastname, title))
+	AddLog(("A new bulletin was added by %s with the title: %s!"):format(playerName, title))
 	TriggerClientEvent('mdt:client:newBulletin', -1, src, {id = newBulletin, title = title, info = info, time = time, author = PlayerData.CitizenId}, JobType)
 end)
 
@@ -1001,6 +1000,42 @@ RegisterNetEvent('mdt:server:newReport', function(existing, id, title, reporttyp
 			end
 		end)
 	end
+end)
+
+QBCore.Functions.CreateCallback('mdt:server:SearchVehicles', function(source, cb, sentData)
+	if not sentData then  return cb({}) end
+	if not PermCheck(source) then return cb({}) end
+	local src = source
+	local PlayerData = GetPlayerData(src)
+	local JobName = PlayerData.job.name
+
+	if Config.PoliceJobs[JobName] then
+		local vehicles = MySQL.query.await("SELECT id, citizenid, plate, vehicle, image, state FROM `player_vehicles` WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :hash LIMIT 25", {
+			query = string.lower('%'..search..'%'),
+			hash = string.lower('%'..hash..'%'),
+		})
+
+		if not next(vehicles) then cb({}) return end
+
+		for _, value in ipairs(vehicles) do
+			if value.state == 0 then
+				value.state = "Out"
+			elseif value.state == 1 then
+				value.state = "Garaged"
+			elseif value.state == 2 then
+				value.state = "Impounded"
+			end
+
+
+			
+		end
+
+		-- idk if this works or I have to call cb first then return :shrug:
+		return cb(vehicles)
+	end
+
+	return cb({})
+
 end)
 
 RegisterNetEvent('mdt:server:searchVehicles', function(search, hash)

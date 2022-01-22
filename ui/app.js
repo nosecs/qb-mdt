@@ -593,7 +593,7 @@ $(document).ready(() => {
             setTimeout(() => {
                 $("#dmv-search-input:text").val(plate.toString());
                 $.post(
-                    "https://qbcore_erp_mdt/searchVehicles",
+                    `https://${GetParentResourceName()}/searchVehicles`,
                     JSON.stringify({
                         name: plate.toString(),
                     })
@@ -665,7 +665,7 @@ $(document).ready(() => {
         }
     );
 
-    $(".licenses-holder").on("contextmenu", ".license-tag", function (e) {
+    $(".licences-holder").on("contextmenu", ".license-tag", function (e) {
         const fuckyou = $(this).data("type");
         let type = $(this).html();
 
@@ -761,24 +761,114 @@ $(document).ready(() => {
             }
         }
     });
-    $("#profile-search-input").keydown(function (e) {
+
+    $("#profile-search-input").keydown(async function (e) {
         if (e.keyCode === 13 && canSearchForProfiles == true) {
             let name = $("#profile-search-input").val();
-            if (name !== "") {
+            if (name != "") {
                 canSearchForProfiles = false;
-                $.post(
+                $(".profile-items").empty();
+                $(".profile-items").prepend(
+                    `<div class="profile-loader"></div>`
+                );
+
+                let result = await $.post(
                     "https://qbcore_erp_mdt/searchProfiles",
                     JSON.stringify({
                         name: name,
                     })
                 );
+
+                canSearchForProfiles = true;
                 $(".profile-items").empty();
-                $(".profile-items").prepend(
-                    `<div class="profile-loader"></div>`
-                );
+
+                if (result.length < 1) {
+                    $(".profile-items").html(
+                        `
+                            <div class="profile-item" data-id="0">
+
+                                <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                                <div style="display: flex; flex-direction: column;">
+                                    <div class="profile-item-title">No Users Matching that search</div>
+                                    </div>
+                                    <div class="profile-bottom-info">
+                                    </div>
+                                </div>
+                            </div>
+                    `
+                    );
+                    return true;
+                }
+
+                let profileHTML = "";
+
+                result.forEach((value) => {
+                    let charinfo = value.charinfo;
+                    let metadata = value.metadata;
+
+                    if (typeof value.charinfo == "string") {
+                        charinfo = JSON.parse(charinfo);
+                    }
+
+                    if (typeof value.metadata == "string") {
+                        metadata = JSON.parse(metadata);
+                    }
+
+                    let name = charinfo.firstname + " " + charinfo.lastname;
+                    let licences = "";
+                    let licArr = Object.entries(metadata.licences);
+                    let warrant = "";
+                    let convictions = "";
+
+                    if (licArr.length > 0) {
+                        for (const [lic, hasLic] of licArr) {
+                            let tagColour =
+                                hasLic == true ? "green-tag" : "red-tag";
+                            licences += `<span class="license-tag ${tagColour}">${lic}</span>`;
+                        }
+                    }
+
+                    if (value.warrant == true) {
+                        warrant = "green-tag";
+                    } else {
+                        warrant = "red-tag";
+                    }
+
+                    if (value.convictions < 5) {
+                        convictions = "green-tag";
+                    } else if (
+                        value.convictions > 4 &&
+                        value.convictions < 15
+                    ) {
+                        convictions = "orange-tag";
+                    } else {
+                        convictions = "red-tag";
+                    }
+
+                    profileHTML += `
+                                <div class="profile-item" data-id="${value.citizenid}">
+                                    <img src="${value.pp}" class="profile-image">
+                                    <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <div class="profile-item-title">${name}</div>
+                                            <div class="profile-tags">
+                                                ${licences}
+                                            </div>
+                                        </div>
+                                        <div class="profile-bottom-info">
+                                            <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;<span style="color:#f2f2f2">|</span>&nbsp;
+                                            <div class="profile-id" style="float:right;">FP: ${metadata.fingerprint}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                        `;
+                });
+
+                $(".profile-items").html(profileHTML);
             }
         }
     });
+
     $(".incidents-title").click(function () {
         if (canSearchForProfiles == true) {
             if ($(".incidents-search-input").css("display") == "none") {
@@ -792,6 +882,7 @@ $(document).ready(() => {
             }
         }
     });
+
     $("#incidents-search-input").keydown(function (e) {
         if (e.keyCode === 13 && canSearchForProfiles == true) {
             let incident = $("#incidents-search-input").val();
@@ -2384,17 +2475,20 @@ $(document).ready(() => {
         }
     });
 
-    $("#dmv-search-input").keydown(function (e) {
+    $("#dmv-search-input").keydown(async function (e) {
         if (e.keyCode === 13 && canSearchForVehicles == true) {
             let name = $("#dmv-search-input").val();
             if (name !== "") {
                 canSearchForVehicles = false;
-                $.post(
-                    "https://qbcore_erp_mdt/searchVehicles",
+                let result = await $.post(
+                    `https://${GetParentResourceName()}/searchVehicles`,
                     JSON.stringify({
                         name: name,
                     })
                 );
+
+                console.log(result);
+
                 $(".dmv-items").empty();
                 $(".dmv-items").prepend(`<div class="profile-loader"></div>`);
             }
@@ -3642,8 +3736,8 @@ $(document).ready(() => {
             } else {
                 pilot = "red-tag";
             }
-            $(".licenses-holder").empty();
-            $(".licenses-holder").prepend(
+            $(".licences-holder").empty();
+            $(".licences-holder").prepend(
                 `
                 <div class="license-tag ${theory} theory" data-type="theory">Theory</div>
                 <div class="license-tag ${car} car" data-type="car">Car</div>
@@ -3691,93 +3785,6 @@ $(document).ready(() => {
                 $(".manage-profile-houses-container").fadeIn(250);
                 $(".manage-profile-houses-container").fadeIn(250);
             }
-        } else if (eventData.type == "profiles") {
-            let table = eventData.data;
-            canSearchForProfiles = true;
-            $(".profile-items").empty();
-            $.each(table, function (index, value) {
-                let name = value.firstname + " " + value.lastname;
-                let weapon = "";
-                let hunting = "";
-                let pilot = "";
-                let theory = "";
-                let car = "";
-                let bike = "";
-                let truck = "";
-                let warrant = "";
-                let convictions = "";
-                if (value.weapon == true) {
-                    weapon = "green-tag";
-                } else {
-                    weapon = "red-tag";
-                }
-                if (value.hunting == true) {
-                    hunting = "green-tag";
-                } else {
-                    hunting = "red-tag";
-                }
-                if (value.pilot == true) {
-                    pilot = "green-tag";
-                } else {
-                    pilot = "red-tag";
-                }
-                if (value.theory == true) {
-                    theory = "green-tag";
-                } else {
-                    theory = "red-tag";
-                }
-                if (value.car == true) {
-                    car = "green-tag";
-                } else {
-                    car = "red-tag";
-                }
-                if (value.bike == true) {
-                    bike = "green-tag";
-                } else {
-                    bike = "red-tag";
-                }
-                if (value.truck == true) {
-                    truck = "green-tag";
-                } else {
-                    truck = "red-tag";
-                }
-                if (value.warrant == true) {
-                    warrant = "green-tag";
-                } else {
-                    warrant = "red-tag";
-                }
-                if (value.convictions < 5) {
-                    convictions = "green-tag";
-                } else if (value.convictions > 4 && value.convictions < 15) {
-                    convictions = "orange-tag";
-                } else {
-                    convictions = "red-tag";
-                }
-                $(".profile-items").prepend(
-                    `
-                <div class="profile-item" data-id="${value.id}">
-                    <img src="${value.pp}" class="profile-image">
-                    <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                    <div style="display: flex; flex-direction: column;">
-                        <div class="profile-item-title">${name}</div>
-                            <div class="profile-tags">
-                                <div class="profile-tag ${theory}">Theory</div>
-                                <div class="profile-tag ${car}">Car</div>
-                                <div class="profile-tag ${bike}">Bike</div>
-                                <div class="profile-tag ${truck}">Truck</div>
-                                <div class="profile-tag ${weapon}">Weapon</div>
-                                <div class="profile-tag ${hunting}">Hunting</div>
-                                <div class="profile-tag ${pilot}">Pilot</div>
-                            </div>
-                        </div>
-                        <div class="profile-bottom-info">
-                            <div class="profile-id">ID: ${value.id}</div>
-                        </div>
-                    </div>
-                </div>
-                `
-                );
-            });
         } else if (eventData.type == "bulletin") {
             $(".bulletin-items-continer").empty();
             $.each(eventData.data, function (index, value) {
@@ -4759,7 +4766,6 @@ $(document).ready(() => {
             $(".active-unit-list").html(' ');
             let unitListHTML = '';
 
-            console.log(JSON.stringify(Object.values(activeUnits)))
             activeUnits = Object.values(activeUnits)
             activeUnits.forEach((unit) => {
                 let status = unit.duty == 1 ? "10-8" : '10-7';
@@ -4768,8 +4774,6 @@ $(document).ready(() => {
                 let radio = unit.radio ? unit.radio : "0";
                 let callSign = unit.callSign ? unit.callSign : "000";
                 let activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
-
-                console.log(JSON.stringify(unit))
 
                 if (unit.duty == 1){
                     if(unit.unitType == "Police"){

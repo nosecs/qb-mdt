@@ -127,7 +127,6 @@ end
 --====================================================================================
 
 
-
 RegisterCommand("restartmdt", function(source, args, rawCommand)
 	RefreshGUI()
 end, false)
@@ -148,12 +147,6 @@ end)
 
 RegisterNUICallback('escape', function(data, cb)
     EnableGUI(false)
-    cb(true)
-end)
-
-RegisterNUICallback("searchProfiles", function(data, cb)
-    local name = data.name
-    TriggerServerEvent('mdt:server:searchProfile', name)
     cb(true)
 end)
 
@@ -219,9 +212,29 @@ end)
 
 --====================================================================================
 ------------------------------------------
---               BOLO PAGE              --
+--             PROFILE PAGE             --
 ------------------------------------------
 --====================================================================================
+
+RegisterNUICallback("searchProfiles", function(data, cb)
+    local name = data.name
+    local p = nil
+
+    local searchProfilePromise = function(data)
+        if p then return end
+        p = promise.new()
+
+        QBCore.Functions.TriggerCallback('mdt:server:SearchProfile', function(result)
+            p:resolve(result)
+        end, data)
+
+        return Citizen.Await(p)
+    end
+
+    local result = searchProfilePromise(name)
+    return cb(result)
+end)
+
 
 RegisterNetEvent('mdt:client:searchProfile', function(sentData, isLimited)
     SendNUIMessage({ type = "profiles", data = sentData, isLimited = isLimited })
@@ -458,9 +471,24 @@ end)
 ------------------------------------------
 --====================================================================================
 RegisterNUICallback("searchVehicles", function(data, cb)
-    local name = data.name
-    TriggerServerEvent('mdt:server:searchVehicles', name, GetHashKey(name))
-    cb(true)
+    local plate = data.name
+    local p = nil
+
+    -- TriggerServerEvent('mdt:server:searchVehicles', name, GetHashKey(name))
+
+    local searchVehiclesPromise = function(data)
+        if p then return end
+        p = promise.new()
+
+        QBCore.Functions.TriggerCallback('mdt:server:SearchVehicles', function(result)
+            p:resolve(result)
+        end, data)
+
+        return Citizen.Await(p)
+    end
+
+    local result = searchVehiclesPromise(plate)
+    return cb(result)
 end)
 
 RegisterNUICallback("getVehicleData", function(data, cb)

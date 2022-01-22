@@ -1,6 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
 function GetPlayerData(source)
+	print(source)
 	local Player = QBCore.Functions.GetPlayer(source)
 	return Player.PlayerData
 end

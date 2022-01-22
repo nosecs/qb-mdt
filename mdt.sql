@@ -2,15 +2,15 @@ CREATE TABLE IF NOT EXISTS `mdt_data` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cid` int(11) DEFAULT NULL,
   `information` MEDIUMTEXT DEFAULT NULL,
-  `tags` TEXT DEFAULT '[]',
-  `gallery` TEXT DEFAULT '[]',
+  `tags` TEXT NOT NULL,
+  `gallery` TEXT NOT NULL,
   `jobtype` VARCHAR(11) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `mdt_bulletin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` text NOT NULL,
+  `title` TEXT NOT NULL,
   `desc` TEXT NOT NULL,
   `author` varchar(50) NOT NULL,
   `time` varchar(255)  NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `mdt_reports` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `pd_bolos` (
+CREATE TABLE IF NOT EXISTS `mdt_bolos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author` varchar(50) DEFAULT NULL,
   `title` varchar(50) DEFAULT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `pd_bolos` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `pd_convictions` (
+CREATE TABLE IF NOT EXISTS `mdt_convictions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cid` varchar(50) DEFAULT NULL,
   `linkedincident` int(11) NOT NULL DEFAULT 0,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `pd_convictions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `pd_incidents` (
+CREATE TABLE IF NOT EXISTS `mdt_incidents` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author` varchar(50) NOT NULL DEFAULT '',
   `title` varchar(50) NOT NULL DEFAULT '0',
@@ -78,18 +78,16 @@ CREATE TABLE IF NOT EXISTS `pd_incidents` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `pd_logs` (
+CREATE TABLE IF NOT EXISTS `mdt_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `text` text NOT NULL DEFAULT '',
+  `text` text NOT NULL,
   `time` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `pd_vehicleinfo` (
+CREATE TABLE IF NOT EXISTS `mdt_vehicleinfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `plate` varchar(50) DEFAULT NULL,
   `information` TEXT NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-ALTER TABLE `player_vehicles` ADD COLUMN `image` text NULL DEFAULT NULL AFTER `garage`;

@@ -138,17 +138,22 @@ RegisterNetEvent('mdt:server:DeleteBulletin', function(id)
 end)
 
 QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb, sentId)
-	local src = source
 	if not sentId then return cb({}) end
+
+	local src = source
 	local PlayerData = GetPlayerData(src)
-	if not PermCheck(src) then return cb({}) end
+	if not PermCheck(src, PlayerData) then return cb({}) end
 	local JobType = GetJobType(PlayerData)
-	local target = GetPlayerDataById(sendId)
+	local target = GetPlayerDataById(sentId)
 	local JobName = PlayerData.job.name
 
-	if not target or not next(target) then
-		return cb(nil)
-	end
+	if not target or not next(target) then return cb({}) end
+
+	-- Convert to string because bad code, yes?
+	if type(target.job) == 'string' then target.job = json.decode(target.job) end
+	if type(target.charinfo) == 'string' then target.charinfo = json.decode(target.charinfo) end
+	if type(target.metadata) == 'string' then target.metadata = json.decode(target.metadata) end
+
 
 	local job, grade = UnpackJob(target.job)
 
@@ -156,14 +161,17 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		cid = target.citizenid,
 		firstname = target.charinfo.firstname,
 		lastname = target.charinfo.lastname,
-		job = {job, grade},
+		job = job.label,
+		grade = grade.name,
 		pp = ProfPic(target.charinfo.gender, null),
-		licenses = target.metadata['licenses'],
+		licences = target.metadata['licences'],
+		dob = target.charinfo.birthdate,
 		mdtinfo = '',
 		tags = {},
 		vehicles = {},
 		properties = {},
 		gallery = {},
+		isLimited = false
 	}
 
 	if Config.PoliceJobs[JobName] then
@@ -187,7 +195,7 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		person.gallery = mdtData.gallery
 	end
 
-	cb(person)
+	return cb(person)
 end)
 
 RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName, sName)

@@ -53,7 +53,7 @@ function GetBulletins(JobType)
 end
 
 function GetPlayerDataById(id)
-	return MySQL.query.await('SELECT citizenid, charinfo, job FROM players WHERE citizenid = ? LIMIT 1', { id })
+	return MySQL.single.await('SELECT citizenid, charinfo, job, metadata FROM players WHERE citizenid = ? LIMIT 1', { id })
 	-- return exports.oxmysql:executeSync('SELECT citizenid, charinfo, job FROM players WHERE citizenid = ? LIMIT 1', { id })
 end
 

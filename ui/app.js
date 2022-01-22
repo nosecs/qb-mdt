@@ -131,15 +131,127 @@ $(document).ready(() => {
             currentTab = $(this).data("page");
         }
     });
-    $(".profile-items").on("click", ".profile-item", function () {
+
+    $(".profile-items").on("click", ".profile-item", async function () {
         let id = $(this).data("id");
-        $.post(
+        console.log(id)
+        let result = await $.post(
             "https://qbcore_erp_mdt/getProfileData",
             JSON.stringify({
                 id: id,
             })
         );
+
+        console.log(JSON.stringify(result));
+        if (!canInputTag) {
+            if ($(".tags-add-btn").hasClass("fa-minus")) {
+                $(".tags-add-btn")
+                    .removeClass("fa-minus")
+                    .addClass("fa-plus");
+            }
+            $(".tag-input").remove();
+            canInputTag = true;
+        }
+
+        if ($(".gallery-upload-input").css("display") == "block") {
+            $(".gallery-upload-input").slideUp(250);
+            setTimeout(() => {
+                $(".gallery-upload-input").css("display", "none");
+            }, 250);
+        }
+
+        if ($(".gallery-add-btn").hasClass("fa-minus")) {
+            $(".gallery-add-btn")
+                .removeClass("fa-minus")
+                .addClass("fa-plus");
+        }
+
+        $(".manage-profile-editing-title").html(`You are currently editing ${result["firstname"]} ${result["lastname"]}`);
+        $(".manage-profile-citizenid-input").val(result['cid']);
+        $(".manage-profile-name-input-1").val(result["firstname"]);
+        $(".manage-profile-name-input-2").val(result["lastname"]);
+        $(".manage-profile-dob-input").val(result["dob"]);
+        $(".manage-profile-job-input").val(`${result.job}, ${result.grade}`);
+        $(".manage-profile-url-input").val(result["profilepic"]);
+        $(".manage-profile-info").val(result["mdtinfo"]);
+        $(".manage-profile-info").removeAttr("disabled");
+        $(".manage-profile-pic").attr("src", result["profilepic"]);
+
+        const {vehicles, tags, gallery, convictions} = result
+
+        $(".licences-holder").empty();
+        $(".tags-holder").empty();
+        $(".vehs-holder").empty();
+        $(".gallery-inner-container").empty();
+        $(".convictions-holder").empty();
+
+        let licencesHTML = '<div style="color: #fff; text-align:center;">No Licenses</div>';
+        let tagsHTML = '<div style="color: #fff; text-align:center;">No Tags</div>';
+        let convHTML = '<div style="color: #fff; text-align:center;">Clean Record ?</div>';
+        let vehHTML = '<div style="color: #fff; text-align:center;">No Vehicles</div>';
+        let galleryHTML = '<div style="color: #fff; text-align:center;">No Photos</div>';
+
+        // convert key value pair object of licenses to array
+        let licenses = Object.entries(result.licences);
+
+
+        if (licenses.length > 0) {
+
+            licencesHTML = '';
+            for (const [lic, hasLic] of licenses) {
+
+                let tagColour = hasLic == true ? "green-tag" : "red-tag";
+                licencesHTML += `<span class="license-tag ${tagColour} ${lic}" data-type="${lic}">${lic}</span>`;
+            }
+        }
+
+        if(tags && tags.length > 0){
+            tagsHTML = '';
+            tags.forEach((tag) => {
+                tagsHTML += `<div class="tag">${tag}</div>`;
+            })
+        }
+
+        if (vehicles && vehicles.length > 0) {
+            vehHTML = '';
+            vehicles.forEach(value => {
+                vehHMTL += `<div class="veh-tag" data-plate="${value.plate}">${value.plate} - ${value.model} </div>`
+            })
+        }
+
+
+        if(gallery && gallery.length > 0){
+            galleryHTML = '';
+            gallery.forEach(value => {
+                galleryHTML += `<img src="${value}" class="gallery-img" onerror="this.src='img/not-found.jpg'">`;
+            })
+        }
+
+
+        if (convictions && convictions.length > 0 ) {
+            convHTML = '';
+            convictions.forEach(value => {
+                convHTML +=  `<div class="white-tag">${value} </div>`;
+            })
+        }
+
+        if (result.isLimited) {
+            $(".manage-profile-vehs-container").fadeOut(250);
+            $(".manage-profile-houses-container").fadeOut(250);
+            $(".manage-profile-houses-container").fadeOut(250);
+        } else {
+            $(".manage-profile-vehs-container").fadeIn(250);
+            $(".manage-profile-houses-container").fadeIn(250);
+            $(".manage-profile-houses-container").fadeIn(250);
+        }
+
+        $(".licenses-holder").html(licencesHTML);
+        $(".tags-holder").html(tagsHTML);
+        $(".convictions-holder").html(convHTML);
+        $(".vehs-holder").html(vehHTML);
+        $(".gallery-inner-container").html(galleryHTML);
     });
+
     $(".bulletin-add-btn").click(function () {
         if (canCreateBulletin == 0) {
             $(this).removeClass("fa-plus").addClass("fa-minus");
@@ -815,10 +927,11 @@ $(document).ready(() => {
                     }
 
                     let name = charinfo.firstname + " " + charinfo.lastname;
+                    let warrant = "red-tag";
+                    let convictions = "red-tag";
+
                     let licences = "";
                     let licArr = Object.entries(metadata.licences);
-                    let warrant = "";
-                    let convictions = "";
 
                     if (licArr.length > 0) {
                         for (const [lic, hasLic] of licArr) {
@@ -830,8 +943,6 @@ $(document).ready(() => {
 
                     if (value.warrant == true) {
                         warrant = "green-tag";
-                    } else {
-                        warrant = "red-tag";
                     }
 
                     if (value.convictions < 5) {
@@ -841,27 +952,25 @@ $(document).ready(() => {
                         value.convictions < 15
                     ) {
                         convictions = "orange-tag";
-                    } else {
-                        convictions = "red-tag";
                     }
 
                     profileHTML += `
-                                <div class="profile-item" data-id="${value.citizenid}">
-                                    <img src="${value.pp}" class="profile-image">
-                                    <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                                    <div style="display: flex; flex-direction: column;">
-                                        <div class="profile-item-title">${name}</div>
-                                            <div class="profile-tags">
-                                                ${licences}
-                                            </div>
-                                        </div>
-                                        <div class="profile-bottom-info">
-                                            <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;<span style="color:#f2f2f2">|</span>&nbsp;
-                                            <div class="profile-id" style="float:right;">FP: ${metadata.fingerprint}</div>
-                                        </div>
+                        <div class="profile-item" data-id="${value.citizenid}">
+                            <img src="${value.pp}" class="profile-image">
+                            <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                            <div style="display: flex; flex-direction: column;">
+                                <div class="profile-item-title">${name}</div>
+                                    <div class="profile-tags">
+                                        ${licences}
                                     </div>
                                 </div>
-                        `;
+                                <div class="profile-bottom-info">
+                                    <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;<span style="color:#f2f2f2">|</span>&nbsp;
+                                    <div class="profile-id" style="float:right;">FP: ${metadata.fingerprint}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 });
 
                 $(".profile-items").html(profileHTML);
@@ -3726,141 +3835,6 @@ $(document).ready(() => {
             $(".name-shit").html(eventData.name);
             $(".header-location").html(" " + eventData.location);
             MyName = eventData.fullname;
-        } else if (eventData.type == "profileData") {
-            let table = eventData.data;
-            if (!canInputTag) {
-                if ($(".tags-add-btn").hasClass("fa-minus")) {
-                    $(".tags-add-btn")
-                        .removeClass("fa-minus")
-                        .addClass("fa-plus");
-                }
-                $(".tag-input").remove();
-                canInputTag = true;
-            }
-
-            if ($(".gallery-upload-input").css("display") == "block") {
-                $(".gallery-upload-input").slideUp(250);
-                setTimeout(() => {
-                    $(".gallery-upload-input").css("display", "none");
-                }, 250);
-            }
-
-            if ($(".gallery-add-btn").hasClass("fa-minus")) {
-                $(".gallery-add-btn")
-                    .removeClass("fa-minus")
-                    .addClass("fa-plus");
-            }
-
-            $(".manage-profile-editing-title").html(
-                "You are currently editing " +
-                    table["firstname"] +
-                    " " +
-                    table["lastname"]
-            );
-            $(".manage-profile-citizenid-input").val(table["cid"]);
-            $(".manage-profile-name-input-1").val(table["firstname"]);
-            $(".manage-profile-name-input-2").val(table["lastname"]);
-            $(".manage-profile-dob-input").val(table["dateofbirth"]);
-            $(".manage-profile-job-input").val(table["job"]);
-            $(".manage-profile-url-input").val(table["profilepic"]);
-            $(".manage-profile-info").val(table["policemdtinfo"]);
-            $(".manage-profile-info").removeAttr("disabled");
-            $(".manage-profile-pic").attr("src", table["profilepic"]);
-            let theory = "";
-            if (table["theory"] == true) {
-                theory = "green-tag";
-            } else {
-                theory = "red-tag";
-            }
-
-            let car = "";
-            if (table["car"] == true) {
-                car = "green-tag";
-            } else {
-                car = "red-tag";
-            }
-
-            let bike = "";
-            if (table["bike"] == true) {
-                bike = "green-tag";
-            } else {
-                bike = "red-tag";
-            }
-
-            let truck = "";
-            if (table["truck"] == true) {
-                truck = "green-tag";
-            } else {
-                truck = "red-tag";
-            }
-
-            let weapon = "";
-            if (table["weapon"] == true) {
-                weapon = "green-tag";
-            } else {
-                weapon = "red-tag";
-            }
-            let hunting = "";
-            if (table["hunting"] == true) {
-                hunting = "green-tag";
-            } else {
-                hunting = "red-tag";
-            }
-            let pilot = "";
-            if (table["pilot"] == true) {
-                pilot = "green-tag";
-            } else {
-                pilot = "red-tag";
-            }
-            $(".licences-holder").empty();
-            $(".licences-holder").prepend(
-                `
-                <div class="license-tag ${theory} theory" data-type="theory">Theory</div>
-                <div class="license-tag ${car} car" data-type="car">Car</div>
-                <div class="license-tag ${bike} bike" data-type="bike">Bike</div>
-                <div class="license-tag ${truck} truck" data-type="truck">Truck</div>
-                <div class="license-tag ${weapon} weapon" data-type="weapon">Weapon</div>
-                <div class="license-tag ${hunting} hunting" data-type="hunting">Hunting</div>
-                <div class="license-tag ${pilot} pilot" data-type="pilot">Pilot</div>
-            `
-            );
-            $(".tags-holder").empty();
-            $.each(table["tags"], function (index, value) {
-                $(".tags-holder").prepend(`<div class="tag">${value}</div>`);
-            });
-            $(".vehs-holder").empty();
-            if (table["vehicles"]) {
-                $.each(table["vehicles"], function (index, value) {
-                    $(".vehs-holder").prepend(
-                        `<div class="veh-tag" data-plate="${value.plate}">${value.plate} - ${value.model} </div>`
-                    );
-                });
-            }
-            $(".gallery-inner-container").empty();
-            $.each(table["gallery"], function (index, value) {
-                $(".gallery-inner-container").prepend(
-                    `<img src="${value}" class="gallery-img" onerror="this.src='img/not-found.jpg'">`
-                );
-            });
-
-            $(".convictions-holder").empty();
-            if (table["convictions"]) {
-                $.each(table["convictions"], function (index, value) {
-                    $(".convictions-holder").prepend(
-                        `<div class="white-tag">${value} </div>`
-                    );
-                });
-            }
-
-            if (eventData.isLimited) {
-                $(".manage-profile-vehs-container").fadeOut(250);
-                $(".manage-profile-houses-container").fadeOut(250);
-                $(".manage-profile-houses-container").fadeOut(250);
-            } else {
-                $(".manage-profile-vehs-container").fadeIn(250);
-                $(".manage-profile-houses-container").fadeIn(250);
-                $(".manage-profile-houses-container").fadeIn(250);
-            }
         } else if (eventData.type == "bulletin") {
             $(".bulletin-items-continer").empty();
             $.each(eventData.data, function (index, value) {

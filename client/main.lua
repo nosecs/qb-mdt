@@ -232,6 +232,7 @@ RegisterNUICallback("searchProfiles", function(data, cb)
     end
 
     local result = searchProfilePromise(name)
+    p = nil
     return cb(result)
 end)
 
@@ -252,8 +253,20 @@ end)
 
 RegisterNUICallback("getProfileData", function(data, cb)
     local id = data.id
-    TriggerServerEvent('mdt:server:getProfileData', id)
-    cb(true)
+    local p = nil
+    local getProfileDataPromise = function(data)
+        if p then return end
+        p = promise.new()
+        QBCore.Functions.TriggerCallback('mdt:server:GetProfileData', function(result)
+            p:resolve(result)
+        end, data)
+
+        return Citizen.Await(p)
+    end
+
+    local result = getProfileDataPromise(id)
+    p = nil
+    return cb(result)
 end)
 
 RegisterNUICallback("newTag", function(data, cb)

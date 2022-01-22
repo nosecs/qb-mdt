@@ -68,6 +68,7 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 		end
 
 		local convictions = GetConvictions(citizenIds)
+		
 
 		if next(convictions) then
 			for _, conv in pairs(convictions) do
@@ -186,6 +187,11 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 				end
 			end
 		end
+		local vehicles = GetPlayerVehicles(person.cid)
+		
+		if vehicles then
+			person.vehicles = vehicles
+		end
 	end
 
 	local mdtData = GetPersonInformation(sentId, JobType)
@@ -194,6 +200,8 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		person.tags = mdtData.tags
 		person.gallery = mdtData.gallery
 	end
+
+	
 
 	return cb(person)
 end)

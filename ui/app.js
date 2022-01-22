@@ -213,9 +213,10 @@ $(document).ready(() => {
         }
 
         if (vehicles && vehicles.length > 0) {
+            
             vehHTML = '';
             vehicles.forEach(value => {
-                vehHMTL += `<div class="veh-tag" data-plate="${value.plate}">${value.plate} - ${value.model} </div>`
+                vehHTML += `<div class="veh-tag" data-plate="${value.plate}">${value.plate} - ${value.model} </div>`
             })
         }
 

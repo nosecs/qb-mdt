@@ -13,9 +13,6 @@ local dispatchMessages = {}
 AddEventHandler("onResourceStart", function(resourceName)
 	if (resourceName == 'qbcore_erp_mdt') then
         activeUnits = {}
-		for index, _ in pairs(Config.AllowedJobs) do
-			activeUnits[index] = {}
-		end
     end
 end)
 
@@ -32,16 +29,17 @@ local function openMDT(src)
 		Radio = 0
 	end
 
-	activeUnits[PlayerData.job.name][#activeUnits[PlayerData.job.name] + 1] = {
+	activeUnits[PlayerData.citizenid] = {
+		cid = PlayerData.citizenid,
 		callSign = PlayerData.metadata['callsign'],
 		firstName = PlayerData.charinfo.firstname,
 		lastName = PlayerData.charinfo.lastname,
-		radio = Radio
+		radio = Radio,
+		unitType = PlayerData.job.name
 	}
 
-
 	TriggerClientEvent('mdt:client:open', src)
-	TriggerClientEvent('mdt:client:GetActiveUnits', source, activeUnits)
+	TriggerClientEvent('mdt:client:GetActiveUnits', src, activeUnits)
 end
 
 QBCore.Commands.Add("mdt", "Opens the mdt", {}, false, function(source)

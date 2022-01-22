@@ -13,6 +13,10 @@ local tabletBone = 60309
 local tabletOffset = vector3(0.03, 0.002, -0.0)
 local tabletRot = vector3(10.0, 160.0, 0.0)
 
+local NUI_FUNCS = {
+    ['GET_ACTIVE_UNITS'] = "getActiveUnits"
+}
+
 
 -- Events from qbcore
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
@@ -42,7 +46,7 @@ end)
 
 AddEventHandler('onResourceStart', function(resourceName)
     if GetCurrentResourceName() ~= resourceName then return end
-    Wait(2000)
+    Wait(150)
     PlayerData = QBCore.Functions.GetPlayerData()
     callSign = PlayerData.metadata.callsign
 end)
@@ -104,14 +108,14 @@ local function EnableGUI(enable)
     print("MDT Enable GUI", enable)
     if enable then TriggerServerEvent('mdt:server:opendashboard') end
     SetNuiFocus(enable, enable)
-    SendNUIMessage({ type = "show", enable = enable, job = PlayerData['job']['name'] })
+    SendNUIMessage({ type = "show", enable = enable, job = PlayerData.job.name })
     isOpen = enable
     doAnimation()
 end
 
 local function RefreshGUI()
     SetNuiFocus(false, false)
-    SendNUIMessage({ type = "show", enable = false, job = PlayerData['job']['name'] })
+    SendNUIMessage({ type = "show", enable = false, job = PlayerData.job.name })
     isOpen = false
 end
 
@@ -138,7 +142,7 @@ RegisterNUICallback("newBulletin", function(data, cb)
     local title = data.title
     local info = data.info
     local time = data.time
-    TriggerServerEvent('mdt:server:newBulletin', title, info, time)
+    TriggerServerEvent('mdt:server:NewBulletin', title, info, time)
     cb(true)
 end)
 
@@ -204,7 +208,9 @@ RegisterNetEvent('mdt:client:open', function()
     elseif currentStreetName ~= nil and currentStreetName ~= "" then playerStreetsLocation = currentStreetName .. ", " .. area
     else playerStreetsLocation = area end
 
-    SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.name..' '..PlayerData.charinfo.lastname, location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname })
+    -- local grade = PlayerData.job.grade.name
+
+    SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.grade.name..' '..PlayerData.charinfo.lastname, location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname })
 end)
 
 RegisterNetEvent('mdt:client:exitMDT', function()
@@ -552,8 +558,8 @@ RegisterNetEvent('mdt:client:getPenalCode', function(titles, penalcode)
     SendNUIMessage({ type = "getPenalCode", titles = titles, penalcode = penalcode })
 end)
 
-RegisterNetEvent('mdt:client:getActiveUnits', function(lspd, bcso, sast, sasp, doc, sapr, pa, ems)
-    SendNUIMessage({ type = "getActiveUnits", lspd = lspd, bcso = bcso, sast = sast, doc = doc, sasp = sasp, sapr = sapr, pa = pa, ems = ems })
+RegisterNetEvent('mdt:client:GetActiveUnits', function(activeUnits)
+    SendNUIMessage({type  = NUI_FUNCS.GET_ACTIVE_UNITS, activeUnits = activeUnits})
 end)
 
 RegisterNetEvent('mdt:client:setRadio', function(radio, name)

@@ -20,6 +20,20 @@ let canSaveVehicle = true;
 var LastName = "";
 var DispatchNum = 0;
 
+
+// TEMP CONFIG OF JOBS
+const PoliceJobs = {
+    ['police']: true,
+}
+
+const AmbulanceJobs = {
+    ['ambulance']: true,
+}
+
+const DojJobs = {
+    ['doj']: true
+}
+
 const MONTH_NAMES = [
     "January",
     "February",
@@ -3513,11 +3527,11 @@ $(document).ready(() => {
     }
 
     window.addEventListener("message", function (event) {
-        let e = event.data;
+        let eventData = event.data;
         $(".dispatch-msg-notif").fadeIn(500);
-        if (e.type == "show") {
-            if (e.enable == true) {
-                JobColors(e.job);
+        if (eventData.type == "show") {
+            if (eventData.enable == true) {
+                JobColors(eventData.job);
                 $("body").fadeIn(0);
                 $(".close-all").css("filter", "none");
                 $(".close-all").fadeOut(0);
@@ -3538,12 +3552,12 @@ $(document).ready(() => {
                 $("body").slideUp(250);
                 $(".close-all").slideUp(250);
             }
-        } else if (e.type == "data") {
-            $(".name-shit").html(e.name);
-            $(".header-location").html(" " + e.location);
-            MyName = e.fullname;
-        } else if (e.type == "profileData") {
-            let table = e.data;
+        } else if (eventData.type == "data") {
+            $(".name-shit").html(eventData.name);
+            $(".header-location").html(" " + eventData.location);
+            MyName = eventData.fullname;
+        } else if (eventData.type == "profileData") {
+            let table = eventData.data;
             if (!canInputTag) {
                 if ($(".tags-add-btn").hasClass("fa-minus")) {
                     $(".tags-add-btn")
@@ -3668,7 +3682,7 @@ $(document).ready(() => {
                 });
             }
 
-            if (e.isLimited) {
+            if (eventData.isLimited) {
                 $(".manage-profile-vehs-container").fadeOut(250);
                 $(".manage-profile-houses-container").fadeOut(250);
                 $(".manage-profile-houses-container").fadeOut(250);
@@ -3677,8 +3691,8 @@ $(document).ready(() => {
                 $(".manage-profile-houses-container").fadeIn(250);
                 $(".manage-profile-houses-container").fadeIn(250);
             }
-        } else if (e.type == "profiles") {
-            let table = e.data;
+        } else if (eventData.type == "profiles") {
+            let table = eventData.data;
             canSearchForProfiles = true;
             $(".profile-items").empty();
             $.each(table, function (index, value) {
@@ -3764,9 +3778,9 @@ $(document).ready(() => {
                 `
                 );
             });
-        } else if (e.type == "bulletin") {
+        } else if (eventData.type == "bulletin") {
             $(".bulletin-items-continer").empty();
-            $.each(e.data, function (index, value) {
+            $.each(eventData.data, function (index, value) {
                 $(
                     ".bulletin-items-continer"
                 ).prepend(`<div class="bulletin-item" data-id=${value.id}>
@@ -3780,8 +3794,8 @@ $(document).ready(() => {
                 </div>
                 </div>`);
             });
-        } else if (e.type == "newBulletin") {
-            const value = e.data;
+        } else if (eventData.type == "newBulletin") {
+            const value = eventData.data;
             $(".bulletin-items-continer")
                 .prepend(`<div class="bulletin-item" data-id=${value.id}>
                 <div class="bulletin-item-title">${value.title}</div>
@@ -3793,12 +3807,12 @@ $(document).ready(() => {
             )}</div>
                 </div>
             </div>`);
-        } else if (e.type == "deleteBulletin") {
+        } else if (eventData.type == "deleteBulletin") {
             $(".bulletin-items-continer")
-                .find("[data-id='" + e.data + "']")
+                .find("[data-id='" + eventData.data + "']")
                 .remove();
-        } else if (e.type == "warrants") {
-            const value = e.data;
+        } else if (eventData.type == "warrants") {
+            const value = eventData.data;
             if (value.firsttime) {
                 $(".warrants-items").empty();
             }
@@ -3818,8 +3832,8 @@ $(document).ready(() => {
                     <div class="warrant-expiry-date">Expires in TODO days</div>
                 </div>
             </div></div>`);
-        } else if (e.type == "dispatchmessages") {
-            const table = e.data;
+        } else if (eventData.type == "dispatchmessages") {
+            const table = eventData.data;
             LastName = "";
             DispatchNum = 0;
             $(".dispatch-items").empty();
@@ -3880,8 +3894,8 @@ $(document).ready(() => {
             $(".dispatch-items").scrollTop(
                 $(".dispatch-items")[0].scrollHeight
             );
-        } else if (e.type == "dispatchmessage") {
-            const value = e.data;
+        } else if (eventData.type == "dispatchmessage") {
+            const value = eventData.data;
             DispatchNum = DispatchNum + 1;
             const BodyDisplay = $("body").css("display");
             if (BodyDisplay == "block") {
@@ -3944,8 +3958,8 @@ $(document).ready(() => {
             $(".dispatch-items").scrollTop(
                 $(".dispatch-items")[0].scrollHeight
             );
-        } else if (e.type == "call") {
-            const value = e.data;
+        } else if (eventData.type == "call") {
+            const value = eventData.data;
             if (value) {
                 const prio = value["priority"];
                 let DispatchItem = `<div class="active-calls-item" data-id="${value.callId}" data-canrespond="false"><div class="active-call-inner-container"><div class="call-item-top"><div class="call-number">#${value.callId}</div><div class="call-code priority-${value.priority}">${value.dispatchCode}</div><div class="call-title">${value.dispatchMessage}</div><div class="call-radio">${value.units.length}</div></div><div class="call-item-bottom">`;
@@ -4012,8 +4026,8 @@ $(document).ready(() => {
                     $(DispatchItem).hide().fadeIn("slow")
                 );
             }
-        } else if (e.type == "attachedUnits") {
-            const table = e.data;
+        } else if (eventData.type == "attachedUnits") {
+            const table = eventData.data;
             if (table) {
                 $(".dispatch-attached-units").fadeIn(0);
                 $(".dispatch-attached-units-container").fadeIn(250);
@@ -4031,29 +4045,29 @@ $(document).ready(() => {
                 setTimeout(() => {
                     $(".dispatch-attached-units-container").attr(
                         "id",
-                        e.callid
+                        eventData.callid
                     );
                 }, 1000);
             }
-        } else if (e.type == "sendCallResponse") {
-            if ($(".respond-calls-container").data("id") == e.callid) {
+        } else if (eventData.type == "sendCallResponse") {
+            if ($(".respond-calls-container").data("id") == eventData.callid) {
                 $(".respond-calls-responses").prepend(
                     `<div class="respond-calls-response"> ${
-                        e["name"]
-                    } responded "${e["message"]}" - ${timeAgo(
-                        Number(e.time)
+                        eventData["name"]
+                    } responded "${eventData["message"]}" - ${timeAgo(
+                        Number(eventData.time)
                     )}. </div>`
                 );
             }
-        } else if (e.type == "getCallResponses") {
-            const table = e.data;
+        } else if (eventData.type == "getCallResponses") {
+            const table = eventData.data;
             $(".respond-calls").fadeIn(0);
             $(".respond-calls-container").fadeIn(250);
             $(".close-all").css("filter", "brightness(15%)");
             $("#respondcalls").val("");
             $(".respond-calls-responses").empty();
             setTimeout(() => {
-                $(".respond-calls-container").data("id", e.callid);
+                $(".respond-calls-container").data("id", eventData.callid);
             }, 1000);
             $.each(table, function (index, value) {
                 $(".respond-calls-responses").prepend(
@@ -4064,8 +4078,8 @@ $(document).ready(() => {
                     )}. </div>`
                 );
             });
-        } else if (e.type == "calls") {
-            const table = e.data;
+        } else if (eventData.type == "calls") {
+            const table = eventData.data;
             $(".active-calls-list").empty();
             $.each(table, function (index, value) {
                 if (value) {
@@ -4135,8 +4149,8 @@ $(document).ready(() => {
                     );
                 }
             });
-        } else if (e.type == "incidents") {
-            let table = e.data;
+        } else if (eventData.type == "incidents") {
+            let table = eventData.data;
             canSearchForProfiles = true;
             $(".incidents-items").empty();
             $.each(table, function (index, value) {
@@ -4155,9 +4169,9 @@ $(document).ready(() => {
                 </div>`
                 );
             });
-        } else if (e.type == "getPenalCode") {
-            const titles = e.titles;
-            const penalcode = e.penalcode;
+        } else if (eventData.type == "getPenalCode") {
+            const titles = eventData.titles;
+            const penalcode = eventData.penalcode;
             $(".offenses-main-container").empty();
             $.each(titles, function (index, value) {
                 $(".offenses-main-container").append(
@@ -4184,8 +4198,8 @@ $(document).ready(() => {
                     `);
                 });
             });
-        } else if (e.type == "incidentData") {
-            let table = e.data;
+        } else if (eventData.type == "incidentData") {
+            let table = eventData.data;
 
             $(".incidents-ghost-holder").html("");
             $(".associated-incidents-tags-holder").html("");
@@ -4262,7 +4276,7 @@ $(document).ready(() => {
             $(".manage-incidents-title").css("width", "66%");
             $(".manage-incidents-create").css("margin-right", "0px");
 
-            let associateddata = e.convictions;
+            let associateddata = eventData.convictions;
             $.each(associateddata, function (index, value) {
                 $(".associated-incidents-tags-holder").prepend(
                     `<div class="associated-incidents-tag" data-id="${value.cid}">${value.name}</div>`
@@ -4358,8 +4372,8 @@ $(document).ready(() => {
                     );
                 }
             });
-        } else if (e.type == "incidentSearchPerson") {
-            let table = e.data;
+        } else if (eventData.type == "incidentSearchPerson") {
+            let table = eventData.data;
             $(".icidents-person-search-holder").empty();
             $.each(table, function (index, value) {
                 let name = value.firstname + " " + value.lastname;
@@ -4377,8 +4391,8 @@ $(document).ready(() => {
                     `
                 );
             });
-        } else if (e.type == "boloData") {
-            let table = e.data;
+        } else if (eventData.type == "boloData") {
+            let table = eventData.data;
             $(".manage-bolos-editing-title").html(
                 "You are currently editing BOLO " + table["id"]
             );
@@ -4419,8 +4433,8 @@ $(document).ready(() => {
                     `<div class="tag">${value}</div>`
                 );
             });
-        } else if (e.type == "bolos") {
-            let table = e.data;
+        } else if (eventData.type == "bolos") {
+            let table = eventData.data;
             var reportName = "General BOLO";
             canSearchForProfiles = true;
             $(".bolos-items").empty();
@@ -4443,8 +4457,8 @@ $(document).ready(() => {
                 </div>`
                 );
             });
-        } else if (e.type == "boloComplete") {
-            let id = e.data;
+        } else if (eventData.type == "boloComplete") {
+            let id = eventData.data;
             if (canRefreshBolo == true) {
                 canRefreshBolo = false;
                 $(".bolos-search-refresh").empty();
@@ -4462,8 +4476,8 @@ $(document).ready(() => {
                 "You are currently editing BOLO " + id
             );
             $(".manage-bolos-editing-title").data("id", Number(id));
-        } else if (e.type == "reportComplete") {
-            let id = e.data;
+        } else if (eventData.type == "reportComplete") {
+            let id = eventData.data;
             if (canRefreshReports == true) {
                 canRefreshReports = false;
                 $(".reports-search-refresh").empty();
@@ -4481,8 +4495,8 @@ $(document).ready(() => {
                 "You are currently editing report " + id
             );
             $(".manage-reports-editing-title").data("id", Number(id));
-        } else if (e.type == "reports") {
-            let table = e.data;
+        } else if (eventData.type == "reports") {
+            let table = eventData.data;
             canSearchForReports = true;
             $(".reports-items").empty();
             $.each(table, function (index, value) {
@@ -4503,8 +4517,8 @@ $(document).ready(() => {
                 </div>`
                 );
             });
-        } else if (e.type == "reportData") {
-            let table = e.data;
+        } else if (eventData.type == "reportData") {
+            let table = eventData.data;
 
             $(".manage-reports-editing-title").html(
                 "You are currently editing report " + table["id"]
@@ -4537,8 +4551,8 @@ $(document).ready(() => {
                     `<div class="tag">${value}</div>`
                 );
             });
-        } else if (e.type == "searchedVehicles") {
-            let table = e.data;
+        } else if (eventData.type == "searchedVehicles") {
+            let table = eventData.data;
             $(".dmv-items").empty();
             canSearchForVehicles = true;
             $.each(table, function (index, value) {
@@ -4585,8 +4599,8 @@ $(document).ready(() => {
                 </div>
                 `);
             });
-        } else if (e.type == "getVehicleData") {
-            let table = e.data;
+        } else if (eventData.type == "getVehicleData") {
+            let table = eventData.data;
 
             $(".vehicle-information-title-holder").data(
                 "dbid",
@@ -4641,10 +4655,10 @@ $(document).ready(() => {
                 `<div class="vehicle-tag ${stolen} stolen-tag">Stolen</div>`
             );
             $(".vehicle-info-imageurl-input").val(table["image"]);
-        } else if (e.type == "updateVehicleDbId") {
-            $(".vehicle-information-title-holder").data("dbid", Number(e.data));
-        } else if (e.type == "updateIncidentDbId") {
-            $(".manage-incidents-editing-title").data("id", Number(e.data));
+        } else if (eventData.type == "updateVehicleDbId") {
+            $(".vehicle-information-title-holder").data("dbid", Number(eventData.data));
+        } else if (eventData.type == "updateIncidentDbId") {
+            $(".manage-incidents-editing-title").data("id", Number(eventData.data));
 
             $(".manage-incidents-tags-add-btn").css("pointer-events", "auto");
             $(".manage-incidents-reports-content").css(
@@ -4667,22 +4681,22 @@ $(document).ready(() => {
                 "pointer-events",
                 "auto"
             );
-        } else if (e.type == "callDetach") {
+        } else if (eventData.type == "callDetach") {
             $(".active-calls-item")
-                .filter("[data-id='" + e.callid + "']")
+                .filter("[data-id='" + eventData.callid + "']")
                 .children()
                 .children()
                 .find(".call-radio")
-                .html(e.data);
-        } else if (e.type == "callAttach") {
+                .html(eventData.data);
+        } else if (eventData.type == "callAttach") {
             $(".active-calls-item")
-                .filter("[data-id='" + e.callid + "']")
+                .filter("[data-id='" + eventData.callid + "']")
                 .children()
                 .children()
                 .find(".call-radio")
-                .html(e.data);
-        } else if (e.type == "getAllLogs") {
-            let table = e.data;
+                .html(eventData.data);
+        } else if (eventData.type == "getAllLogs") {
+            let table = eventData.data;
             $(".stafflogs-container").empty();
             $.each(table, function (index, value) {
                 $(".stafflogs-container").append(
@@ -4693,9 +4707,9 @@ $(document).ready(() => {
                     )})</span></p>`
                 );
             });
-        } else if (e.type == "statusImpound") {
-            const table = e.data;
-            const plate = e.plate;
+        } else if (eventData.type == "statusImpound") {
+            const table = eventData.data;
+            const plate = eventData.plate;
             const linkedreport = table["linkedreport"];
             const fee = table["fee"];
             const time = table["time"] * 1000;
@@ -4729,281 +4743,68 @@ $(document).ready(() => {
             $(".impound-submit").fadeOut(250);
             $(".impound-form").slideDown(250);
             $(".impound-form").fadeIn(250);
-        } else if (e.type == "greenShit") {
+        } else if (eventData.type == "greenShit") {
             $(".vehicle-tags")
                 .find(".impound-tag")
                 .addClass("green-tag")
                 .removeClass("red-tag");
-        } else if (e.type == "getActiveUnits") {
-            var PoliceCount = 0;
-            var EmsCount = 0;
-            var DocCount = 0;
-            var PaCount = 0;
+        } else if (eventData.type == "getActiveUnits") {
 
-            const lspd = e.lspd;
-            const bcso = e.bcso;
-            const sast = e.sast;
-            const sasp = e.sasp;
-            const doc = e.doc;
-            const sapr = e.sapr;
-            const PublicAffairs = e.pa;
-            const ems = e.ems;
+            let policeCount = 0;
+            let emsCount = 0;
+            let dojCount = 0;
+            let fireCount = 0;
 
-            $(".active-unit-list").empty();
+            let {activeUnits} = eventData;
+            $(".active-unit-list").html(' ');
+            let unitListHTML = '';
 
-            $.each(lspd, function (index, value) {
-                var status = "10-8";
-                var statuscolor = "green-status";
-                var radioback = "var(--color-3)";
-                var radio = "0";
-                var callsign = "000";
-                if (value.duty == 0) {
-                    status = "10-7";
-                    statuscolor = "yellow-status";
-                } else if (value.duty == 1) {
-                    PoliceCount = PoliceCount + 1;
+            console.log(JSON.stringify(Object.values(activeUnits)))
+            activeUnits = Object.values(activeUnits)
+            activeUnits.forEach((unit) => {
+                let status = unit.duty == 1 ? "10-8" : '10-7';
+                let statusColor = unit.duty == 1 ? "green-status" : 'yellow-status';
+                let radioBack = unit.sig100 ? "#7b2c2c" : "var(--color-3)";
+                let radio = unit.radio ? unit.radio : "0";
+                let callSign = unit.callSign ? unit.callSign : "000";
+                let activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
+
+                console.log(JSON.stringify(unit))
+
+                if (unit.duty == 1){
+                    if(unit.unitType == "Police"){
+                        policeCount++;
+                    }
+                    if(unit.unitType == "EMS"){
+                        activeInfoJob = `<div class="unit-job active-info-job-ambulance">AMBALAMCE</div>`
+                        emsCount++;
+                    }
+                    if(unit.unitType == "Fire"){
+                        activeInfoJob = `<div class="unit-job active-info-job-fire">FIRE</div>`
+                        fireCount++;
+                    }
+                    if(unit.unitType == "DOJ"){
+                        activeInfoJob = `<div class="unit-job active-info-job-doj">DACAS</div>`
+                        dojCount++;
+                    }
                 }
-                if (value.radio) {
-                    radio = value.radio;
-                }
-                if (value.sig100) {
-                    radioback = "#7b2c2c";
-                }
-                if (value.callsign) {
-                    callsign = value.callsign;
-                }
-                $(".active-unit-list").prepend(`
-                <div class="active-unit-item" data-id="${value.cid}">
-                    <div class="unit-status ${statuscolor}">${status}</div>
-                    <div class="unit-job active-info-job-lspd">LSPD</div>
-                    <div class="unit-name">(${callsign}) ${value.name}</div>
-                    <div class="unit-radio" style="background-color: ${radioback};">${radio}</div>
-                </div>
-                `);
+                unitListHTML += `
+                    <div class="active-unit-item" data-id="${unit.cid}">
+                        <div class="unit-status ${statusColor}">${status}</div>
+                        <div class="unit-job active-info-job-lspd">LSPD</div>
+                        <div class="unit-name">(${callSign}) ${unit.firstName} ${unit.lastName}</div>
+                        <div class="unit-radio" style="background-color: ${radioBack};">${radio}</div>
+                    </div>
+                `;
             });
 
-            $.each(bcso, function (index, value) {
-                var status = "10-8";
-                var statuscolor = "green-status";
-                var radioback = "var(--color-3)";
-                var radio = "0";
-                var callsign = "000";
-                if (value.duty == 0) {
-                    status = "10-7";
-                    statuscolor = "yellow-status";
-                } else if (value.duty == 1) {
-                    PoliceCount = PoliceCount + 1;
-                }
-                if (value.radio) {
-                    radio = value.radio;
-                }
-                if (value.sig100) {
-                    radioback = "#7b2c2c";
-                }
-                if (value.callsign) {
-                    callsign = value.callsign;
-                }
-                $(".active-unit-list").prepend(`
-                <div class="active-unit-item" data-id="${value.cid}">
-                    <div class="unit-status ${statuscolor}">${status}</div>
-                    <div class="unit-job active-info-job-bcso">BCSO</div>
-                    <div class="unit-name">(${callsign}) ${value.name}</div>
-                    <div class="unit-radio" style="background-color: ${radioback};">${radio}</div>
-                </div>
-                `);
-            });
+            $(".active-unit-list").html(unitListHTML)
 
-            $.each(sast, function (index, value) {
-                var status = "10-8";
-                var statuscolor = "green-status";
-                var radioback = "var(--color-3)";
-                var radio = "0";
-                var callsign = "000";
-                if (value.duty == 0) {
-                    status = "10-7";
-                    statuscolor = "yellow-status";
-                } else if (value.duty == 1) {
-                    PoliceCount = PoliceCount + 1;
-                }
-                if (value.radio) {
-                    radio = value.radio;
-                }
-                if (value.sig100) {
-                    radioback = "#7b2c2c";
-                }
-                if (value.callsign) {
-                    callsign = value.callsign;
-                }
-                $(".active-unit-list").prepend(`
-                <div class="active-unit-item" data-id="${value.cid}">
-                    <div class="unit-status ${statuscolor}">${status}</div>
-                    <div class="unit-job active-info-job-sast">SAST</div>
-                    <div class="unit-name">(${callsign}) ${value.name}</div>
-                    <div class="unit-radio" style="background-color: ${radioback};">${radio}</div>
-                </div>
-                `);
-            });
 
-            $.each(sasp, function (index, value) {
-                var status = "10-8";
-                var statuscolor = "green-status";
-                var radioback = "var(--color-3)";
-                var radio = "0";
-                var callsign = "000";
-                if (value.duty == 0) {
-                    status = "10-7";
-                    statuscolor = "yellow-status";
-                } else if (value.duty == 1) {
-                    PoliceCount = PoliceCount + 1;
-                }
-                if (value.radio) {
-                    radio = value.radio;
-                }
-                if (value.sig100) {
-                    radioback = "#7b2c2c";
-                }
-                if (value.callsign) {
-                    callsign = value.callsign;
-                }
-                $(".active-unit-list").prepend(`
-                <div class="active-unit-item" data-id="${value.cid}">
-                    <div class="unit-status ${statuscolor}">${status}</div>
-                    <div class="unit-job active-info-job-sasp">SASP</div>
-                    <div class="unit-name">(${callsign}) ${value.name}</div>
-                    <div class="unit-radio" style="background-color: ${radioback};">${radio}</div>
-                </div>
-                `);
-            });
-
-            $.each(doc, function (index, value) {
-                var status = "10-8";
-                var statuscolor = "green-status";
-                var radio = "0";
-                var radioback = "var(--color-3)";
-                var callsign = "000";
-                if (value.duty == 0) {
-                    status = "10-7";
-                    statuscolor = "yellow-status";
-                } else if (value.duty == 1) {
-                    DocCount = DocCount + 1;
-                }
-                if (value.radio) {
-                    radio = value.radio;
-                }
-                if (value.sig100) {
-                    radioback = "#7b2c2c";
-                }
-                if (value.callsign) {
-                    callsign = value.callsign;
-                }
-                $(".active-unit-list").prepend(`
-                <div class="active-unit-item" data-id="${value.cid}">
-                    <div class="unit-status ${statuscolor}">${status}</div>
-                    <div class="unit-job active-info-job-doc">DOC</div>
-                    <div class="unit-name">(${callsign}) ${value.name}</div>
-                    <div class="unit-radio" style="background-color: ${radioback};">${radio}</div>
-                </div>
-                `);
-            });
-
-            $.each(sapr, function (index, value) {
-                var status = "10-8";
-                var statuscolor = "green-status";
-                var radio = "0";
-                var radioback = "var(--color-3)";
-                var callsign = "000";
-                if (value.duty == 0) {
-                    status = "10-7";
-                    statuscolor = "yellow-status";
-                } else if (value.duty == 1) {
-                    PoliceCount = PoliceCount + 1;
-                }
-                if (value.radio) {
-                    radio = value.radio;
-                }
-                if (value.sig100) {
-                    radioback = "#7b2c2c";
-                }
-                if (value.callsign) {
-                    callsign = value.callsign;
-                }
-                $(".active-unit-list").prepend(`
-                <div class="active-unit-item" data-id="${value.cid}">
-                    <div class="unit-status ${statuscolor}">${status}</div>
-                    <div class="unit-job active-info-job-sapr">SAPR</div>
-                    <div class="unit-name">(${callsign}) ${value.name}</div>
-                    <div class="unit-radio" style="background-color: ${radioback};">${radio}</div>
-                </div>
-                `);
-            });
-
-            $.each(PublicAffairs, function (index, value) {
-                var status = "10-8";
-                var statuscolor = "green-status";
-                var radio = "0";
-                var radioback = "var(--color-3)";
-                var callsign = "000";
-                if (value.duty == 0) {
-                    status = "10-7";
-                    statuscolor = "yellow-status";
-                } else if (value.duty == 1) {
-                    PaCount = PaCount + 1;
-                }
-                if (value.radio) {
-                    radio = value.radio;
-                }
-                if (value.sig100) {
-                    radioback = "#7b2c2c";
-                }
-                if (value.callsign) {
-                    callsign = value.callsign;
-                }
-
-                $(".active-unit-list").prepend(`
-                <div class="active-unit-item" data-id="${value.cid}">
-                    <div class="unit-status ${statuscolor}">${status}</div>
-                    <div class="unit-job active-info-job-pa">PA</div>
-                    <div class="unit-name">(${callsign}) ${value.name}</div>
-                    <div class="unit-radio" style="background-color: ${radioback};">${radio}</div>
-                </div>
-                `);
-            });
-
-            $.each(ems, function (index, value) {
-                var status = "10-8";
-                var statuscolor = "green-status";
-                var radio = "0";
-                var radioback = "var(--color-3)";
-                var callsign = "000";
-                if (value.duty == 0) {
-                    status = "10-7";
-                    statuscolor = "yellow-status";
-                } else if (value.duty == 1) {
-                    EmsCount = EmsCount + 1;
-                }
-                if (value.radio) {
-                    radio = value.radio;
-                }
-                if (value.sig100) {
-                    radioback = "#7b2c2c";
-                }
-                if (value.callsign) {
-                    callsign = value.callsign;
-                }
-                $(".active-unit-list").prepend(`
-                <div class="active-unit-item" data-id="${value.cid}">
-                    <div class="unit-status ${statuscolor}">${status}</div>
-                    <div class="unit-job active-info-job-ambulance">MZ</div>
-                    <div class="unit-name">(${callsign}) ${value.name}</div>
-                    <div class="unit-radio" style="background-color: ${radioback};">${radio}</div>
-                </div>
-                `);
-            });
-
-            $("#police-count").html(PoliceCount);
-            $("#ems-count").html(EmsCount);
-            $("#doc-count").html(DocCount);
-            $("#pa-count").html(PaCount);
+            $("#police-count").html(policeCount);
+            $("#ems-count").html(emsCount);
+            $("#doj-count").html(dojCount);
+            $("#fire-count").html(fireCount);
         }
     });
 });

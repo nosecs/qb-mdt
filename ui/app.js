@@ -216,7 +216,7 @@ $(document).ready(() => {
             
             vehHTML = '';
             vehicles.forEach(value => {
-                vehHTML += `<div class="veh-tag" data-plate="${value.plate}">${value.plate} - ${value.model} </div>`
+                vehHTML += `<div class="veh-tag" data-plate="${value.plate}">${value.plate} - ${value.vehicle} </div>`
             })
         }
 
@@ -705,21 +705,12 @@ $(document).ready(() => {
             $(".dmv-search-input").css("display", "block");
             setTimeout(() => {
                 $("#dmv-search-input:text").val(plate.toString());
-                $.post(
-                    `https://${GetParentResourceName()}/searchVehicles`,
-                    JSON.stringify({
-                        name: plate.toString(),
-                    })
-                );
-                $(".dmv-items").empty();
-                $(".dmv-items").prepend(`<div class="profile-loader"></div>`);
                 setTimeout(() => {
-                    $.post(
-                        "https://qbcore_erp_mdt/getVehicleData",
-                        JSON.stringify({
-                            plate: plate.toString(),
-                        })
-                    );
+                    var e = jQuery.Event("keydown");
+                    e.which = 13; // # Some key code value
+                    e.keyCode = 13
+                    $("#dmv-search-input").trigger(e);
+                    console.log(keydown) 
                 }, 250);
             }, 250);
         }, 250);

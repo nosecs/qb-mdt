@@ -1943,6 +1943,7 @@ $(document).ready(() => {
     $(".contextmenu").on("click", ".incidents-remove-tag", function () {
         $(`.tag:contains(${$(this).data("info")})`).remove();
     });
+
     $(".manage-incidents-tags-holder").on("contextmenu", ".tag", function (e) {
         let args = [
             {
@@ -1961,6 +1962,7 @@ $(document).ready(() => {
             `.manage-incidents-officers:contains(${$(this).data("info")})`
         ).remove();
     });
+
     $(".manage-incidents-officers-holder").on(
         "contextmenu",
         ".manage-incidents-officers",
@@ -1983,6 +1985,7 @@ $(document).ready(() => {
             `.manage-incidents-civilians:contains(${$(this).data("info")})`
         ).remove();
     });
+
     $(".manage-incidents-civilians-holder").on(
         "contextmenu",
         ".manage-incidents-civilians",
@@ -2062,6 +2065,7 @@ $(document).ready(() => {
             mouse_is_inside = false;
         }
     );
+
     $(".reports-search-refresh").click(function () {
         if (canRefreshReports == true) {
             canRefreshReports = false;
@@ -2077,6 +2081,7 @@ $(document).ready(() => {
             }, 1500);
         }
     });
+
     $(".dispatch-comms-refresh").click(function () {
         $(".dispatch-comms-refresh").empty();
         $(".dispatch-comms-refresh").prepend(
@@ -2089,6 +2094,7 @@ $(document).ready(() => {
             $.post("https://qbcore_erp_mdt/refreshDispatchMsgs", JSON.stringify({}));
         }, 1500);
     });
+
     $(".reports-items").on("click", ".reports-item", function () {
         if (currentTab != ".reports-page-container") {
             fidgetSpinner(".reports-page-container");
@@ -2219,6 +2225,7 @@ $(document).ready(() => {
             .filter("[src='" + $(this).data("info") + "']")
             .remove();
     });
+
     $(".reports-gallery-inner-container").on(
         "contextmenu",
         ".reports-img",
@@ -2480,17 +2487,86 @@ $(document).ready(() => {
             let name = $("#dmv-search-input").val();
             if (name !== "") {
                 canSearchForVehicles = false;
+                $(".dmv-items").empty();
+                $(".dmv-items").prepend(`<div class="profile-loader"></div>`);
+
                 let result = await $.post(
                     `https://${GetParentResourceName()}/searchVehicles`,
                     JSON.stringify({
                         name: name,
                     })
                 );
+                if (result.length < 1) {
+                    $(".dmv-items").html(
+                        `
+                            <div class="profile-item" data-id="0">
 
-                console.log(result);
-
+                                <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                                <div style="display: flex; flex-direction: column;">
+                                    <div class="profile-item-title">No Users Matching that search</div>
+                                    </div>
+                                    <div class="profile-bottom-info">
+                                    </div>
+                                </div>
+                            </div>
+                    `
+                    );
+                    return true;
+                }
                 $(".dmv-items").empty();
-                $(".dmv-items").prepend(`<div class="profile-loader"></div>`);
+                canSearchForVehicles = true;
+
+                let vehicleHTML = "";
+
+                result.forEach((value) => {
+                    let paint = value.color;
+                    let impound = "red-tag";
+                    let bolo = "red-tag";
+                    let codefive = "red-tag";
+                    let stolen = "red-tag";
+
+                    if (value.impound) {
+                        impound = "green-tag";
+                    }
+
+                    if (value.bolo) {
+                        bolo = "green-tag";
+                    }
+
+                    if (value.code) {
+                        codefive = "green-tag";
+                    }
+
+                    if (value.stolen) {
+                        stolen = "green-tag";
+                    }
+
+                    vehicleHTML += `
+                        <div class="dmv-item" data-id="${value.id}" data-dbid="${value.dbid}" data-plate="${value.plate}">
+                            <img src="${value.image}" class="dmv-image">
+                            <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                            <div style="display: flex; flex-direction: column;">
+                                <div class="dmv-item-title">${value.model}</div>
+                                    <div class="dmv-tags">
+                                        <div class="dmv-tag ${paint}-color">${value.colorName}</div>
+                                        <div class="dmv-tag ${impound}">Impound</div>
+                                        <div class="dmv-tag ${bolo}">BOLO</div>
+                                        <div class="dmv-tag ${stolen}">Stolen</div>
+                                        <div class="dmv-tag ${codefive}">Code 5</div>
+                                    </div>
+                                </div>
+                                <div class="dmv-bottom-info">
+                                    <div class="dmv-id">Plate: ${value.plate} · Owner: ${value.owner}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                $(".dmv-items").html(vehicleHTML);
+
+                canSearchForVehicles = true;
+
             }
         }
     });
@@ -4559,53 +4635,7 @@ $(document).ready(() => {
                 );
             });
         } else if (eventData.type == "searchedVehicles") {
-            let table = eventData.data;
-            $(".dmv-items").empty();
-            canSearchForVehicles = true;
-            $.each(table, function (index, value) {
-                let paint = value.color;
-                let impound = "red-tag";
-                let bolo = "red-tag";
-                let codefive = "red-tag";
-                let stolen = "red-tag";
 
-                if (value.impound) {
-                    impound = "green-tag";
-                }
-
-                if (value.bolo) {
-                    bolo = "green-tag";
-                }
-
-                if (value.code) {
-                    codefive = "green-tag";
-                }
-
-                if (value.stolen) {
-                    stolen = "green-tag";
-                }
-
-                $(".dmv-items").prepend(`
-                <div class="dmv-item" data-id="${value.id}" data-dbid="${value.dbid}" data-plate="${value.plate}">
-                    <img src="${value.image}" class="dmv-image">
-                    <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                    <div style="display: flex; flex-direction: column;">
-                        <div class="dmv-item-title">${value.model}</div>
-                            <div class="dmv-tags">
-                                <div class="dmv-tag ${paint}-color">${value.colorName}</div>
-                                <div class="dmv-tag ${impound}">Impound</div>
-                                <div class="dmv-tag ${bolo}">BOLO</div>
-                                <div class="dmv-tag ${stolen}">Stolen</div>
-                                <div class="dmv-tag ${codefive}">Code 5</div>
-                            </div>
-                        </div>
-                        <div class="dmv-bottom-info">
-                            <div class="dmv-id">ID: ${value.id} · Owner: ${value.owner}</div>
-                        </div>
-                    </div>
-                </div>
-                `);
-            });
         } else if (eventData.type == "getVehicleData") {
             let table = eventData.data;
 

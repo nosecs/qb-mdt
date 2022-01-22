@@ -62,12 +62,14 @@ function GetImpoundStatus(vehicleid, cb)
 	cb( #(exports.oxmysql:executeSync('SELECT id FROM `impound` WHERE `vehicleid`=:vehicleid', {['vehicleid'] = vehicleid })) > 0 )
 end
 
-function GetBoloStatus(plate, cb)
-	cb(exports.oxmysql:executeSync('SELECT id FROM `mdt_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)}))
+function GetBoloStatus(plate)
+	return MySQL.scalar.await('SELECT id FROM `mdt_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)})
+	-- return exports.oxmysql:scalarSync('SELECT id FROM `mdt_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)})
 end
 
-function GetOwnerName(cid, cb)
-	cb(exports.oxmysql:executeSync('SELECT firstname, lastname FROM `users` WHERE id=:cid LIMIT 1', { cid = cid}))
+function GetOwnerName(cid)
+	return MySQL.scalar.await('SELECT charinfo FROM `players` WHERE LOWER(`citizenid`) = ? LIMIT 1', {cid})
+	-- return exports.oxmysql:scalarSync('SELECT charinfo FROM `players` WHERE id=:cid LIMIT 1', { cid = cid})
 end
 
 function GetVehicleInformation(plate, cb)

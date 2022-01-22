@@ -1,7 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
 function GetPlayerData(source)
-	print(source)
 	local Player = QBCore.Functions.GetPlayer(source)
 	return Player.PlayerData
 end
@@ -19,8 +18,7 @@ function UnpackJob(data)
 end
 
 -- Do Perm Check
-function PermCheck(src)
-	local PlayerData = GetPlayerData(src)
+function PermCheck(src, PlayerData)
 	local result = true
 
 	-- if job is not in config

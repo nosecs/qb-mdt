@@ -22,8 +22,8 @@ CreateThread(function()
 end)
 
 local function openMDT(src)
-	if not PermCheck(src) then return end
 	local PlayerData = GetPlayerData(src)
+	if not PermCheck(src, PlayerData) then return end
 	local Radio = Player(src).state.radioChannel or 0
 	if Radio > 100 then
 		Radio = 0
@@ -49,9 +49,8 @@ end)
 
 QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb, sentData)
 	if not sentData then  return cb({}) end
-	if not PermCheck(source) then return cb({}) end
-	local src = source
-	local PlayerData = GetPlayerData(src)
+	local PlayerData = GetPlayerData(source)
+	if not PermCheck(source, PlayerData) then return cb({}) end
 	local JobName = PlayerData.job.name
 
 	if Config.PoliceJobs[JobName] then
@@ -98,8 +97,8 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 end)
 
 QBCore.Functions.CreateCallback('mdt:server:OpenDashboard', function(source, cb)
-	if not PermCheck(source) then return end
 	local PlayerData = GetPlayerData(source)
+	if not PermCheck(source,PlayerData) then return end
 	local JobType = GetJobType(PlayerData)
 	local bulletin = GetBulletins(JobType)
 	cb(bulletin)
@@ -126,8 +125,8 @@ end)
 RegisterNetEvent('mdt:server:DeleteBulletin', function(id)
 	if not id then return false end
 	local src = source
-	if not PermCheck(src) then return end
 	local PlayerData = GetPlayerData(src)
+	if not PermCheck(src) then return end
 	local JobType = GetJobType(PlayerData)
 
 	local bulletin = MySQL.scalar.await('SELECT `title` from `mdt_bulletin WHERE id = ? LIMIT 1', {id})
@@ -141,8 +140,8 @@ end)
 QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb, sentId)
 	local src = source
 	if not sentId then return cb({}) end
-	if not PermCheck(src) then return cb({}) end
 	local PlayerData = GetPlayerData(src)
+	if not PermCheck(src) then return cb({}) end
 	local JobType = GetJobType(PlayerData)
 	local target = GetPlayerDataById(sendId)
 	local JobName = PlayerData.job.name
@@ -192,8 +191,9 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 end)
 
 RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName, sName)
-	if not PermCheck(src) then return cb({}) end
+	local src = source
 	local PlayerData = GetPlayerData(src)
+	if not PermCheck(src) then return cb({}) end
 	local JobType = GetJobType(PlayerData)
 	local target = GetPlayerDataById(sendId)
 	local JobName = PlayerData.job.name
@@ -1004,15 +1004,16 @@ end)
 
 QBCore.Functions.CreateCallback('mdt:server:SearchVehicles', function(source, cb, sentData)
 	if not sentData then  return cb({}) end
-	if not PermCheck(source) then return cb({}) end
 	local src = source
 	local PlayerData = GetPlayerData(src)
+	if not PermCheck(source, PlayerData) then return cb({}) end
+
+
 	local JobName = PlayerData.job.name
 
 	if Config.PoliceJobs[JobName] then
-		local vehicles = MySQL.query.await("SELECT id, citizenid, plate, vehicle, image, state FROM `player_vehicles` WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :hash LIMIT 25", {
-			query = string.lower('%'..search..'%'),
-			hash = string.lower('%'..hash..'%'),
+		local vehicles = MySQL.query.await("SELECT id, citizenid, plate, vehicle, image, state, mods FROM `player_vehicles` WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :hash LIMIT 25", {
+			query = string.lower('%'..sentData..'%')
 		})
 
 		if not next(vehicles) then cb({}) return end
@@ -1026,10 +1027,18 @@ QBCore.Functions.CreateCallback('mdt:server:SearchVehicles', function(source, cb
 				value.state = "Impounded"
 			end
 
+			value.bolo = false
+			local boloResult = GetBoloStatus(value.plate)
+			if boloResult then
+				value.bolo = true
+			end
 
-			
+			local ownerResult = GetOwnerName(value.citizenid)
+			if type(ownerResult) ~= 'table' then ownerResult = json.decode(ownerResult) end
+
+			value.owner = ownerResult['firstname'] .. " " .. ownerResult['lastname']
+			value.image = "img/not-found.jpg"
 		end
-
 		-- idk if this works or I have to call cb first then return :shrug:
 		return cb(vehicles)
 	end
@@ -1038,54 +1047,54 @@ QBCore.Functions.CreateCallback('mdt:server:SearchVehicles', function(source, cb
 
 end)
 
-RegisterNetEvent('mdt:server:searchVehicles', function(search, hash)
-	if search then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					exports.oxmysql:execute("SELECT id, owner, plate, vehicle, code, stolen, image FROM `owned_vehicles` WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :hash LIMIT 25", {
-						query = string.lower('%'..search..'%'),
-						hash = string.lower('%'..hash..'%'),
-					}, function(vehicles)
-						for i=1, #vehicles do
+-- RegisterNetEvent('mdt:server:searchVehicles', function(search, hash)
+-- 	if search then
+-- 		TriggerEvent('echorp:getplayerfromid', source, function(result)
+-- 			if result then
+-- 				if result.job and (result.job.isPolice or result.job.name == 'doj') then
+-- 					exports.oxmysql:execute("SELECT id, owner, plate, vehicle, code, stolen, image FROM `owned_vehicles` WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :hash LIMIT 25", {
+-- 						query = string.lower('%'..search..'%'),
+-- 						hash = string.lower('%'..hash..'%'),
+-- 					}, function(vehicles)
+-- 						for i=1, #vehicles do
 
-							-- Impound Status
-							GetImpoundStatus(vehicles[i]['id'], function(impoundStatus)
-								vehicles[i]['impound'] = impoundStatus
-							end)
+-- 							-- Impound Status
+-- 							GetImpoundStatus(vehicles[i]['id'], function(impoundStatus)
+-- 								vehicles[i]['impound'] = impoundStatus
+-- 							end)
 
-							vehicles[i]['bolo'] = false
+-- 							vehicles[i]['bolo'] = false
 
-							if tonumber(vehicles[i]['code']) == 5 then
-								vehicles[i]['code'] = true
-							else
-								vehicles[i]['code'] = false
-							end
+-- 							if tonumber(vehicles[i]['code']) == 5 then
+-- 								vehicles[i]['code'] = true
+-- 							else
+-- 								vehicles[i]['code'] = false
+-- 							end
 
-							-- Bolo Status
-							GetBoloStatus(vehicles[i]['plate'], function(boloStatus)
-								if boloStatus and boloStatus[1] then
-									vehicles[i]['bolo'] = true
-								end
-							end)
+-- 							-- Bolo Status
+-- 							GetBoloStatus(vehicles[i]['plate'], function(boloStatus)
+-- 								if boloStatus and boloStatus[1] then
+-- 									vehicles[i]['bolo'] = true
+-- 								end
+-- 							end)
 
-							GetOwnerName(vehicles[i]['owner'], function(name)
-								if name and name[1] then
-									vehicles[i]['owner'] = name[1]['firstname']..' '..name[1]['lastname']
-								end
-							end)
+-- 							GetOwnerName(vehicles[i]['owner'], function(name)
+-- 								if name and name[1] then
+-- 									vehicles[i]['owner'] = name[1]['firstname']..' '..name[1]['lastname']
+-- 								end
+-- 							end)
 
-							if vehicles[i]['image'] == nil then vehicles[i]['image'] = "img/not-found.jpg" end
+-- 							if vehicles[i]['image'] == nil then vehicles[i]['image'] = "img/not-found.jpg" end
 
-						end
+-- 						end
 
-						TriggerClientEvent('mdt:client:searchVehicles', result.source, vehicles)
-					end)
-				end
-			end
-		end)
-	end
-end)
+-- 						TriggerClientEvent('mdt:client:searchVehicles', result.source, vehicles)
+-- 					end)
+-- 				end
+-- 			end
+-- 		end)
+-- 	end
+-- end)
 
 RegisterNetEvent('mdt:server:getVehicleData', function(plate)
 	if plate then

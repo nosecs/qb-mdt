@@ -488,6 +488,16 @@ RegisterNUICallback("searchVehicles", function(data, cb)
     end
 
     local result = searchVehiclesPromise(plate)
+
+    for i=1, #result do
+        local vehicle = result[i]
+        local mods = json.decode(result[i].mods)
+        result[i]['plate'] = string.upper(result[i]['plate'])
+        result[i]['color'] = Config.ColorInformation[mods['color1']]
+        result[i]['colorName'] = Config.ColorNames[mods['color1']]
+        result[i]['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehicle['vehicle']))
+    end
+
     return cb(result)
 end)
 
@@ -548,17 +558,6 @@ end)
 RegisterNUICallback("removeIncidentCriminal", function(data, cb)
     TriggerServerEvent('mdt:server:removeIncidentCriminal', data.cid, data.incidentId)
     cb(true)
-end)
-
-RegisterNetEvent('mdt:client:searchVehicles', function(sentData)
-    for i=1, #sentData do
-        local vehicle = json.decode(sentData[i]['vehicle'])
-        sentData[i]['plate'] = string.upper(sentData[i]['plate'])
-        sentData[i]['color'] = ColorInformation[vehicle['color1']]
-        sentData[i]['colorName'] = ColorNames[vehicle['color1']]
-        sentData[i]['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehicle['model']))
-    end
-    SendNUIMessage({ type = "searchedVehicles", data = sentData })
 end)
 
 RegisterNetEvent('mdt:client:getVehicleData', function(sentData)

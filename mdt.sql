@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS `mdt_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `text` text NOT NULL,
   `time` varchar(255) DEFAULT NULL,
+  `jobtype` varchar(255) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

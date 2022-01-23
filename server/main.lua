@@ -194,10 +194,10 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 			person.vehicles = vehicles
 		end
 
-		local properties=GetPlayerProperties(person.cid)
-		if properties then
-			person.properties = properties
-		end
+		-- local properties=GetPlayerProperties(person.cid)
+		-- if properties then
+		-- 	person.properties = properties
+		-- end
 	end
 
 	local mdtData = GetPersonInformation(sentId, JobType)

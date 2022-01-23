@@ -178,7 +178,7 @@ $(document).ready(() => {
     $(".manage-profile-info").removeAttr("disabled");
     $(".manage-profile-pic").attr("src", result["profilepic"]);
 
-    const { vehicles, tags, gallery, convictions,properties } = result
+    const { vehicles, tags, gallery, convictions, properties } = result
 
     $(".licences-holder").empty();
     $(".tags-holder").empty();
@@ -222,7 +222,7 @@ $(document).ready(() => {
       if (properties && properties.length > 0) {
         propertyHTML = '';
         properties.forEach(value => {
-          propertyHTML += `<div class="white-tag">${value.house} </div>`;
+          propertyHTML += `<div class="white-tag" data-location="${value.coords.x}===${value.coords.y}">${value.label} </div>`;
         })
       }
     }
@@ -734,6 +734,30 @@ $(document).ready(() => {
         icon: "fas fa-car",
         text: "Search Vehicle",
         info: $(this).data("plate"),
+        status: "",
+      },
+    ];
+    openContextMenu(e, args);
+  });
+
+  $(".contextmenu").on("click", ".make-waypoint", function () {
+    let coord = $(this).data("info").split("===")
+    setTimeout(() => {
+      $.post(
+        `https://${GetParentResourceName()}/SetHouseLocation`,
+        JSON.stringify({
+          coord: coord,
+        })
+      );
+    }, 250);
+  });
+  $(".houses-holder").on("contextmenu", ".white-tag", function (e) {
+    let args = [
+      {
+        className: "make-waypoint",
+        icon: "fas fa-car",
+        text: "Make Waypoint",
+        info: $(this).data("location"),
         status: "",
       },
     ];

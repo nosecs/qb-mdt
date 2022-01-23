@@ -45,9 +45,6 @@ end
 function GetPlayerVehicles(cid, cb)
 	return MySQL.query.await('SELECT id, plate, vehicle FROM player_vehicles WHERE citizenid=:cid', { cid = cid })
 end
-function GetPlayerProperties(cid, cb)
-	return MySQL.query.await('SELECT id, house FROM player_houses WHERE citizenid=:cid', { cid = cid })
-end
 
 function GetBulletins(JobType)
 	return MySQL.query.await('SELECT * FROM `mdt_bulletin` WHERE `jobtype` = ? LIMIT 10', { JobType })

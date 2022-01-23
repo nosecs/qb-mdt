@@ -5817,3 +5817,6 @@ span.civilian-tag-reports-input[contenteditable]:empty::before {
 .dispatch-reply:hover {
     background-color: var(--color-1);
 }
+.display_hidden{
+    display: none;
+}

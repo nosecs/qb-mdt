@@ -755,7 +755,7 @@ $(document).ready(() => {
     let args = [
       {
         className: "make-waypoint",
-        icon: "fas fa-car",
+        icon: "fas fa-map-pin",
         text: "Make Waypoint",
         info: $(this).data("location"),
         status: "",

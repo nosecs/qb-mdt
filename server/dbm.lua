@@ -44,7 +44,9 @@ end
 
 function GetPlayerVehicles(cid, cb)
 	return MySQL.query.await('SELECT id, plate, vehicle FROM player_vehicles WHERE citizenid=:cid', { cid = cid })
-	-- return exports.oxmysql:executeSync('SELECT id, plate, vehicle FROM owned_vehicles WHERE owner=:cid', { cid = cid })
+end
+function GetPlayerProperties(cid, cb)
+	return MySQL.query.await('SELECT id, house FROM player_houses WHERE citizenid=:cid', { cid = cid })
 end
 
 function GetBulletins(JobType)

@@ -189,8 +189,14 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		end
 		local vehicles = GetPlayerVehicles(person.cid)
 		
+		
 		if vehicles then
 			person.vehicles = vehicles
+		end
+
+		local properties=GetPlayerProperties(person.cid)
+		if properties then
+			person.properties = properties
 		end
 	end
 

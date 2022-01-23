@@ -21,18 +21,19 @@ var LastName = "";
 var DispatchNum = 0;
 var playerJob = "";
 
+
 // TEMP CONFIG OF JOBS
 const PoliceJobs = {
-  ["police"]: true,
-};
+  ['police']: true,
+}
 
 const AmbulanceJobs = {
-  ["ambulance"]: true,
-};
+  ['ambulance']: true,
+}
 
 const DojJobs = {
-  ["doj"]: true,
-};
+  ['doj']: true
+}
 
 const MONTH_NAMES = [
   "January",
@@ -76,7 +77,8 @@ function timeAgo(dateParam) {
     return null;
   }
 
-  const date = typeof dateParam === "object" ? dateParam : new Date(dateParam);
+  const date =
+    typeof dateParam === "object" ? dateParam : new Date(dateParam);
   const DAY_IN_MS = 86400000;
   const today = new Date();
   const yesterday = new Date(today - DAY_IN_MS);
@@ -133,7 +135,7 @@ $(document).ready(() => {
 
   $(".profile-items").on("click", ".profile-item", async function () {
     let id = $(this).data("id");
-    console.log(id);
+    console.log(id)
     let result = await $.post(
       "https://qbcore_erp_mdt/getProfileData",
       JSON.stringify({
@@ -144,7 +146,9 @@ $(document).ready(() => {
     console.log(JSON.stringify(result));
     if (!canInputTag) {
       if ($(".tags-add-btn").hasClass("fa-minus")) {
-        $(".tags-add-btn").removeClass("fa-minus").addClass("fa-plus");
+        $(".tags-add-btn")
+          .removeClass("fa-minus")
+          .addClass("fa-plus");
       }
       $(".tag-input").remove();
       canInputTag = true;
@@ -158,13 +162,13 @@ $(document).ready(() => {
     }
 
     if ($(".gallery-add-btn").hasClass("fa-minus")) {
-      $(".gallery-add-btn").removeClass("fa-minus").addClass("fa-plus");
+      $(".gallery-add-btn")
+        .removeClass("fa-minus")
+        .addClass("fa-plus");
     }
 
-    $(".manage-profile-editing-title").html(
-      `You are currently editing ${result["firstname"]} ${result["lastname"]}`
-    );
-    $(".manage-profile-citizenid-input").val(result["cid"]);
+    $(".manage-profile-editing-title").html(`You are currently editing ${result["firstname"]} ${result["lastname"]}`);
+    $(".manage-profile-citizenid-input").val(result['cid']);
     $(".manage-profile-name-input-1").val(result["firstname"]);
     $(".manage-profile-name-input-2").val(result["lastname"]);
     $(".manage-profile-dob-input").val(result["dob"]);
@@ -174,7 +178,7 @@ $(document).ready(() => {
     $(".manage-profile-info").removeAttr("disabled");
     $(".manage-profile-pic").attr("src", result["profilepic"]);
 
-    const { vehicles, tags, gallery, convictions } = result;
+    const { vehicles, tags, gallery, convictions } = result
 
     $(".licences-holder").empty();
     $(".tags-holder").empty();
@@ -182,56 +186,54 @@ $(document).ready(() => {
     $(".gallery-inner-container").empty();
     $(".convictions-holder").empty();
 
-    let licencesHTML =
-      '<div style="color: #fff; text-align:center;">No Licenses</div>';
+    let licencesHTML = '<div style="color: #fff; text-align:center;">No Licenses</div>';
     let tagsHTML = '<div style="color: #fff; text-align:center;">No Tags</div>';
-    let convHTML =
-      '<div style="color: #fff; text-align:center;">Clean Record ?</div>';
-    let vehHTML =
-      '<div style="color: #fff; text-align:center;">No Vehicles</div>';
-    let galleryHTML =
-      '<div style="color: #fff; text-align:center;">No Photos</div>';
+    let convHTML = '<div style="color: #fff; text-align:center;">Clean Record ?</div>';
+    let vehHTML = '<div style="color: #fff; text-align:center;">No Vehicles</div>';
+    let galleryHTML = '<div style="color: #fff; text-align:center;">No Photos</div>';
 
     // convert key value pair object of licenses to array
     let licenses = Object.entries(result.licences);
 
-    if (
-      licenses.length > 0 &&
-      (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)
-    ) {
-      licencesHTML = "";
+
+    if (licenses.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
+      licencesHTML = '';
       for (const [lic, hasLic] of licenses) {
+
         let tagColour = hasLic == true ? "green-tag" : "red-tag";
         licencesHTML += `<span class="license-tag ${tagColour} ${lic}" data-type="${lic}">${lic}</span>`;
       }
     }
 
     if (tags && tags.length > 0) {
-      tagsHTML = "";
+      tagsHTML = '';
       tags.forEach((tag) => {
         tagsHTML += `<div class="tag">${tag}</div>`;
-      });
+      })
     }
 
     if (vehicles && vehicles.length > 0) {
-      vehHTML = "";
-      vehicles.forEach((value) => {
-        vehHTML += `<div class="veh-tag" data-plate="${value.plate}">${value.plate} - ${value.vehicle} </div>`;
-      });
+
+      vehHTML = '';
+      vehicles.forEach(value => {
+        vehHTML += `<div class="veh-tag" data-plate="${value.plate}">${value.plate} - ${value.vehicle} </div>`
+      })
     }
+
 
     if (gallery && gallery.length > 0) {
-      galleryHTML = "";
-      gallery.forEach((value) => {
+      galleryHTML = '';
+      gallery.forEach(value => {
         galleryHTML += `<img src="${value}" class="gallery-img" onerror="this.src='img/not-found.jpg'">`;
-      });
+      })
     }
 
+
     if (convictions && convictions.length > 0) {
-      convHTML = "";
-      convictions.forEach((value) => {
+      convHTML = '';
+      convictions.forEach(value => {
         convHTML += `<div class="white-tag">${value} </div>`;
-      });
+      })
     }
 
     if (result.isLimited) {
@@ -302,8 +304,8 @@ $(document).ready(() => {
                 <div class="bulletin-bottom-info">
                     <div class="bulletin-id">ID: ${canCreateBulletin}</div>
                     <div class="bulletin-date">${MyName} - ${timeAgo(
-        Number(time.getTime())
-      )}</div>
+          Number(time.getTime())
+        )}</div>
                 </div>
             </div>`);
       canCreateBulletin = 0;
@@ -389,7 +391,9 @@ $(document).ready(() => {
         setTimeout(() => {
           $(".gallery-upload-input").css("display", "none");
         }, 250);
-        $(".gallery-add-btn").removeClass("fa-minus").addClass("fa-plus");
+        $(".gallery-add-btn")
+          .removeClass("fa-minus")
+          .addClass("fa-plus");
       }
     }
   });
@@ -397,7 +401,9 @@ $(document).ready(() => {
     if (canSaveProfile == true) {
       canSaveProfile = false;
       $(".manage-profile-save").empty();
-      $(".manage-profile-save").prepend(`<span class="fas fa-check"></span>`);
+      $(".manage-profile-save").prepend(
+        `<span class="fas fa-check"></span>`
+      );
       setTimeout(() => {
         $(".manage-profile-save").empty();
         $(".manage-profile-save").html("Save");
@@ -451,7 +457,9 @@ $(document).ready(() => {
 
         // Title, information, tags, officers involved, civs involved, evidence
         const title = $("#manage-incidents-title-input").val();
-        const information = $(".manage-incidents-reports-content").val();
+        const information = $(
+          ".manage-incidents-reports-content"
+        ).val();
         const dbid = $(".manage-incidents-editing-title").data("id");
 
         let tags = new Array();
@@ -495,7 +503,9 @@ $(document).ready(() => {
 
         let associated = new Array();
 
-        $(".associated-incidents-user-container").each(function (index) {
+        $(".associated-incidents-user-container").each(function (
+          index
+        ) {
           var cid = Number($(this).data("id"));
           var guilty = false;
           var warrant = false;
@@ -637,11 +647,26 @@ $(document).ready(() => {
       $(".manage-incidents-editing-title").data("id", 0);
 
       $(".manage-incidents-tags-add-btn").css("pointer-events", "auto");
-      $(".manage-incidents-reports-content").css("pointer-events", "auto");
-      $(".manage-incidents-officers-add-btn").css("pointer-events", "auto");
-      $(".manage-incidents-civilians-add-btn").css("pointer-events", "auto");
-      $(".manage-incidents-evidence-add-btn").css("pointer-events", "auto");
-      $(".associated-incidents-tags-add-btn").css("pointer-events", "auto");
+      $(".manage-incidents-reports-content").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".manage-incidents-officers-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".manage-incidents-civilians-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".manage-incidents-evidence-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".associated-incidents-tags-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
     }
   );
   $(".tags-add-btn").click(function () {
@@ -683,9 +708,9 @@ $(document).ready(() => {
         setTimeout(() => {
           var e = jQuery.Event("keydown");
           e.which = 13; // # Some key code value
-          e.keyCode = 13;
+          e.keyCode = 13
           $("#dmv-search-input").trigger(e);
-          console.log(keydown);
+          console.log(keydown)
         }, 250);
       }, 250);
     }, 250);
@@ -720,25 +745,29 @@ $(document).ready(() => {
       .filter("[src='" + $(this).data("info") + "']")
       .remove();
   });
-  $(".gallery-inner-container").on("contextmenu", ".gallery-img", function (e) {
-    let args = [
-      {
-        className: "remove-image",
-        icon: "fas fa-times",
-        text: "Remove Image",
-        info: $(this).attr("src"),
-        status: "",
-      },
-      {
-        className: "expand-image",
-        icon: "fas fa-expand",
-        text: "Expand Image",
-        info: $(this).attr("src"),
-        status: $(this).css("filter"),
-      },
-    ];
-    openContextMenu(e, args);
-  });
+  $(".gallery-inner-container").on(
+    "contextmenu",
+    ".gallery-img",
+    function (e) {
+      let args = [
+        {
+          className: "remove-image",
+          icon: "fas fa-times",
+          text: "Remove Image",
+          info: $(this).attr("src"),
+          status: "",
+        },
+        {
+          className: "expand-image",
+          icon: "fas fa-expand",
+          text: "Expand Image",
+          info: $(this).attr("src"),
+          status: $(this).css("filter"),
+        },
+      ];
+      openContextMenu(e, args);
+    }
+  );
 
   $(".licences-holder").on("contextmenu", ".license-tag", function (e) {
     const fuckyou = $(this).data("type");
@@ -843,7 +872,9 @@ $(document).ready(() => {
       if (name != "") {
         canSearchForProfiles = false;
         $(".profile-items").empty();
-        $(".profile-items").prepend(`<div class="profile-loader"></div>`);
+        $(".profile-items").prepend(
+          `<div class="profile-loader"></div>`
+        );
 
         let result = await $.post(
           "https://qbcore_erp_mdt/searchProfiles",
@@ -894,13 +925,10 @@ $(document).ready(() => {
           let licences = "";
           let licArr = Object.entries(metadata.licences);
 
-          if (
-            licArr.length > 0 &&
-            (PoliceJobs[playerJob] !== undefined ||
-              DojJobs[playerJob] !== undefined)
-          ) {
+          if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
             for (const [lic, hasLic] of licArr) {
-              let tagColour = hasLic == true ? "green-tag" : "red-tag";
+              let tagColour =
+                hasLic == true ? "green-tag" : "red-tag";
               licences += `<span class="license-tag ${tagColour}">${lic}</span>`;
             }
           }
@@ -911,7 +939,10 @@ $(document).ready(() => {
 
           if (value.convictions < 5) {
             convictions = "green-tag";
-          } else if (value.convictions > 4 && value.convictions < 15) {
+          } else if (
+            value.convictions > 4 &&
+            value.convictions < 15
+          ) {
             convictions = "orange-tag";
           }
 
@@ -965,7 +996,9 @@ $(document).ready(() => {
           })
         );
         $(".incidents-items").empty();
-        $(".incidents-items").prepend(`<div class="profile-loader"></div>`);
+        $(".incidents-items").prepend(
+          `<div class="profile-loader"></div>`
+        );
       }
     }
   });
@@ -1015,7 +1048,9 @@ $(document).ready(() => {
             })
           );
           $(".profile-items").empty();
-          $(".profile-items").prepend(`<div class="profile-loader"></div>`);
+          $(".profile-items").prepend(
+            `<div class="profile-loader"></div>`
+          );
           setTimeout(() => {
             $.post(
               "https://qbcore_erp_mdt/getProfileData",
@@ -1053,7 +1088,9 @@ $(document).ready(() => {
         $(".incidents-image-enlarged").css("display", "none");
       }
 
-      if ($(".icidents-person-search-container").css("display") != "none") {
+      if (
+        $(".icidents-person-search-container").css("display") != "none"
+      ) {
         shouldClose = false;
         $(".icidents-person-search-container").fadeOut(250);
         $(".close-all").css("filter", "none");
@@ -1158,7 +1195,9 @@ $(document).ready(() => {
           ).text()}</div>`
         );
         // Have it save instantly if it's an existing report.
-        if ($(".manage-incidents-officers-add-btn").hasClass("fa-minus")) {
+        if (
+          $(".manage-incidents-officers-add-btn").hasClass("fa-minus")
+        ) {
           $(".manage-incidents-officers-add-btn")
             .removeClass("fa-minus")
             .addClass("fa-plus");
@@ -1191,7 +1230,11 @@ $(document).ready(() => {
           ).text()}</div>`
         );
         // Have it save instantly if it's an existing report.
-        if ($(".manage-incidents-civilians-add-btn").hasClass("fa-minus")) {
+        if (
+          $(".manage-incidents-civilians-add-btn").hasClass(
+            "fa-minus"
+          )
+        ) {
           $(".manage-incidents-civilians-add-btn")
             .removeClass("fa-minus")
             .addClass("fa-plus");
@@ -1248,55 +1291,63 @@ $(document).ready(() => {
     }
   );
 
-  $(".manage-bolos-title-holder").on("click", ".manage-bolos-new", function () {
-    //if ($(".manage-bolos-editing-title").html() == 'You are currently creating a new BOLO') {
-    //$(".manage-bolos-new").effect("shake", { times: 2, distance: 2 }, 500)
-    //} else {
-    var template = "";
-    if ($(".badge-logo").attr("src") == "img/ems_badge.png") {
-      template =
-        "ICU Room #: [ # ]\n\nReport ID: [ Report ID ]\n\nTime Admitted: [ Date and Time Here ]\n\nSurgery: [Yes/No]\n\nInjuries/Ailments:\n - [ Enter List Of Injuries Here ]\n\n\nAdditional Attending:\n - [ List Any Other Staff Here ]\n\n\n🧑‍🤝‍🧑 Additonal Emergency Contacts:\n - [ Name And Number ]\n\n\nNotes:\n[Additional Notes Here]";
-    }
-    $(".manage-bolos-editing-title").html(
-      "You are currently creating a new BOLO"
-    );
-    $(".manage-bolos-input-title").val("");
-    $(".manage-bolos-input-plate").val("");
-    $(".manage-bolos-input-owner").val("");
-    $(".manage-bolos-input-individual").val("");
-    $(".manage-bolos-reports-content").val(template);
-    $(".manage-bolos-tags-holder").empty();
-    $(".bolo-gallery-inner-container").empty();
-    $(".manage-officers-tags-holder").empty();
+  $(".manage-bolos-title-holder").on(
+    "click",
+    ".manage-bolos-new",
+    function () {
+      //if ($(".manage-bolos-editing-title").html() == 'You are currently creating a new BOLO') {
+      //$(".manage-bolos-new").effect("shake", { times: 2, distance: 2 }, 500)
+      //} else {
+      var template = "";
+      if ($(".badge-logo").attr("src") == "img/ems_badge.png") {
+        template =
+          "ICU Room #: [ # ]\n\nReport ID: [ Report ID ]\n\nTime Admitted: [ Date and Time Here ]\n\nSurgery: [Yes/No]\n\nInjuries/Ailments:\n - [ Enter List Of Injuries Here ]\n\n\nAdditional Attending:\n - [ List Any Other Staff Here ]\n\n\n🧑‍🤝‍🧑 Additonal Emergency Contacts:\n - [ Name And Number ]\n\n\nNotes:\n[Additional Notes Here]";
+      }
+      $(".manage-bolos-editing-title").html(
+        "You are currently creating a new BOLO"
+      );
+      $(".manage-bolos-input-title").val("");
+      $(".manage-bolos-input-plate").val("");
+      $(".manage-bolos-input-owner").val("");
+      $(".manage-bolos-input-individual").val("");
+      $(".manage-bolos-reports-content").val(template);
+      $(".manage-bolos-tags-holder").empty();
+      $(".bolo-gallery-inner-container").empty();
+      $(".manage-officers-tags-holder").empty();
 
-    if ($(".manage-bolos-tags-add-btn").hasClass("fa-minus")) {
-      $(".manage-bolos-tags-add-btn")
-        .removeClass("fa-minus")
-        .addClass("fa-plus");
-    }
-    if ($(".bolo-gallery-add-btn").hasClass("fa-minus")) {
-      $(".bolo-gallery-add-btn").removeClass("fa-minus").addClass("fa-plus");
-    }
-    if ($(".officers-add-btn").hasClass("fa-minus")) {
-      $(".officers-add-btn").removeClass("fa-minus").addClass("fa-plus");
-    }
+      if ($(".manage-bolos-tags-add-btn").hasClass("fa-minus")) {
+        $(".manage-bolos-tags-add-btn")
+          .removeClass("fa-minus")
+          .addClass("fa-plus");
+      }
+      if ($(".bolo-gallery-add-btn").hasClass("fa-minus")) {
+        $(".bolo-gallery-add-btn")
+          .removeClass("fa-minus")
+          .addClass("fa-plus");
+      }
+      if ($(".officers-add-btn").hasClass("fa-minus")) {
+        $(".officers-add-btn")
+          .removeClass("fa-minus")
+          .addClass("fa-plus");
+      }
 
-    if ($(".bolo-gallery-upload-input").css("display") == "block") {
-      $(".bolo-gallery-upload-input").slideUp(250);
-      setTimeout(() => {
-        $(".bolo-gallery-upload-input").css("display", "none");
-      }, 250);
+      if ($(".bolo-gallery-upload-input").css("display") == "block") {
+        $(".bolo-gallery-upload-input").slideUp(250);
+        setTimeout(() => {
+          $(".bolo-gallery-upload-input").css("display", "none");
+        }, 250);
+      }
+
+      canInputTag = true;
+      canInputBoloTag = true;
+      canInputBoloOfficerTag = true;
+
+      $(".tag-bolo-input").remove();
+      canInputBoloTag = true;
+
+      //}
     }
-
-    canInputTag = true;
-    canInputBoloTag = true;
-    canInputBoloOfficerTag = true;
-
-    $(".tag-bolo-input").remove();
-    canInputBoloTag = true;
-
-    //}
-  });
+  );
 
   $(".manage-bolos-title-holder").on(
     "click",
@@ -1441,21 +1492,25 @@ $(document).ready(() => {
     }
   });
 
-  $(".manage-bolos-tags-holder").on("keydown", ".tag-bolo-input", function (e) {
-    if (e.keyCode === 13) {
-      $(".manage-bolos-tags-holder").prepend(
-        `<div class="tag">${$(".tag-bolo-input").text()}</div>`
-      );
-      // Have it save instantly if it's an existing report.
-      if ($(".manage-bolos-tags-add-btn").hasClass("fa-minus")) {
-        $(".manage-bolos-tags-add-btn")
-          .removeClass("fa-minus")
-          .addClass("fa-plus");
+  $(".manage-bolos-tags-holder").on(
+    "keydown",
+    ".tag-bolo-input",
+    function (e) {
+      if (e.keyCode === 13) {
+        $(".manage-bolos-tags-holder").prepend(
+          `<div class="tag">${$(".tag-bolo-input").text()}</div>`
+        );
+        // Have it save instantly if it's an existing report.
+        if ($(".manage-bolos-tags-add-btn").hasClass("fa-minus")) {
+          $(".manage-bolos-tags-add-btn")
+            .removeClass("fa-minus")
+            .addClass("fa-plus");
+        }
+        $(".tag-bolo-input").remove();
+        canInputBoloTag = true;
       }
-      $(".tag-bolo-input").remove();
-      canInputBoloTag = true;
     }
-  });
+  );
 
   $(".bolo-gallery-add-btn").click(function () {
     //if ($(".manage-profile-citizenid-input").val()) {
@@ -1489,7 +1544,9 @@ $(document).ready(() => {
         setTimeout(() => {
           $(".bolo-gallery-upload-input").css("display", "none");
         }, 250);
-        $(".bolo-gallery-add-btn").removeClass("fa-minus").addClass("fa-plus");
+        $(".bolo-gallery-add-btn")
+          .removeClass("fa-minus")
+          .addClass("fa-plus");
       }
     }
   });
@@ -1501,7 +1558,9 @@ $(document).ready(() => {
         .addClass("fa-plus");
     }
     if ($(".bolo-gallery-add-btn").hasClass("fa-minus")) {
-      $(".bolo-gallery-add-btn").removeClass("fa-minus").addClass("fa-plus");
+      $(".bolo-gallery-add-btn")
+        .removeClass("fa-minus")
+        .addClass("fa-plus");
     }
     if ($(".officers-add-btn").hasClass("fa-minus")) {
       $(".officers-add-btn").removeClass("fa-minus").addClass("fa-plus");
@@ -1606,7 +1665,9 @@ $(document).ready(() => {
             .eq(index)
             .data("id") == stupidasscid
         ) {
-          const randomNum = Math.ceil(Math.random() * 1000).toString();
+          const randomNum = Math.ceil(
+            Math.random() * 1000
+          ).toString();
           $("#current-charges-holder").prepend(
             `<div class="current-charges-tag" data-link="${randomNum}">${$(
               ".associated-incidents-user-holder"
@@ -1633,93 +1694,113 @@ $(document).ready(() => {
     }
   });
 
-  $(".offenses-main-container").on("mousedown", ".offense-item", function (e) {
-    const cid = $("#current-charges-holder").data("cid");
-    const newItem = $(this).find(".offense-item-offense").html();
-    const Fine = +$(this).data("fine");
-    const Sentence = +$(this).data("sentence");
-    if (e.which == 1) {
-      let randomNum = Math.ceil(Math.random() * 1000).toString();
-      $(`[data-name="${cid}"]`).prepend(
-        `<div class="white-tag" data-link="${randomNum}" data-id="${cid}">${$(
-          this
-        )
-          .find(".offense-item-offense")
-          .html()}</div>`
-      );
-      $("#current-charges-holder").prepend(
-        `<div class="current-charges-tag" data-link="${randomNum}">${$(this)
-          .find(".offense-item-offense")
-          .html()}</div>`
-      );
+  $(".offenses-main-container").on(
+    "mousedown",
+    ".offense-item",
+    function (e) {
+      const cid = $("#current-charges-holder").data("cid");
+      const newItem = $(this).find(".offense-item-offense").html();
+      const Fine = +$(this).data("fine");
+      const Sentence = +$(this).data("sentence");
+      if (e.which == 1) {
+        let randomNum = Math.ceil(Math.random() * 1000).toString();
+        $(`[data-name="${cid}"]`).prepend(
+          `<div class="white-tag" data-link="${randomNum}" data-id="${cid}">${$(
+            this
+          )
+            .find(".offense-item-offense")
+            .html()}</div>`
+        );
+        $("#current-charges-holder").prepend(
+          `<div class="current-charges-tag" data-link="${randomNum}">${$(
+            this
+          )
+            .find(".offense-item-offense")
+            .html()}</div>`
+        );
 
-      const CurrRfine = $(".fine-recommended-amount").val();
-      const NewFine = +CurrRfine + +Fine;
-      $(".fine-recommended-amount").val(NewFine);
-      const CurrRsentence = $(".sentence-recommended-amount").val();
-      const NewSentence = +CurrRsentence + +Sentence;
-      $(".sentence-recommended-amount").val(NewSentence);
-    } else if (e.which == 3) {
-      $(".associated-incidents-user-holder")
-        .children("div")
-        .each(function (index) {
-          if (
-            $(".associated-incidents-user-holder")
-              .children()
-              .eq(index)
-              .data("id") == cid
-          ) {
+        const CurrRfine = $(".fine-recommended-amount").val();
+        const NewFine = +CurrRfine + +Fine;
+        $(".fine-recommended-amount").val(NewFine);
+        const CurrRsentence = $(".sentence-recommended-amount").val();
+        const NewSentence = +CurrRsentence + +Sentence;
+        $(".sentence-recommended-amount").val(NewSentence);
+      } else if (e.which == 3) {
+        $(".associated-incidents-user-holder")
+          .children("div")
+          .each(function (index) {
             if (
               $(".associated-incidents-user-holder")
                 .children()
                 .eq(index)
-                .html() == newItem
+                .data("id") == cid
             ) {
-              const linkedId = $(".associated-incidents-user-holder")
-                .children()
-                .eq(index)
-                .data("link");
-              //$(".current-charges-tag").filter(`[data-link="${linkedId}"]`).remove()
-              $(".white-tag").filter(`[data-link="${linkedId}"]`).remove();
+              if (
+                $(".associated-incidents-user-holder")
+                  .children()
+                  .eq(index)
+                  .html() == newItem
+              ) {
+                const linkedId = $(
+                  ".associated-incidents-user-holder"
+                )
+                  .children()
+                  .eq(index)
+                  .data("link");
+                //$(".current-charges-tag").filter(`[data-link="${linkedId}"]`).remove()
+                $(".white-tag")
+                  .filter(`[data-link="${linkedId}"]`)
+                  .remove();
 
-              var stop = false;
+                var stop = false;
 
-              $("#current-charges-holder")
-                .children("div")
-                .each(function (index) {
-                  if (stop == false) {
-                    if (
-                      $("#current-charges-holder")
-                        .children()
-                        .eq(index)
-                        .html() == newItem
-                    ) {
-                      const linkedId = $("#current-charges-holder")
-                        .children()
-                        .eq(index)
-                        .data("link");
-                      $(".current-charges-tag")
-                        .filter(`[data-link="${linkedId}"]`)
-                        .remove();
-                      stop = true;
+                $("#current-charges-holder")
+                  .children("div")
+                  .each(function (index) {
+                    if (stop == false) {
+                      if (
+                        $("#current-charges-holder")
+                          .children()
+                          .eq(index)
+                          .html() == newItem
+                      ) {
+                        const linkedId = $(
+                          "#current-charges-holder"
+                        )
+                          .children()
+                          .eq(index)
+                          .data("link");
+                        $(".current-charges-tag")
+                          .filter(
+                            `[data-link="${linkedId}"]`
+                          )
+                          .remove();
+                        stop = true;
+                      }
                     }
-                  }
-                });
+                  });
 
-              const CurrRfine = $(".fine-recommended-amount").val();
-              const NewFine = +CurrRfine - Fine;
-              $(".fine-recommended-amount").val(NewFine);
-              //
-              const CurrRsentence = $(".sentence-recommended-amount").val();
-              const NewSentence = +CurrRsentence - +Sentence;
-              $(".sentence-recommended-amount").val(NewSentence);
+                const CurrRfine = $(
+                  ".fine-recommended-amount"
+                ).val();
+                const NewFine = +CurrRfine - Fine;
+                $(".fine-recommended-amount").val(NewFine);
+                //
+                const CurrRsentence = $(
+                  ".sentence-recommended-amount"
+                ).val();
+                const NewSentence = +CurrRsentence - +Sentence;
+                $(".sentence-recommended-amount").val(
+                  NewSentence
+                );
 
-              return false;
+                return false;
+              }
             }
-          }
-        });
+          });
+      }
     }
-  });
+  );
 
   $(".bolo-gallery-inner-container").on("click", ".bolo-img", function () {
     if ($(this).css("filter") == "none") {
@@ -1777,12 +1858,16 @@ $(document).ready(() => {
     function (e) {
       if (e.keyCode === 13) {
         $(".manage-officers-tags-holder").prepend(
-          `<div class="tag">${$(".officer-tag-bolo-input").text()}</div>`
+          `<div class="tag">${$(
+            ".officer-tag-bolo-input"
+          ).text()}</div>`
         );
         // Have it save instantly if it's an existing report.
         if ($(".officers-add-btn").hasClass("fa-minus")) {
           canInputBoloOfficerTag = true;
-          $(".officers-add-btn").removeClass("fa-minus").addClass("fa-plus");
+          $(".officers-add-btn")
+            .removeClass("fa-minus")
+            .addClass("fa-plus");
         }
         canInputBoloOfficerTag = true;
         $(".officer-tag-bolo-input").remove();
@@ -1834,8 +1919,14 @@ $(document).ready(() => {
     "click",
     ".associated-incidents-remove-tag",
     function () {
-      $(`.associated-incidents-tag:contains(${$(this).data("info")})`).remove();
-      $(`.associated-incidents-user-title:contains(${$(this).data("info")})`)
+      $(
+        `.associated-incidents-tag:contains(${$(this).data("info")})`
+      ).remove();
+      $(
+        `.associated-incidents-user-title:contains(${$(this).data(
+          "info"
+        )})`
+      )
         .parent()
         .remove();
       const incidentId = $(".manage-incidents-editing-title").data("id");
@@ -1881,67 +1972,67 @@ $(document).ready(() => {
       $(".incidents-ghost-holder").prepend(
         `
             <div class="associated-incidents-user-container" data-id="${$(
-              this
-            ).data("cid")}">
+          this
+        ).data("cid")}">
                 <div class="associated-incidents-user-title">${$(this).data(
-                  "info"
-                )}</div>
+          "info"
+        )}</div>
                 <div class="associated-incidents-user-tags-holder">
                     <div class="associated-incidents-user-tag red-tag" data-id="${$(
-                      this
-                    ).data("cid")}">Warrant</div>
+          this
+        ).data("cid")}">Warrant</div>
                     <div class="associated-incidents-user-tag red-tag" data-id="${$(
-                      this
-                    ).data("cid")}">Guilty</div>
+          this
+        ).data("cid")}">Guilty</div>
                     <div class="associated-incidents-user-tag red-tag" data-id="${$(
-                      this
-                    ).data("cid")}">Processed</div>
+          this
+        ).data("cid")}">Processed</div>
                     <div class="associated-incidents-user-tag red-tag" data-id="${$(
-                      this
-                    ).data("cid")}">Associated</div>
+          this
+        ).data("cid")}">Associated</div>
                 </div>
                 <div class="associated-incidents-user-holder" data-name="${$(
-                  this
-                ).data("cid")}">
+          this
+        ).data("cid")}">
                 </div>
                 <div class="manage-incidents-title-tag" data-id="${$(this).data(
-                  "cid"
-                )}">Recommended Fine</div>
+          "cid"
+        )}">Recommended Fine</div>
                 <div class="associated-incidents-fine-input" data-id="${$(
-                  this
-                ).data(
-                  "cid"
-                )}"><img src="https://i.imgur.com/h7S5f9J.png"> <input disabled placeholder="0" class="fine-recommended-amount" id="fine-recommended-amount" data-id="${$(
+          this
+        ).data(
+          "cid"
+        )}"><img src="https://i.imgur.com/h7S5f9J.png"> <input disabled placeholder="0" class="fine-recommended-amount" id="fine-recommended-amount" data-id="${$(
           this
         ).data("cid")}" type="number"></div>
                 <div class="manage-incidents-title-tag" data-id="${$(this).data(
-                  "cid"
-                )}">Recommended Sentence</div>
+          "cid"
+        )}">Recommended Sentence</div>
                 <div class="associated-incidents-sentence-input" data-id="${$(
-                  this
-                ).data(
-                  "cid"
-                )}"><img src="https://i.imgur.com/9Xn6xXK.png"> <input disabled placeholder="0" class="sentence-recommended-amount" id="sentence-recommended-amount" data-id="${$(
+          this
+        ).data(
+          "cid"
+        )}"><img src="https://i.imgur.com/9Xn6xXK.png"> <input disabled placeholder="0" class="sentence-recommended-amount" id="sentence-recommended-amount" data-id="${$(
           this
         ).data("cid")}" type="number"></div>
                 <div class="manage-incidents-title-tag" data-id="${$(this).data(
-                  "cid"
-                )}">Fine</div>
+          "cid"
+        )}">Fine</div>
                 <div class="associated-incidents-fine-input" data-id="${$(
-                  this
-                ).data(
-                  "cid"
-                )}"><img src="https://i.imgur.com/h7S5f9J.png"> <input placeholder="Enter fine here..." value="0" class="fine-amount" data-id="${$(
+          this
+        ).data(
+          "cid"
+        )}"><img src="https://i.imgur.com/h7S5f9J.png"> <input placeholder="Enter fine here..." value="0" class="fine-amount" data-id="${$(
           this
         ).data("cid")}" type="number"></div>
                 <div class="manage-incidents-title-tag" data-id="${$(this).data(
-                  "cid"
-                )}">Sentence</div>
+          "cid"
+        )}">Sentence</div>
                 <div class="associated-incidents-sentence-input" data-id="${$(
-                  this
-                ).data(
-                  "cid"
-                )}"><img src="https://i.imgur.com/9Xn6xXK.png"> <input placeholder="Enter months here..." value="0" class="sentence-amount" data-id="${$(
+          this
+        ).data(
+          "cid"
+        )}"><img src="https://i.imgur.com/9Xn6xXK.png"> <input placeholder="Enter months here..." value="0" class="sentence-amount" data-id="${$(
           this
         ).data("cid")}" type="number"></div>
             </div>
@@ -1968,7 +2059,9 @@ $(document).ready(() => {
   });
 
   $(".contextmenu").on("click", ".incidents-remove-officer-tag", function () {
-    $(`.manage-incidents-officers:contains(${$(this).data("info")})`).remove();
+    $(
+      `.manage-incidents-officers:contains(${$(this).data("info")})`
+    ).remove();
   });
 
   $(".manage-incidents-officers-holder").on(
@@ -1989,7 +2082,9 @@ $(document).ready(() => {
   );
 
   $(".contextmenu").on("click", ".incidents-remove-civ-tag", function () {
-    $(`.manage-incidents-civilians:contains(${$(this).data("info")})`).remove();
+    $(
+      `.manage-incidents-civilians:contains(${$(this).data("info")})`
+    ).remove();
   });
 
   $(".manage-incidents-civilians-holder").on(
@@ -2113,7 +2208,9 @@ $(document).ready(() => {
         .addClass("fa-plus");
     }
     if ($(".reports-gallery-add-btn").hasClass("fa-minus")) {
-      $(".reports-gallery-add-btn").removeClass("fa-minus").addClass("fa-plus");
+      $(".reports-gallery-add-btn")
+        .removeClass("fa-minus")
+        .addClass("fa-plus");
     }
     if ($(".reports-officers-add-btn").hasClass("fa-minus")) {
       $(".reports-officers-add-btn")
@@ -2274,7 +2371,9 @@ $(document).ready(() => {
     function (e) {
       if (e.keyCode === 13) {
         $(".reports-officers-tags-holder").prepend(
-          `<div class="tag">${$(".officer-tag-reports-input").text()}</div>`
+          `<div class="tag">${$(
+            ".officer-tag-reports-input"
+          ).text()}</div>`
         );
         // Have it save instantly if it's an existing report.
         if ($(".reports-officers-add-btn").hasClass("fa-minus")) {
@@ -2309,7 +2408,9 @@ $(document).ready(() => {
     function (e) {
       if (e.keyCode === 13) {
         $(".reports-civilians-tags-holder").prepend(
-          `<div class="tag">${$(".civilian-tag-reports-input").text()}</div>`
+          `<div class="tag">${$(
+            ".civilian-tag-reports-input"
+          ).text()}</div>`
         );
         // Have it save instantly if it's an existing report.
         if ($(".reports-civilians-add-btn").hasClass("fa-minus")) {
@@ -2357,7 +2458,9 @@ $(document).ready(() => {
           .addClass("fa-plus");
       }
       if ($(".officers-add-btn").hasClass("fa-minus")) {
-        $(".officers-add-btn").removeClass("fa-minus").addClass("fa-plus");
+        $(".officers-add-btn")
+          .removeClass("fa-minus")
+          .addClass("fa-plus");
       }
 
       if ($(".reports-gallery-upload-input").css("display") == "block") {
@@ -2390,7 +2493,9 @@ $(document).ready(() => {
           })
         );
         $(".reports-items").empty();
-        $(".reports-items").prepend(`<div class="profile-loader"></div>`);
+        $(".reports-items").prepend(
+          `<div class="profile-loader"></div>`
+        );
       }
     }
   });
@@ -2562,6 +2667,7 @@ $(document).ready(() => {
         $(".dmv-items").html(vehicleHTML);
 
         canSearchForVehicles = true;
+
       }
     }
   });
@@ -2591,7 +2697,9 @@ $(document).ready(() => {
           canSaveVehicle = true;
         }, 750);
         setTimeout(() => {
-          let dbid = $(".vehicle-information-title-holder").data("dbid");
+          let dbid = $(".vehicle-information-title-holder").data(
+            "dbid"
+          );
           let plate = $(".vehicle-info-plate-input").val();
           let notes = $(".vehicle-info-content").val();
 
@@ -2766,7 +2874,10 @@ $(document).ready(() => {
     if (!plate || plate === "") {
       $(".impound-form").css("border", "1px solid rgb(184, 3, 3)");
       setTimeout(() => {
-        $(".impound-form").css("border", "1px solid rgb(168, 168, 168)");
+        $(".impound-form").css(
+          "border",
+          "1px solid rgb(168, 168, 168)"
+        );
       }, 500);
       return;
     }
@@ -2774,7 +2885,10 @@ $(document).ready(() => {
     if (!linkedreport || linkedreport === "") {
       $(".impound-form").css("border", "1px solid rgb(184, 3, 3)");
       setTimeout(() => {
-        $(".impound-form").css("border", "1px solid rgb(168, 168, 168)");
+        $(".impound-form").css(
+          "border",
+          "1px solid rgb(168, 168, 168)"
+        );
       }, 500);
       return;
     }
@@ -2782,7 +2896,10 @@ $(document).ready(() => {
     if (!fee || fee === "") {
       $(".impound-form").css("border", "1px solid rgb(184, 3, 3)");
       setTimeout(() => {
-        $(".impound-form").css("border", "1px solid rgb(168, 168, 168)");
+        $(".impound-form").css(
+          "border",
+          "1px solid rgb(168, 168, 168)"
+        );
       }, 500);
       return;
     }
@@ -2790,7 +2907,10 @@ $(document).ready(() => {
     if (!time || time === "") {
       $(".impound-form").css("border", "1px solid rgb(184, 3, 3)");
       setTimeout(() => {
-        $(".impound-form").css("border", "1px solid rgb(168, 168, 168)");
+        $(".impound-form").css(
+          "border",
+          "1px solid rgb(168, 168, 168)"
+        );
       }, 500);
       return;
     }
@@ -2904,7 +3024,9 @@ $(document).ready(() => {
           })
         );
         $(".profile-items").empty();
-        $(".profile-items").prepend(`<div class="profile-loader"></div>`);
+        $(".profile-items").prepend(
+          `<div class="profile-loader"></div>`
+        );
         setTimeout(() => {
           $.post(
             "https://qbcore_erp_mdt/getProfileData",
@@ -2934,7 +3056,9 @@ $(document).ready(() => {
           })
         );
         $(".incidents-items").empty();
-        $(".incidents-items").prepend(`<div class="profile-loader"></div>`);
+        $(".incidents-items").prepend(
+          `<div class="profile-loader"></div>`
+        );
         setTimeout(() => {
           $.post(
             "https://qbcore_erp_mdt/getIncidentData",
@@ -2972,7 +3096,9 @@ $(document).ready(() => {
 
   $(".contextmenu").on("click", ".toggle-duty", function () {
     let info = $(this).data("info");
-    let currentStatus = $(`[data-id="${info}"]`).find(".unit-status").html();
+    let currentStatus = $(`[data-id="${info}"]`)
+      .find(".unit-status")
+      .html();
     if (currentStatus == "10-8") {
       $(`[data-id="${info}"]`).find(".unit-status").html("10-7");
       $(`[data-id="${info}"]`)
@@ -3132,89 +3258,93 @@ $(document).ready(() => {
       })
     );
     /**$(".respond-calls").fadeIn(0)
-        $(".respond-calls-container").fadeIn(250)
-        $(".close-all").css("filter", "brightness(15%)");
-        $("#respondcalls").val("")*/
+    $(".respond-calls-container").fadeIn(250)
+    $(".close-all").css("filter", "brightness(15%)");
+    $("#respondcalls").val("")*/
   });
 
-  $(".active-calls-list").on("contextmenu", ".active-calls-item", function (e) {
-    const callId = $(this).data("id");
-    const canRespond = $(this).data("canrespond");
-    if (callId) {
-      if (canRespond == true) {
-        args = [
-          {
-            className: "respond-call",
-            icon: "fas fa-reply",
-            text: "Respond to Call",
-            info: callId,
-            status: "",
-          },
-          {
-            className: "attached-units",
-            icon: "fas fa-link",
-            text: "Attached Units",
-            info: callId,
-            status: "",
-          },
-          {
-            className: "call-detach",
-            icon: "fas fa-sign-out-alt",
-            text: "Detach",
-            info: callId,
-            status: "",
-          },
-          {
-            className: "call-attach",
-            icon: "fas fa-sign-in-alt",
-            text: "Respond",
-            info: callId,
-            status: "",
-          },
-          {
-            className: "Set-Waypoint",
-            icon: "fas fa-map-marker-alt",
-            text: "Set Waypoint",
-            info: callId,
-            status: "",
-          },
-        ];
-      } else if (canRespond == false) {
-        args = [
-          {
-            className: "attached-units",
-            icon: "fas fa-link",
-            text: "Attached Units",
-            info: callId,
-            status: "",
-          },
-          {
-            className: "call-detach",
-            icon: "fas fa-sign-out-alt",
-            text: "Detach",
-            info: callId,
-            status: "",
-          },
-          {
-            className: "call-attach",
-            icon: "fas fa-sign-in-alt",
-            text: "Respond",
-            info: callId,
-            status: "",
-          },
-          {
-            className: "Set-Waypoint",
-            icon: "fas fa-map-marker-alt",
-            text: "Set Waypoint",
-            info: callId,
-            status: "",
-          },
-        ];
+  $(".active-calls-list").on(
+    "contextmenu",
+    ".active-calls-item",
+    function (e) {
+      const callId = $(this).data("id");
+      const canRespond = $(this).data("canrespond");
+      if (callId) {
+        if (canRespond == true) {
+          args = [
+            {
+              className: "respond-call",
+              icon: "fas fa-reply",
+              text: "Respond to Call",
+              info: callId,
+              status: "",
+            },
+            {
+              className: "attached-units",
+              icon: "fas fa-link",
+              text: "Attached Units",
+              info: callId,
+              status: "",
+            },
+            {
+              className: "call-detach",
+              icon: "fas fa-sign-out-alt",
+              text: "Detach",
+              info: callId,
+              status: "",
+            },
+            {
+              className: "call-attach",
+              icon: "fas fa-sign-in-alt",
+              text: "Respond",
+              info: callId,
+              status: "",
+            },
+            {
+              className: "Set-Waypoint",
+              icon: "fas fa-map-marker-alt",
+              text: "Set Waypoint",
+              info: callId,
+              status: "",
+            },
+          ];
+        } else if (canRespond == false) {
+          args = [
+            {
+              className: "attached-units",
+              icon: "fas fa-link",
+              text: "Attached Units",
+              info: callId,
+              status: "",
+            },
+            {
+              className: "call-detach",
+              icon: "fas fa-sign-out-alt",
+              text: "Detach",
+              info: callId,
+              status: "",
+            },
+            {
+              className: "call-attach",
+              icon: "fas fa-sign-in-alt",
+              text: "Respond",
+              info: callId,
+              status: "",
+            },
+            {
+              className: "Set-Waypoint",
+              icon: "fas fa-map-marker-alt",
+              text: "Set Waypoint",
+              info: callId,
+              status: "",
+            },
+          ];
+        }
+
+        openContextMenu(e, args);
       }
-
-      openContextMenu(e, args);
     }
-  });
+  );
 
   $(".contextmenu").on("click", ".call-dispatch-detach", function () {
     const cid = $(this).data("info");
@@ -3320,7 +3450,9 @@ $(document).ready(() => {
         .html()
         .replace(/\s*(?:\[[^\]]*\]|\([^)]*\))\s*/g, "");
       let newunitname = `(${callsign}) ${name}`;
-      $(`[data-id="${editingcallsign}"]`).find(".unit-name").html(newunitname);
+      $(`[data-id="${editingcallsign}"]`)
+        .find(".unit-name")
+        .html(newunitname);
       $.post(
         "https://qbcore_erp_mdt/setCallsign",
         JSON.stringify({
@@ -3354,7 +3486,9 @@ $(document).ready(() => {
     if (radio.length > 0) {
       let editingradio = $(".radio-container").data("id");
       let newunitname = `${radio}`;
-      $(`[data-id="${editingradio}"]`).find(".unit-radio").html(newunitname);
+      $(`[data-id="${editingradio}"]`)
+        .find(".unit-radio")
+        .html(newunitname);
       $.post(
         "https://qbcore_erp_mdt/setRadio",
         JSON.stringify({
@@ -3450,17 +3584,38 @@ $(document).ready(() => {
         sentJob == "sapr" ||
         sentJob == "pa"
       ) {
-        document.documentElement.style.setProperty("--color-1", "#1E3955");
-        document.documentElement.style.setProperty("--color-2", "#213F5F");
-        document.documentElement.style.setProperty("--color-3", "#2C537B");
-        document.documentElement.style.setProperty("--color-4", "#23405E");
-        document.documentElement.style.setProperty("--color-5", "#152638");
-        document.documentElement.style.setProperty("--color-6", "#121f2c");
+        document.documentElement.style.setProperty(
+          "--color-1",
+          "#1E3955"
+        );
+        document.documentElement.style.setProperty(
+          "--color-2",
+          "#213F5F"
+        );
+        document.documentElement.style.setProperty(
+          "--color-3",
+          "#2C537B"
+        );
+        document.documentElement.style.setProperty(
+          "--color-4",
+          "#23405E"
+        );
+        document.documentElement.style.setProperty(
+          "--color-5",
+          "#152638"
+        );
+        document.documentElement.style.setProperty(
+          "--color-6",
+          "#121f2c"
+        );
         document.documentElement.style.setProperty(
           "--color-7",
           "rgb(28, 54, 82)"
         );
-        document.documentElement.style.setProperty("--color-8", "#2554cc");
+        document.documentElement.style.setProperty(
+          "--color-8",
+          "#2554cc"
+        );
         $(".badge-logo").attr("src", "img/sasp_badge.png");
         $(".header-title").html("SAN ANDREAS STATE POLICE");
         $(".bolo-nav-item").html("BOLOs");
@@ -3474,9 +3629,18 @@ $(document).ready(() => {
         $(".boloowner-title").html("Owner");
         $(".boloindividual-title").html("Individual");
         $("#boloplate").attr("placeholder", "Place plate here...");
-        $("#bolodetail").attr("placeholder", "Bolo detail goes here...");
-        $("#boloowner").attr("placeholder", "Place vehicle owner here...");
-        $("#boloindividual").attr("placeholder", "Place invidivual here...");
+        $("#bolodetail").attr(
+          "placeholder",
+          "Bolo detail goes here..."
+        );
+        $("#boloowner").attr(
+          "placeholder",
+          "Place vehicle owner here..."
+        );
+        $("#boloindividual").attr(
+          "placeholder",
+          "Place invidivual here..."
+        );
         $("#home-warrants-container").fadeIn(0);
         $("#home-reports-container").fadeOut(0);
         $(".quote-span").html("TUCKER MALD, BEST MALD");
@@ -3487,7 +3651,9 @@ $(document).ready(() => {
         $(".dispatch-comms-container").fadeIn(0);
         $(".manage-profile-name-input-1").attr("readonly", true);
         $(".manage-profile-name-input-2").attr("readonly", true);
-        $("#reports-officers-involved-tag-title").html("Officers Involved");
+        $("#reports-officers-involved-tag-title").html(
+          "Officers Involved"
+        );
         $(".roster-iframe").attr(
           "src",
           "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdoer41P1HV_ErH6W2oYblUdsrNY92FtBKq1kZ32x1BhGLxUnnlcB_cNkML5zodI_bkPvmecw27Uiv/pubhtml?widget=true&amp;headers=false"
@@ -3495,19 +3661,46 @@ $(document).ready(() => {
       } else if (sentJob == "ambulance") {
         $("#home-warrants-container").fadeOut(0);
         $("#home-reports-container").fadeIn(0);
-        document.documentElement.style.setProperty("--color-1", "#00a3d0");
-        document.documentElement.style.setProperty("--color-2", "#017190");
-        document.documentElement.style.setProperty("--color-3", "#017190");
-        document.documentElement.style.setProperty("--color-4", "#025269");
-        document.documentElement.style.setProperty("--color-5", "#023f50");
-        document.documentElement.style.setProperty("--color-6", "#023f50");
+        document.documentElement.style.setProperty(
+          "--color-1",
+          "#00a3d0"
+        );
+        document.documentElement.style.setProperty(
+          "--color-2",
+          "#017190"
+        );
+        document.documentElement.style.setProperty(
+          "--color-3",
+          "#017190"
+        );
+        document.documentElement.style.setProperty(
+          "--color-4",
+          "#025269"
+        );
+        document.documentElement.style.setProperty(
+          "--color-5",
+          "#023f50"
+        );
+        document.documentElement.style.setProperty(
+          "--color-6",
+          "#023f50"
+        );
         document.documentElement.style.setProperty(
           "--color-7",
           "rgb(2, 63, 80)"
         );
-        document.documentElement.style.setProperty("--color-8", "#00a3d0");
-        document.documentElement.style.setProperty("--color-9", "#eaeaea");
-        document.documentElement.style.setProperty("--color-10", "#444444");
+        document.documentElement.style.setProperty(
+          "--color-8",
+          "#00a3d0"
+        );
+        document.documentElement.style.setProperty(
+          "--color-9",
+          "#eaeaea"
+        );
+        document.documentElement.style.setProperty(
+          "--color-10",
+          "#444444"
+        );
         $(".badge-logo").attr("src", "img/ems_badge.png");
         $(".header-title").html("MOUNT ZONAH MEDICAL CENTER");
         $(".quote-span").html(
@@ -3515,7 +3708,10 @@ $(document).ready(() => {
         );
         $(".bolo-nav-item").html("ICU");
         $(".bolos-search-title").html("ICU Check-ins");
-        $("#bolos-search-input").attr("placeholder", "Search Check-ins...");
+        $("#bolos-search-input").attr(
+          "placeholder",
+          "Search Check-ins..."
+        );
         $(".manage-bolos-title").html("Manage ICU Check-in");
         $(".manage-bolos-editing-title").html(
           "You are creating a new ICU Check-in"
@@ -3523,12 +3719,18 @@ $(document).ready(() => {
         $(".boloplate-title").html("Estimated Recovery");
         $(".boloowner-title").html("Emergency Contact");
         $(".boloindividual-title").html("Patient");
-        $("#boloplate").attr("placeholder", "Enter recovery time here...");
+        $("#boloplate").attr(
+          "placeholder",
+          "Enter recovery time here..."
+        );
         $("#bolodetail").attr(
           "placeholder",
           "Enter ICU Check-in details here..."
         );
-        $("#boloowner").attr("placeholder", "Enter emergency contact here...");
+        $("#boloowner").attr(
+          "placeholder",
+          "Enter emergency contact here..."
+        );
         $("#boloindividual").attr(
           "placeholder",
           "Enter patient name and CID here..."
@@ -3545,17 +3747,38 @@ $(document).ready(() => {
           "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIzcmRoaChLj8r25FtoUe2xpbghdFMk9Qxbxk1vwbI59MlFKqoIu2_KOsI5DclLMEzpx8rr6OLaZch/pubhtml?widget=true&amp;headers=false%22%3E"
         );
       } else if (sentJob == "doj") {
-        document.documentElement.style.setProperty("--color-1", "#553a1e");
-        document.documentElement.style.setProperty("--color-2", "#5f4321");
-        document.documentElement.style.setProperty("--color-3", "#7b552c");
-        document.documentElement.style.setProperty("--color-4", "#5e4123");
-        document.documentElement.style.setProperty("--color-5", "#382815");
-        document.documentElement.style.setProperty("--color-6", "#2c2312");
+        document.documentElement.style.setProperty(
+          "--color-1",
+          "#553a1e"
+        );
+        document.documentElement.style.setProperty(
+          "--color-2",
+          "#5f4321"
+        );
+        document.documentElement.style.setProperty(
+          "--color-3",
+          "#7b552c"
+        );
+        document.documentElement.style.setProperty(
+          "--color-4",
+          "#5e4123"
+        );
+        document.documentElement.style.setProperty(
+          "--color-5",
+          "#382815"
+        );
+        document.documentElement.style.setProperty(
+          "--color-6",
+          "#2c2312"
+        );
         document.documentElement.style.setProperty(
           "--color-7",
           "rgb(82, 60, 28)"
         );
-        document.documentElement.style.setProperty("--color-8", "#cc9225");
+        document.documentElement.style.setProperty(
+          "--color-8",
+          "#cc9225"
+        );
         $(".badge-logo").attr("src", "img/court.png");
         $(".header-title").html("DEPARTMENT OF JUSTICE");
         $(".quote-span").html("Actually useless.");
@@ -3580,12 +3803,10 @@ $(document).ready(() => {
     if (eventData.type == "show") {
       if (eventData.enable == true) {
         JobColors(eventData.job);
-        playerJob = eventData.job;
-        if (
-          PoliceJobs[playerJob] !== undefined ||
-          DojJobs[playerJob] !== undefined
-        ) {
-          $(".manage-profile-licenses-container").removeClass("display_hidden");
+        playerJob = eventData.job
+        if (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined) {
+          $('.manage-profile-licenses-container').removeClass("display_hidden");
+          $(".manage-convictions-container").removeClass("display_hidden");
         }
         $("body").fadeIn(0);
         $(".close-all").css("filter", "none");
@@ -3621,9 +3842,8 @@ $(document).ready(() => {
                 <div class="bulletin-item-info">${value.desc}</div>
                 <div class="bulletin-bottom-info">
                     <div class="bulletin-id">ID: ${value.id}</div>
-                    <div class="bulletin-date">${
-                      value.author
-                    } - ${timeAgo(Number(value.time))}</div>
+                    <div class="bulletin-date">${value.author
+          } - ${timeAgo(Number(value.time))}</div>
                 </div>
                 </div>`);
       });
@@ -3636,8 +3856,8 @@ $(document).ready(() => {
                 <div class="bulletin-bottom-info">
                     <div class="bulletin-id">ID: ${value.id}</div>
                     <div class="bulletin-date">${value.author} - ${timeAgo(
-        Number(value.time)
-      )}</div>
+          Number(value.time)
+        )}</div>
                 </div>
             </div>`);
     } else if (eventData.type == "deleteBulletin") {
@@ -3649,16 +3869,13 @@ $(document).ready(() => {
       if (value.firsttime) {
         $(".warrants-items").empty();
       }
-      $(".warrants-items").prepend(`<div class="warrants-item" data-cid=${
-        value.cid
-      } data-id=${
-        value.linkedincident
-      }><div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 0.75vh; width: 100%;">
+      $(".warrants-items").prepend(`<div class="warrants-item" data-cid=${value.cid
+        } data-id=${value.linkedincident
+        }><div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 0.75vh; width: 100%;">
                 <div style="display: flex; flex-direction: column;">
                     <div class="warrant-title">${value.name}</div>
-                    <div class="warrant-item-info">${
-                      value.reporttitle
-                    } - ${timeAgo(Number(value.time))}</div>
+                    <div class="warrant-item-info">${value.reporttitle
+        } - ${timeAgo(Number(value.time))}</div>
                 </div>
                 <div class="warrant-bottom-info">
                     <div class="warrant-id">ID: ${value.linkedincident}</div>
@@ -3682,47 +3899,43 @@ $(document).ready(() => {
           if (DispatchNum == 1) {
             $(".dispatch-items")
               .append(`<div class="dispatch-item" style="display: flex; margin-top: 0vh;" >
-                        <img src="${
-                          value.profilepic
-                        }" class="dispatch-message-profilepic">
+                        <img src="${value.profilepic
+                }" class="dispatch-message-profilepic">
                         <div class="dispatch-item-grid">
-                            <div class="dispatch-item-info dispatch-info-job-${
-                              value.job
-                            }"> ${
-              value.name
-            } <span style="color:#969696; margin-left: 0.5vh; font-size: 12px; font-weight: normal;">${timeAgo(
-              Number(value.time)
-            )}</span> </div>
-                            <div class="dispatch-item-message" data-author="${
-                              value.name
-                            }">${value.message}</div>
+                            <div class="dispatch-item-info dispatch-info-job-${value.job
+                }"> ${value.name
+                } <span style="color:#969696; margin-left: 0.5vh; font-size: 12px; font-weight: normal;">${timeAgo(
+                  Number(value.time)
+                )}</span> </div>
+                            <div class="dispatch-item-message" data-author="${value.name
+                }">${value.message}</div>
                         </div>
                         </div>`);
           } else {
             $(".dispatch-items")
               .append(`<div class="dispatch-item" style="display: flex;" >
-                        <img src="${
-                          value.profilepic
-                        }" class="dispatch-message-profilepic">
+                        <img src="${value.profilepic
+                }" class="dispatch-message-profilepic">
                         <div class="dispatch-item-grid">
-                            <div class="dispatch-item-info dispatch-info-job-${
-                              value.job
-                            }"> ${
-              value.name
-            } <span style="color:#969696; margin-left: 0.5vh; font-size: 12px; font-weight: normal;">${timeAgo(
-              Number(value.time)
-            )}</span> </div>
-                            <div class="dispatch-item-message" data-author="${
-                              value.name
-                            }">${value.message}</div>
+                            <div class="dispatch-item-info dispatch-info-job-${value.job
+                }"> ${value.name
+                } <span style="color:#969696; margin-left: 0.5vh; font-size: 12px; font-weight: normal;">${timeAgo(
+                  Number(value.time)
+                )}</span> </div>
+                            <div class="dispatch-item-message" data-author="${value.name
+                }">${value.message}</div>
                         </div>
                         </div>`);
           }
         }
         LastName = value.name;
-        $(".dispatch-items").scrollTop($(".dispatch-items")[0].scrollHeight);
+        $(".dispatch-items").scrollTop(
+          $(".dispatch-items")[0].scrollHeight
+        );
       });
-      $(".dispatch-items").scrollTop($(".dispatch-items")[0].scrollHeight);
+      $(".dispatch-items").scrollTop(
+        $(".dispatch-items")[0].scrollHeight
+      );
     } else if (eventData.type == "dispatchmessage") {
       const value = eventData.data;
       DispatchNum = DispatchNum + 1;
@@ -3738,39 +3951,31 @@ $(document).ready(() => {
           if (DispatchNum == 1) {
             $(".dispatch-items")
               .append(`<div class="dispatch-item" style="display: flex; margin-top: 0vh;" >
-                        <img src="${
-                          value.profilepic
-                        }" class="dispatch-message-profilepic">
+                        <img src="${value.profilepic
+                }" class="dispatch-message-profilepic">
                         <div class="dispatch-item-grid">
-                            <div class="dispatch-item-info dispatch-info-job-${
-                              value.job
-                            }"> ${
-              value.name
-            } <span style="color:#969696; margin-left: 0.5vh; font-size: 12px; font-weight: normal;">${timeAgo(
-              Number(value.time)
-            )}</span> </div>
-                            <div class="dispatch-item-message" data-author="${
-                              value.name
-                            }">${value.message}</div>
+                            <div class="dispatch-item-info dispatch-info-job-${value.job
+                }"> ${value.name
+                } <span style="color:#969696; margin-left: 0.5vh; font-size: 12px; font-weight: normal;">${timeAgo(
+                  Number(value.time)
+                )}</span> </div>
+                            <div class="dispatch-item-message" data-author="${value.name
+                }">${value.message}</div>
                         </div>
                         </div>`);
           } else {
             $(".dispatch-items")
               .append(`<div class="dispatch-item" style="display: flex;" >
-                        <img src="${
-                          value.profilepic
-                        }" class="dispatch-message-profilepic">
+                        <img src="${value.profilepic
+                }" class="dispatch-message-profilepic">
                         <div class="dispatch-item-grid">
-                            <div class="dispatch-item-info dispatch-info-job-${
-                              value.job
-                            }"> ${
-              value.name
-            } <span style="color:#969696; margin-left: 0.5vh; font-size: 12px; font-weight: normal;">${timeAgo(
-              Number(value.time)
-            )}</span> </div>
-                            <div class="dispatch-item-message" data-author="${
-                              value.name
-                            }">${value.message}</div>
+                            <div class="dispatch-item-info dispatch-info-job-${value.job
+                }"> ${value.name
+                } <span style="color:#969696; margin-left: 0.5vh; font-size: 12px; font-weight: normal;">${timeAgo(
+                  Number(value.time)
+                )}</span> </div>
+                            <div class="dispatch-item-message" data-author="${value.name
+                }">${value.message}</div>
                         </div>
                         </div>`);
           }
@@ -3784,14 +3989,19 @@ $(document).ready(() => {
           })
         );
       }
-      $(".dispatch-items").scrollTop($(".dispatch-items")[0].scrollHeight);
+      $(".dispatch-items").scrollTop(
+        $(".dispatch-items")[0].scrollHeight
+      );
     } else if (eventData.type == "call") {
       const value = eventData.data;
       if (value) {
         const prio = value["priority"];
         let DispatchItem = `<div class="active-calls-item" data-id="${value.callId}" data-canrespond="false"><div class="active-call-inner-container"><div class="call-item-top"><div class="call-number">#${value.callId}</div><div class="call-code priority-${value.priority}">${value.dispatchCode}</div><div class="call-title">${value.dispatchMessage}</div><div class="call-radio">${value.units.length}</div></div><div class="call-item-bottom">`;
 
-        if (value.dispatchCode == "911" || value.dispatchCode == "311") {
+        if (
+          value.dispatchCode == "911" ||
+          value.dispatchCode == "311"
+        ) {
           DispatchItem = `<div class="active-calls-item" data-id="${value.callId}" data-canrespond="true"><div class="active-call-inner-container"><div class="call-item-top"><div class="call-number">#${value.callId}</div><div class="call-code priority-${value.priority}">${value.dispatchCode}</div><div class="call-title">${value.dispatchMessage}</div><div class="call-radio">${value.units.length}</div></div><div class="call-item-bottom">`;
         }
 
@@ -3846,7 +4056,9 @@ $(document).ready(() => {
         }
 
         DispatchItem += `</div></div></div>`;
-        $(".active-calls-list").prepend($(DispatchItem).hide().fadeIn("slow"));
+        $(".active-calls-list").prepend(
+          $(DispatchItem).hide().fadeIn("slow")
+        );
       }
     } else if (eventData.type == "attachedUnits") {
       const table = eventData.data;
@@ -3865,14 +4077,16 @@ $(document).ready(() => {
                     </div> `);
         });
         setTimeout(() => {
-          $(".dispatch-attached-units-container").attr("id", eventData.callid);
+          $(".dispatch-attached-units-container").attr(
+            "id",
+            eventData.callid
+          );
         }, 1000);
       }
     } else if (eventData.type == "sendCallResponse") {
       if ($(".respond-calls-container").data("id") == eventData.callid) {
         $(".respond-calls-responses").prepend(
-          `<div class="respond-calls-response"> ${
-            eventData["name"]
+          `<div class="respond-calls-response"> ${eventData["name"]
           } responded "${eventData["message"]}" - ${timeAgo(
             Number(eventData.time)
           )}. </div>`
@@ -3890,9 +4104,10 @@ $(document).ready(() => {
       }, 1000);
       $.each(table, function (index, value) {
         $(".respond-calls-responses").prepend(
-          `<div class="respond-calls-response"> ${value["name"]} responded "${
-            value["message"]
-          }" - ${timeAgo(Number(value.time))}. </div>`
+          `<div class="respond-calls-response"> ${value["name"]
+          } responded "${value["message"]}" - ${timeAgo(
+            Number(value.time)
+          )}. </div>`
         );
       });
     } else if (eventData.type == "calls") {
@@ -3903,7 +4118,10 @@ $(document).ready(() => {
           const prio = value["priority"];
           let DispatchItem = `<div class="active-calls-item" data-id="${value.callId}" data-canrespond="false"><div class="active-call-inner-container"><div class="call-item-top"><div class="call-number">#${value.callId}</div><div class="call-code priority-${value.priority}">${value.dispatchCode}</div><div class="call-title">${value.dispatchMessage}</div><div class="call-radio">${value.units.length}</div></div><div class="call-item-bottom">`;
 
-          if (value.dispatchCode == "911" || value.dispatchCode == "311") {
+          if (
+            value.dispatchCode == "911" ||
+            value.dispatchCode == "311"
+          ) {
             DispatchItem = `<div class="active-calls-item" data-id="${value.callId}" data-canrespond="true"><div class="active-call-inner-container"><div class="call-item-top"><div class="call-number">#${value.callId}</div><div class="call-code priority-${value.priority}">${value.dispatchCode}</div><div class="call-title">${value.dispatchMessage}</div><div class="call-radio">${value.units.length}</div></div><div class="call-item-bottom">`;
           }
 
@@ -3976,9 +4194,8 @@ $(document).ready(() => {
                     </div>
                     <div class="incidents-bottom-holder">
                         <div class="incedent-report-id">ID: ${value.id}</div>
-                        <div class="incedent-report-time-ago">${
-                          value.author
-                        } - ${timeAgo(Number(value.time))}</div>
+                        <div class="incedent-report-time-ago">${value.author
+          } - ${timeAgo(Number(value.time))}</div>
                     </div>
                 </div>`
         );
@@ -4021,14 +4238,32 @@ $(document).ready(() => {
       $(".manage-incidents-editing-title").html(
         "You are currently editing incident " + table["id"]
       );
-      $(".manage-incidents-editing-title").data("id", Number(table["id"]));
+      $(".manage-incidents-editing-title").data(
+        "id",
+        Number(table["id"])
+      );
 
       $(".manage-incidents-tags-add-btn").css("pointer-events", "auto");
-      $(".manage-incidents-reports-content").css("pointer-events", "auto");
-      $(".manage-incidents-officers-add-btn").css("pointer-events", "auto");
-      $(".manage-incidents-civilians-add-btn").css("pointer-events", "auto");
-      $(".manage-incidents-evidence-add-btn").css("pointer-events", "auto");
-      $(".associated-incidents-tags-add-btn").css("pointer-events", "auto");
+      $(".manage-incidents-reports-content").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".manage-incidents-officers-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".manage-incidents-civilians-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".manage-incidents-evidence-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".associated-incidents-tags-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
 
       $("#manage-incidents-title-input").val(table["title"]);
       $(".manage-incidents-reports-content").val(table["details"]);
@@ -4160,7 +4395,9 @@ $(document).ready(() => {
 
         const charges = value["charges"];
         for (var i = 0; i < charges.length; i++) {
-          const randomNum = Math.ceil(Math.random() * 1000).toString();
+          const randomNum = Math.ceil(
+            Math.random() * 1000
+          ).toString();
           $(`[data-name="${cid}"]`).prepend(
             `<div class="white-tag" data-link="${randomNum}" data-id="${cid}">${charges[i]}</div>`
           );
@@ -4244,9 +4481,8 @@ $(document).ready(() => {
                     </div>
                     <div class="bolo-bottom-holder">
                         <div class="bolo-report-id">ID: ${value.id}</div>
-                        <div class="bolo-report-time-ago">${
-                          value.author
-                        } - ${timeAgo(Number(value.time))}</div>
+                        <div class="bolo-report-time-ago">${value.author
+          } - ${timeAgo(Number(value.time))}</div>
                     </div>
                 </div>`
         );
@@ -4298,15 +4534,13 @@ $(document).ready(() => {
           `<div class="reports-item" data-id="${value.id}">
                     <div class="reports-top-holder">
                         <div class="reports-item-title">${value.title}</div>
-                        <div class="reports-report-name">${
-                          value.type
-                        } Report</div>
+                        <div class="reports-report-name">${value.type
+          } Report</div>
                     </div>
                     <div class="reports-bottom-holder">
                         <div class="reports-report-id">ID: ${value.id}</div>
-                        <div class="reports-report-time-ago">${
-                          value.author
-                        } - ${timeAgo(Number(value.time))}</div>
+                        <div class="reports-report-time-ago">${value.author
+          } - ${timeAgo(Number(value.time))}</div>
                     </div>
                 </div>`
         );
@@ -4346,6 +4580,7 @@ $(document).ready(() => {
         );
       });
     } else if (eventData.type == "searchedVehicles") {
+
     } else if (eventData.type == "getVehicleData") {
       let table = eventData.data;
 
@@ -4392,7 +4627,9 @@ $(document).ready(() => {
       $(".vehicle-tags").append(
         `<div class="vehicle-tag ${impound} impound-tag">Impound</div>`
       );
-      $(".vehicle-tags").append(`<div class="vehicle-tag ${bolo}">BOLO</div>`);
+      $(".vehicle-tags").append(
+        `<div class="vehicle-tag ${bolo}">BOLO</div>`
+      );
       $(".vehicle-tags").append(
         `<div class="vehicle-tag ${codefive} code5-tag">Code 5</div>`
       );
@@ -4401,19 +4638,31 @@ $(document).ready(() => {
       );
       $(".vehicle-info-imageurl-input").val(table["image"]);
     } else if (eventData.type == "updateVehicleDbId") {
-      $(".vehicle-information-title-holder").data(
-        "dbid",
-        Number(eventData.data)
-      );
+      $(".vehicle-information-title-holder").data("dbid", Number(eventData.data));
     } else if (eventData.type == "updateIncidentDbId") {
       $(".manage-incidents-editing-title").data("id", Number(eventData.data));
 
       $(".manage-incidents-tags-add-btn").css("pointer-events", "auto");
-      $(".manage-incidents-reports-content").css("pointer-events", "auto");
-      $(".manage-incidents-officers-add-btn").css("pointer-events", "auto");
-      $(".manage-incidents-civilians-add-btn").css("pointer-events", "auto");
-      $(".manage-incidents-evidence-add-btn").css("pointer-events", "auto");
-      $(".associated-incidents-tags-add-btn").css("pointer-events", "auto");
+      $(".manage-incidents-reports-content").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".manage-incidents-officers-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".manage-incidents-civilians-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".manage-incidents-evidence-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
+      $(".associated-incidents-tags-add-btn").css(
+        "pointer-events",
+        "auto"
+      );
     } else if (eventData.type == "callDetach") {
       $(".active-calls-item")
         .filter("[data-id='" + eventData.callid + "']")
@@ -4433,8 +4682,7 @@ $(document).ready(() => {
       $(".stafflogs-container").empty();
       $.each(table, function (index, value) {
         $(".stafflogs-container").append(
-          `<p style="margin : 0; padding-top:0.8vh;">• ${
-            value.text
+          `<p style="margin : 0; padding-top:0.8vh;">• ${value.text
           } <span style="color: grey; float: right; padding-right: 1vh;">(${timeAgo(
             Number(value.time)
           )})</span></p>`
@@ -4456,7 +4704,9 @@ $(document).ready(() => {
       });
 
       $(".impound-plate").val(plate).attr("disabled", "disabled");
-      $(".impound-linkedreport").val(linkedreport).attr("disabled", "disabled");
+      $(".impound-linkedreport")
+        .val(linkedreport)
+        .attr("disabled", "disabled");
       $(".impound-fee")
         .val("$" + fee)
         .attr("disabled", "disabled");
@@ -4480,19 +4730,20 @@ $(document).ready(() => {
         .addClass("green-tag")
         .removeClass("red-tag");
     } else if (eventData.type == "getActiveUnits") {
+
       let policeCount = 0;
       let emsCount = 0;
       let dojCount = 0;
       let fireCount = 0;
 
       let { activeUnits } = eventData;
-      $(".active-unit-list").html(" ");
-      let unitListHTML = "";
+      $(".active-unit-list").html(' ');
+      let unitListHTML = '';
 
-      activeUnits = Object.values(activeUnits);
+      activeUnits = Object.values(activeUnits)
       activeUnits.forEach((unit) => {
-        let status = unit.duty == 1 ? "10-8" : "10-7";
-        let statusColor = unit.duty == 1 ? "green-status" : "yellow-status";
+        let status = unit.duty == 1 ? "10-8" : '10-7';
+        let statusColor = unit.duty == 1 ? "green-status" : 'yellow-status';
         let radioBack = unit.sig100 ? "#7b2c2c" : "var(--color-3)";
         let radio = unit.radio ? unit.radio : "0";
         let callSign = unit.callSign ? unit.callSign : "000";
@@ -4503,15 +4754,15 @@ $(document).ready(() => {
             policeCount++;
           }
           if (unit.unitType == "EMS") {
-            activeInfoJob = `<div class="unit-job active-info-job-ambulance">AMBALAMCE</div>`;
+            activeInfoJob = `<div class="unit-job active-info-job-ambulance">AMBALAMCE</div>`
             emsCount++;
           }
           if (unit.unitType == "Fire") {
-            activeInfoJob = `<div class="unit-job active-info-job-fire">FIRE</div>`;
+            activeInfoJob = `<div class="unit-job active-info-job-fire">FIRE</div>`
             fireCount++;
           }
           if (unit.unitType == "DOJ") {
-            activeInfoJob = `<div class="unit-job active-info-job-doj">DACAS</div>`;
+            activeInfoJob = `<div class="unit-job active-info-job-doj">DACAS</div>`
             dojCount++;
           }
         }
@@ -4525,7 +4776,8 @@ $(document).ready(() => {
                 `;
       });
 
-      $(".active-unit-list").html(unitListHTML);
+      $(".active-unit-list").html(unitListHTML)
+
 
       $("#police-count").html(policeCount);
       $("#ems-count").html(emsCount);
@@ -4669,7 +4921,10 @@ window.addEventListener("load", function () {
             .find(".offense-item-offense")
             .html()
             .toLowerCase();
-          const Number = $(this).find(".offense-item-id").html().toLowerCase();
+          const Number = $(this)
+            .find(".offense-item-id")
+            .html()
+            .toLowerCase();
           if (Name.includes(search)) {
             $(this).show();
           } else if (Number.includes(search)) {

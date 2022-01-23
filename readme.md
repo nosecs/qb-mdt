@@ -2,6 +2,12 @@
 
 I decided to push the half done server.lua this is purely as a back as my machine rolledback and I lost progress.
 
+## Whats done
+- Searching Profiles
+- Loading profile data
+- Active Duty List
+- Searching Vehicles
+
 ## TODOS
 
 - Continue rewriting server.lua and remove the callback hell, keep function based but with promises.

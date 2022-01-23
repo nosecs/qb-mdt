@@ -260,11 +260,16 @@ RegisterNUICallback("getProfileData", function(data, cb)
         QBCore.Functions.TriggerCallback('mdt:server:GetProfileData', function(result)
             p:resolve(result)
         end, data)
-
         return Citizen.Await(p)
     end
 
     local result = getProfileDataPromise(id)
+    local vehicles=result.vehicles
+    for i=1,#vehicles do
+        local vehicle=result.vehicles[i]
+        print(json.encode(vehicle))
+        result.vehicles[i]['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehicle['vehicle']))
+    end
     p = nil
     return cb(result)
 end)

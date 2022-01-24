@@ -262,12 +262,22 @@ RegisterNUICallback("getProfileData", function(data, cb)
         end, data)
         return Citizen.Await(p)
     end
-
+    local pP = nil
     local result = getProfileDataPromise(id)
+    
+    local getProfileProperties = function(data)
+        if pP then return end
+        pP = promise.new()
+        QBCore.Functions.TriggerCallback('qb-phone:server:MeosGetPlayerHouses', function(result)
+            pP:resolve(result)
+        end, data)
+        return Citizen.Await(pP)
+    end
+    local propertiesResult = getProfileProperties(id)
+    result.properties =propertiesResult
     local vehicles=result.vehicles
     for i=1,#vehicles do
         local vehicle=result.vehicles[i]
-        print(json.encode(vehicle))
         result.vehicles[i]['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehicle['vehicle']))
     end
     p = nil
@@ -355,6 +365,12 @@ end)
 
 RegisterNetEvent('mdt:client:incidentSearchPerson', function(sentData)
     SendNUIMessage({ type = "incidentSearchPerson", data = sentData })
+end)
+
+
+RegisterNUICallback('SetHouseLocation', function(data, cb)
+    SetNewWaypoint(data.coord[1], data.coord[2])
+    QBCore.Functions.Notify('GPS has been set!', 'success')
 end)
 
 --====================================================================================

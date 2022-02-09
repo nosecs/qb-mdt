@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `mdt_data` (
   `information` MEDIUMTEXT DEFAULT NULL,
   `tags` TEXT NOT NULL,
   `gallery` TEXT NOT NULL,
-  `jobtype` VARCHAR(11) DEFAULT 'police',
+  `jobtype` VARCHAR(255) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

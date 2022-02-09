@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `mdt_bulletin` (
   `desc` TEXT NOT NULL,
   `author` varchar(50) NOT NULL,
   `time` varchar(255)  NOT NULL,
-  `jobtype` VARCHAR(11) DEFAULT 'police',
+  `jobtype` VARCHAR(255) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -155,7 +155,6 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 	if type(target.charinfo) == 'string' then target.charinfo = json.decode(target.charinfo) end
 	if type(target.metadata) == 'string' then target.metadata = json.decode(target.metadata) end
 
-
 	local job, grade = UnpackJob(target.job)
 
 	local person = {
@@ -203,11 +202,10 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 	local mdtData = GetPersonInformation(sentId, JobType)
 	if mdtData then
 		person.mdtinfo = mdtData.information
+		person.profilepic = mdtData.pfp
 		person.tags = mdtData.tags
 		person.gallery = mdtData.gallery
 	end
-
-	
 
 	return cb(person)
 end)
@@ -223,7 +221,7 @@ RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName
 	local UglyFunc = function (id, pfp, desc, job)
 		-- exports.oxmysql:executeSync("UPDATE policemdtdata SET `information`=:information WHERE `id`=:id LIMIT 1", { id = id, information = information })
 		-- exports.oxmysql:executeSync("UPDATE users SET `profilepic`=:profilepic WHERE `id`=:id LIMIT 1", { id = cid, profilepic = pfp })
-		MySQL.update.await('UPDATE `mdtdata` SET information = ? where cid = ? LIMIT 1', {id, desc})
+		MySQL.update.await('UPDATE `mdt_data` SET information = ? where cid = ? LIMIT 1', {id, desc})
 		AddLog(("A user with the Citizen ID "..cid.." was updated by %s %s"):format(PlayerData.charinfo.firstname, PlayerData.charinfo.lastname))
 	end
 
@@ -231,12 +229,23 @@ RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName
 	if not person then
 		return cb({})
 	end
-
-
-
 end)
 
 RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		local incJobType = Player.PlayerData.job.name
+		MySQL.Async.insert('INSERT INTO mdt_data (cid, information, pfp, jobtype) VALUES (:cid, :information, :pfp, :jobtype) ON DUPLICATE KEY UPDATE cid = :cid, information = :information, pfp = :pfp', {
+			cid = cid,
+			information = information,
+			pfp = pfp,
+			jobtype = incJobType,
+		})
+	end
+end)
+
+--[[ RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName)
 	TriggerEvent('echorp:getplayerfromid', source, function(player)
 		if player then
 			if player.job and (player.job.isPolice or player.job.name == 'doj') then
@@ -278,7 +287,7 @@ RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName
 			end
 		end
 	end)
-end)
+end) ]]
 
 RegisterNetEvent("mdt:server:newTag", function(cid, tag)
 	TriggerEvent('echorp:getplayerfromid', source, function(result)

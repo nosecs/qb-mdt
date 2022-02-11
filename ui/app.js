@@ -135,7 +135,6 @@ $(document).ready(() => {
 
   $(".profile-items").on("click", ".profile-item", async function () {
     let id = $(this).data("id");
-    console.log(id)
     let result = await $.post(
       `https://${GetParentResourceName()}/getProfileData`,
       JSON.stringify({
@@ -143,7 +142,6 @@ $(document).ready(() => {
       })
     );
 
-    console.log(JSON.stringify(result));
     if (!canInputTag) {
       if ($(".tags-add-btn").hasClass("fa-minus")) {
         $(".tags-add-btn")
@@ -167,6 +165,7 @@ $(document).ready(() => {
         .addClass("fa-plus");
     }
 
+    console.log(result)
     $(".manage-profile-editing-title").html(`You are currently editing ${result["firstname"]} ${result["lastname"]}`);
     $(".manage-profile-citizenid-input").val(result['cid']);
     $(".manage-profile-name-input-1").val(result["firstname"]);
@@ -195,7 +194,6 @@ $(document).ready(() => {
 
     // convert key value pair object of licenses to array
     let licenses = Object.entries(result.licences);
-
 
     if (licenses.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
       if (tags && tags.length > 0) {
@@ -232,10 +230,6 @@ $(document).ready(() => {
         tagsHTML += `<div class="tag">${tag}</div>`;
       })
     }
-    
-
-    
-
 
     if (gallery && gallery.length > 0) {
       galleryHTML = '';
@@ -243,9 +237,6 @@ $(document).ready(() => {
         galleryHTML += `<img src="${value}" class="gallery-img" onerror="this.src='img/not-found.jpg'">`;
       })
     }
-
-
-    
 
     if (result.isLimited) {
       $(".manage-profile-vehs-container").fadeOut(250);
@@ -421,7 +412,17 @@ $(document).ready(() => {
         $(".manage-profile-save").html("Save");
         canSaveProfile = true;
       }, 750);
+
       setTimeout(() => {
+        let tags = new Array();
+
+        $(".tags-holder")
+          .find("div")
+          .each(function () {
+            if ($(this).text() != "") {
+              tags.push($(this).text());
+            }
+        });
         let pfp = $(".manage-profile-pic").attr("src");
         let newpfp = $(".manage-profile-url-input").val();
         if (newpfp.includes("base64")) {
@@ -435,6 +436,9 @@ $(document).ready(() => {
         const fName = $(".manage-profile-name-input-1").val();
         const sName = $(".manage-profile-name-input-2").val();
 
+        console.log("JOE")
+        console.log(tags)
+
         $.post(
           `https://${GetParentResourceName()}/saveProfile`,
           JSON.stringify({
@@ -443,6 +447,7 @@ $(document).ready(() => {
             id: id,
             fName: fName,
             sName: sName,
+            tags: tags,
           })
         );
         $(".manage-profile-pic").attr("src", newpfp);

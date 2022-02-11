@@ -265,7 +265,7 @@ RegisterNUICallback("getProfileData", function(data, cb)
     local pP = nil
     local result = getProfileDataPromise(id)
     
-    local getProfileProperties = function(data)
+    --[[ local getProfileProperties = function(data)
         if pP then return end
         pP = promise.new()
         QBCore.Functions.TriggerCallback('qb-phone:server:MeosGetPlayerHouses', function(result)
@@ -274,7 +274,8 @@ RegisterNUICallback("getProfileData", function(data, cb)
         return Citizen.Await(pP)
     end
     local propertiesResult = getProfileProperties(id)
-    result.properties =propertiesResult
+    result.properties = propertiesResult
+     ]]
     local vehicles=result.vehicles
     for i=1,#vehicles do
         local vehicle=result.vehicles[i]

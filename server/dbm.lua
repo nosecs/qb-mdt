@@ -15,7 +15,8 @@ end
 
 -- idk what this is used for either
 function GetPersonInformation(cid, jobtype)
-	return MySQL.query.await('SELECT information, tags, gallery FROM mdt_data WHERE cid = ? and jobtype = ?', { cid, jobtype })
+	local result = MySQL.query.await('SELECT information, tags, gallery, pfp FROM mdt_data WHERE cid = ? and jobtype = ?', { cid,  jobtype})
+	return result[1]
 	-- return exports.oxmysql:executeSync('SELECT information, tags, gallery FROM mdt WHERE cid= ? and type = ?', { cid, jobtype })
 end
 
@@ -73,4 +74,20 @@ end
 
 function GetVehicleInformation(plate, cb)
 	cb(exports.oxmysql:executeSync('SELECT id, information FROM `mdt_vehicleinfo` WHERE plate=:plate', { plate = plate}))
+end
+
+function GetTags(identifier)
+    local response = false
+    local Player = QBCore.Functions.GetPlayerByCitizenId(identifier)
+    if Player ~= nil then
+        return Player.PlayerData.metadata.licences
+    --[[ else
+        local result = SQL('SELECT * FROM players WHERE citizenid = @identifier', {['@identifier'] = identifier})
+        if result[1] ~= nil then
+            local metadata = json.decode(result[1].metadata)
+            if metadata["licences"][type] ~= nil and metadata["licences"][type] then
+                return true
+            end
+        end ]]
+    end
 end

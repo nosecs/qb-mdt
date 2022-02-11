@@ -1,4 +1,4 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+--local QBCore = exports['qb-core']:GetCoreObject()
 -- Maybe cache?
 local incidents = {}
 local convictions = {}
@@ -100,7 +100,7 @@ end)
 QBCore.Functions.CreateCallback('mdt:server:OpenDashboard', function(source, cb)
 	local PlayerData = GetPlayerData(source)
 	if not PermCheck(source,PlayerData) then return end
-	local JobType = GetJobType(PlayerData)
+	local JobType = GetJobType(PlayerData.job.name)
 	local bulletin = GetBulletins(JobType)
 	cb(bulletin)
 end)
@@ -109,7 +109,7 @@ RegisterNetEvent('mdt:server:NewBulletin', function(title, info, time)
 	local src = source
 	if not PermCheck(src) then return end
 	local PlayerData = GetPlayerData(src)
-	local JobType = GetJobType(PlayerData)
+	local JobType = GetJobType(PlayerData.job.name)
 	local playerName = GetNameFromPlayerData(PlayerData)
 	local newBulletin = MySQL.insert.await('INSERT INTO `mdt_bulletin` (`title`, `desc`, `author`, `time`, `jobtype`) VALUES (:title, :desc, :author, :time, :jt)', {
 		title = title,
@@ -128,7 +128,7 @@ RegisterNetEvent('mdt:server:DeleteBulletin', function(id)
 	local src = source
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(src) then return end
-	local JobType = GetJobType(PlayerData)
+	local JobType = GetJobType(PlayerData.job.name)
 
 	local bulletin = MySQL.scalar.await('SELECT `title` from `mdt_bulletin WHERE id = ? LIMIT 1', {id})
 
@@ -144,7 +144,7 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 	local src = source
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(src, PlayerData) then return cb({}) end
-	local JobType = GetJobType(PlayerData)
+	local JobType = GetJobType(PlayerData.job.name)
 	local target = GetPlayerDataById(sentId)
 	local JobName = PlayerData.job.name
 
@@ -203,18 +203,18 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 	if mdtData then
 		person.mdtinfo = mdtData.information
 		person.profilepic = mdtData.pfp
-		person.tags = mdtData.tags
+		person.tags = json.decode(mdtData.tags)
 		person.gallery = mdtData.gallery
 	end
 
 	return cb(person)
 end)
 
-RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName, sName)
+--[[ RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName, sName)
 	local src = source
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(src) then return cb({}) end
-	local JobType = GetJobType(PlayerData)
+	local JobType = GetJobType(PlayerData.job.name)
 	local target = GetPlayerDataById(sendId)
 	local JobName = PlayerData.job.name
 
@@ -229,18 +229,23 @@ RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName
 	if not person then
 		return cb({})
 	end
-end)
+end) ]]
 
-RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName)
+RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName, tags)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
+	for k, v in pairs(tags) do
+		print(k .. " : " .. tostring(v))
+	end
+
 	if Player then
-		local incJobType = Player.PlayerData.job.name
-		MySQL.Async.insert('INSERT INTO mdt_data (cid, information, pfp, jobtype) VALUES (:cid, :information, :pfp, :jobtype) ON DUPLICATE KEY UPDATE cid = :cid, information = :information, pfp = :pfp', {
+		local incJobType = GetJobType(Player.PlayerData.job.name)
+		MySQL.Async.insert('INSERT INTO mdt_data (cid, information, pfp, jobtype, tags) VALUES (:cid, :information, :pfp, :jobtype, :tags) ON DUPLICATE KEY UPDATE cid = :cid, information = :information, pfp = :pfp, tags = :tags', {
 			cid = cid,
 			information = information,
 			pfp = pfp,
 			jobtype = incJobType,
+			tags = json.encode(tags),
 		})
 	end
 end)
@@ -511,15 +516,13 @@ end)
 
 
 RegisterNetEvent('mdt:server:getAllIncidents', function()
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or result.job.name == 'doj') then
-				exports.oxmysql:execute("SELECT * FROM `pd_incidents` ORDER BY `id` DESC LIMIT 30", {}, function(matches)
-					TriggerClientEvent('mdt:client:getAllIncidents', result.source, matches)
-				end)
-			end
-		end
-	end)
+	local src = source
+	local PlayerData = GetPlayerData(src)
+	if result then
+			exports.oxmysql:execute("SELECT * FROM `mdt_incidents` ORDER BY `id` DESC LIMIT 30", {}, function(matches)
+				TriggerClientEvent('mdt:client:getAllIncidents', result.source, matches)
+			end)
+	end
 end)
 
 RegisterNetEvent('mdt:server:searchIncidents', function(query)

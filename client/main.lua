@@ -247,7 +247,9 @@ RegisterNUICallback("saveProfile", function(data, cb)
     local cid = data.id
     local fName = data.fName
     local sName = data.sName
-    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName)
+    local tags = data.tags
+
+    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags)
     cb(true)
 end)
 

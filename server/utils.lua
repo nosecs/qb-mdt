@@ -1,4 +1,4 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+QBCore = exports['qb-core']:GetCoreObject()
 
 function GetPlayerData(source)
 	local Player = QBCore.Functions.GetPlayer(source)
@@ -39,27 +39,16 @@ function ProfPic(gender, profilepic)
 end
 
 -- There is probably a better way but mehhhhhhh
-function GetJobType(PlayerData)
-	local JobTypes = {}
-	for key, value in pairs(Config.PoliceJobs) do
-		if value then
-			JobTypes[key] = 'police'
-		end
+function GetJobType(job)
+	if Config.PoliceJobs[job] then
+		return 'police'
+	elseif Config.AmbulanceJobs[job] then
+		return 'ambulance'
+	elseif Config.DojJobs[job] then
+		return 'doj'
+	else
+		return nil
 	end
-
-	for key, value in pairs(Config.AmbulanceJobs) do
-		if value then
-			JobTypes[key] = 'ambulance'
-		end
-	end
-
-	for key, value in pairs(Config.DojJobs) do
-		if value then
-			JobTypes[key] = 'doj'
-		end
-	end
-
-	return JobTypes[PlayerData.job.name]
 end
 
 function GetNameFromPlayerData(PlayerData)

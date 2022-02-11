@@ -165,7 +165,6 @@ $(document).ready(() => {
         .addClass("fa-plus");
     }
 
-    console.log(result)
     $(".manage-profile-editing-title").html(`You are currently editing ${result["firstname"]} ${result["lastname"]}`);
     $(".manage-profile-citizenid-input").val(result['cid']);
     $(".manage-profile-name-input-1").val(result["firstname"]);
@@ -196,14 +195,12 @@ $(document).ready(() => {
     let licenses = Object.entries(result.licences);
 
     if (licenses.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
-      if (tags && tags.length > 0) {
         licencesHTML = '';
         for (const [lic, hasLic] of licenses) {
   
           let tagColour = hasLic == true ? "green-tag" : "red-tag";
           licencesHTML += `<span class="license-tag ${tagColour} ${lic}" data-type="${lic}">${lic}</span>`;
         }
-      }
       if (vehicles && vehicles.length > 0) {
 
         vehHTML = '';
@@ -419,7 +416,7 @@ $(document).ready(() => {
         $(".tags-holder")
           .find("div")
           .each(function () {
-            if ($(this).text() != "") {
+            if ($(this).text() != "" && $(this).text() != "No Tags") {
               tags.push($(this).text());
             }
         });
@@ -435,9 +432,6 @@ $(document).ready(() => {
 
         const fName = $(".manage-profile-name-input-1").val();
         const sName = $(".manage-profile-name-input-2").val();
-
-        console.log("JOE")
-        console.log(tags)
 
         $.post(
           `https://${GetParentResourceName()}/saveProfile`,

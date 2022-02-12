@@ -506,56 +506,56 @@ end)
 
 RegisterNetEvent('mdt:server:searchIncidents', function(query)
 	if query then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					exports.oxmysql:execute("SELECT * FROM `pd_incidents` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR LOWER(`author`) LIKE :query OR LOWER(`details`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`civsinvolved`) LIKE :query OR LOWER(`author`) LIKE :query ORDER BY `id` DESC LIMIT 50", {
-						query = string.lower('%'..query..'%') -- % wildcard, needed to search for all alike results
-					}, function(matches)
-						TriggerClientEvent('mdt:client:getIncidents', result.source, matches)
-					end)
-				end
+		local src = source
+		local Player = QBCore.Functions.GetPlayer(src)
+		if Player then
+			if GetJobType(Player.PlayerData.job.name) == 'police' then
+				exports.oxmysql:execute("SELECT * FROM `mdt_incidents` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR LOWER(`author`) LIKE :query OR LOWER(`details`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`civsinvolved`) LIKE :query OR LOWER(`author`) LIKE :query ORDER BY `id` DESC LIMIT 50", {
+					query = string.lower('%'..query..'%') -- % wildcard, needed to search for all alike results
+				}, function(matches)
+					TriggerClientEvent('mdt:client:getIncidents', src, matches)
+				end)
 			end
-		end)
+		end
 	end
 end)
 
 RegisterNetEvent('mdt:server:getIncidentData', function(sentId)
 	if sentId then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					exports.oxmysql:execute("SELECT * FROM `pd_incidents` WHERE `id` = :id", {
+		local src = source
+		local Player = QBCore.Functions.GetPlayer(src)
+		if Player then
+			if GetJobType(Player.PlayerData.job.name) == 'police' then
+				exports.oxmysql:execute("SELECT * FROM `mdt_incidents` WHERE `id` = :id", {
+					id = sentId
+				}, function(matches)
+					local data = matches[1]
+					data['tags'] = json.decode(data['tags'])
+					data['officersinvolved'] = json.decode(data['officersinvolved'])
+					data['civsinvolved'] = json.decode(data['civsinvolved'])
+					data['evidence'] = json.decode(data['evidence'])
+					exports.oxmysql:execute("SELECT * FROM `mdt_incidents` WHERE `id` = :id", {
 						id = sentId
 					}, function(matches)
-						local data = matches[1]
-						data['tags'] = json.decode(data['tags'])
-						data['officersinvolved'] = json.decode(data['officersinvolved'])
-						data['civsinvolved'] = json.decode(data['civsinvolved'])
-						data['evidence'] = json.decode(data['evidence'])
-						exports.oxmysql:execute("SELECT * FROM `pd_incidents` WHERE `id` = :id", {
+						exports.oxmysql:execute("SELECT * FROM `mdt_convictions` WHERE `linkedincident` = :id", {
 							id = sentId
-						}, function(matches)
-							exports.oxmysql:execute("SELECT * FROM `pd_convictions` WHERE `linkedincident` = :id", {
-								id = sentId
-							}, function(convictions)
-								for i=1, #convictions do
-									GetNameFromId(convictions[i]['cid'], function(res)
-										if res and res[1] then
-											convictions[i]['name'] = res[1]['firstname']..' '..res[1]['lastname']
-										else
-											convictions[i]['name'] = "Unknown"
-										end
-									end)
-									convictions[i]['charges'] = json.decode(convictions[i]['charges'])
-								end
-								TriggerClientEvent('mdt:client:getIncidentData', result.source, data, convictions)
-							end)
+						}, function(convictions)
+							for i=1, #convictions do
+								GetNameFromId(convictions[i]['cid'], function(res)
+									if res and res[1] then
+										convictions[i]['name'] = res[1]['firstname']..' '..res[1]['lastname']
+									else
+										convictions[i]['name'] = "Unknown"
+									end
+								end)
+								convictions[i]['charges'] = json.decode(convictions[i]['charges'])
+							end
+							TriggerClientEvent('mdt:client:getIncidentData', src, data, convictions)
 						end)
 					end)
-				end
+				end)
 			end
-		end)
+		end
 	end
 end)
 
@@ -1262,59 +1262,61 @@ RegisterNetEvent('mdt:server:setCallsign', function(cid, newcallsign)
 end)
 
 RegisterNetEvent('mdt:server:saveIncident', function(id, title, information, tags, officers, civilians, evidence, associated, time)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			if (player.job.isPolice or player.job.name == 'doj') then
-				if id == 0 then
-					exports.oxmysql:insert('INSERT INTO `pd_incidents` (`author`, `title`, `details`, `tags`, `officersinvolved`, `civsinvolved`, `evidence`, `time`) VALUES (:author, :title, :details, :tags, :officersinvolved, :civsinvolved, :evidence, :time)',
-					{
-						author = player.fullname,
-						title = title,
-						details = information,
-						tags = json.encode(tags),
-						officersinvolved = json.encode(officers),
-						civsinvolved = json.encode(civilians),
-						evidence = json.encode(evidence),
-						time = time
-					}, function(infoResult)
-						if infoResult then
-							for i=1, #associated do
-								exports.oxmysql:executeSync('INSERT INTO `pd_convictions` (`cid`, `linkedincident`, `warrant`, `guilty`, `processed`, `associated`, `charges`, `fine`, `sentence`, `recfine`, `recsentence`, `time`) VALUES (:cid, :linkedincident, :warrant, :guilty, :processed, :associated, :charges, :fine, :sentence, :recfine, :recsentence, :time)', {
-									cid = tonumber(associated[i]['Cid']),
-									linkedincident = infoResult,
-									warrant = associated[i]['Warrant'],
-									guilty = associated[i]['Guilty'],
-									processed = associated[i]['Processed'],
-									associated = associated[i]['Isassociated'],
-									charges = json.encode(associated[i]['Charges']),
-									fine = tonumber(associated[i]['Fine']),
-									sentence = tonumber(associated[i]['Sentence']),
-									recfine = tonumber(associated[i]['recfine']),
-									recsentence = tonumber(associated[i]['recsentence']),
-									time = time
-								})
-							end
-							TriggerClientEvent('mdt:client:updateIncidentDbId', player.source, infoResult)
-							--TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") was added to the vehicle information database by "..player['fullname'])
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			if id == 0 then
+				local fullname = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
+				exports.oxmysql:insert('INSERT INTO `mdt_incidents` (`author`, `title`, `details`, `tags`, `officersinvolved`, `civsinvolved`, `evidence`, `time`, `jobtype`) VALUES (:author, :title, :details, :tags, :officersinvolved, :civsinvolved, :evidence, :time, :jobtype)',
+				{
+					author = fullname,
+					title = title,
+					details = information,
+					tags = json.encode(tags),
+					officersinvolved = json.encode(officers),
+					civsinvolved = json.encode(civilians),
+					evidence = json.encode(evidence),
+					time = time,
+					jobtype = 'police',
+				}, function(infoResult)
+					if infoResult then
+						for i=1, #associated do
+							exports.oxmysql:executeSync('INSERT INTO `mdt_convictions` (`cid`, `linkedincident`, `warrant`, `guilty`, `processed`, `associated`, `charges`, `fine`, `sentence`, `recfine`, `recsentence`, `time`) VALUES (:cid, :linkedincident, :warrant, :guilty, :processed, :associated, :charges, :fine, :sentence, :recfine, :recsentence, :time)', {
+								cid = tonumber(associated[i]['Cid']),
+								linkedincident = infoResult,
+								warrant = associated[i]['Warrant'],
+								guilty = associated[i]['Guilty'],
+								processed = associated[i]['Processed'],
+								associated = associated[i]['Isassociated'],
+								charges = json.encode(associated[i]['Charges']),
+								fine = tonumber(associated[i]['Fine']),
+								sentence = tonumber(associated[i]['Sentence']),
+								recfine = tonumber(associated[i]['recfine']),
+								recsentence = tonumber(associated[i]['recsentence']),
+								time = time
+							})
 						end
-					end)
-				elseif id > 0 then
-					exports.oxmysql:executeSync("UPDATE pd_incidents SET title=:title, details=:details, civsinvolved=:civsinvolved, tags=:tags, officersinvolved=:officersinvolved, evidence=:evidence WHERE id=:id", {
-						title = title,
-						details = information,
-						tags = json.encode(tags),
-						officersinvolved = json.encode(officers),
-						civsinvolved = json.encode(civilians),
-						evidence = json.encode(evidence),
-						id = id
-					})
-					for i=1, #associated do
-						TriggerEvent('mdt:server:handleExistingConvictions', associated[i], id, time)
+						TriggerClientEvent('mdt:client:updateIncidentDbId', src, infoResult)
+						--TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") was added to the vehicle information database by "..player['fullname'])
 					end
+				end)
+			elseif id > 0 then
+				exports.oxmysql:executeSync("UPDATE mdt_incidents SET title=:title, details=:details, civsinvolved=:civsinvolved, tags=:tags, officersinvolved=:officersinvolved, evidence=:evidence WHERE id=:id", {
+					title = title,
+					details = information,
+					tags = json.encode(tags),
+					officersinvolved = json.encode(officers),
+					civsinvolved = json.encode(civilians),
+					evidence = json.encode(evidence),
+					id = id
+				})
+				for i=1, #associated do
+					TriggerEvent('mdt:server:handleExistingConvictions', associated[i], id, time)
 				end
 			end
 		end
-	end)
+	end
 end)
 
 RegisterNetEvent('mdt:server:handleExistingConvictions', function(data, incidentid, time)

@@ -232,19 +232,20 @@ end)
 	end
 end) ]]
 
-RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName, tags, gallery)
+RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName, tags, gallery, fingerprint)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 
 	if Player then
 		local incJobType = GetJobType(Player.PlayerData.job.name)
-		MySQL.Async.insert('INSERT INTO mdt_data (cid, information, pfp, jobtype, tags) VALUES (:cid, :information, :pfp, :jobtype, :tags) ON DUPLICATE KEY UPDATE cid = :cid, information = :information, pfp = :pfp, tags = :tags, gallery = :gallery', {
+		MySQL.Async.insert('INSERT INTO mdt_data (cid, information, pfp, jobtype, tags, gallery, fingerprint) VALUES (:cid, :information, :pfp, :jobtype, :tags, :gallery, :fingerprint) ON DUPLICATE KEY UPDATE cid = :cid, information = :information, pfp = :pfp, tags = :tags, gallery = :gallery, fingerprint = :fingerprint', {
 			cid = cid,
 			information = information,
 			pfp = pfp,
 			jobtype = incJobType,
 			tags = json.encode(tags),
 			gallery = json.encode(gallery),
+			fingerprint = fingerprint,
 		})
 	end
 end)

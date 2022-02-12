@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS `mdt_incidents` (
   `civsinvolved` text NOT NULL,
   `evidence` text NOT NULL,
   `time` varchar(255) DEFAULT NULL,
+  `jobtype` varchar(50) NOT NULL DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

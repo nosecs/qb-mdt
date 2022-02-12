@@ -106,7 +106,6 @@ end
 
 local function EnableGUI(enable)
     print("MDT Enable GUI", enable)
-    if enable then TriggerServerEvent('mdt:server:opendashboard') end
     SetNuiFocus(enable, enable)
     SendNUIMessage({ type = "show", enable = enable, job = PlayerData.job.name })
     isOpen = enable
@@ -133,6 +132,7 @@ end, false)
 
 RegisterNUICallback("deleteBulletin", function(data, cb)
     local id = data.id
+    print(id)
     TriggerServerEvent('mdt:server:deleteBulletin', id)
     cb(true)
 end)
@@ -177,14 +177,12 @@ end)
 
 RegisterNetEvent('mdt:client:deleteBulletin', function(ignoreId, sentData, job)
     if ignoreId == GetPlayerServerId(PlayerId()) then return end;
-    if PlayerData.job.name == 'police' then
-        SendNUIMessage({ type = "deleteBulletin", data = sentData })
-    elseif PlayerData.job.name == 'ambulance' then
+    if PlayerData.job.name == 'police' or PlayerData.job.name == 'ambulance'then
         SendNUIMessage({ type = "deleteBulletin", data = sentData })
     end
 end)
 
-RegisterNetEvent('mdt:client:open', function()
+RegisterNetEvent('mdt:client:open', function(bulletin)
     EnableGUI(true)
     local x, y, z = table.unpack(GetEntityCoords(PlayerPedId()))
 
@@ -203,7 +201,7 @@ RegisterNetEvent('mdt:client:open', function()
 
     -- local grade = PlayerData.job.grade.name
 
-    SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.grade.name..' '..PlayerData.charinfo.lastname, location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname })
+    SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.grade.name..' '..PlayerData.charinfo.lastname, location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname, bulletin = bulletin })
 end)
 
 RegisterNetEvent('mdt:client:exitMDT', function()
@@ -247,7 +245,11 @@ RegisterNUICallback("saveProfile", function(data, cb)
     local cid = data.id
     local fName = data.fName
     local sName = data.sName
-    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName)
+    local tags = data.tags
+    local gallery = data.gallery
+    local fingerprint = data.fingerprint
+
+    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery, fingerprint)
     cb(true)
 end)
 
@@ -265,7 +267,7 @@ RegisterNUICallback("getProfileData", function(data, cb)
     local pP = nil
     local result = getProfileDataPromise(id)
     
-    local getProfileProperties = function(data)
+    --[[ local getProfileProperties = function(data)
         if pP then return end
         pP = promise.new()
         QBCore.Functions.TriggerCallback('qb-phone:server:MeosGetPlayerHouses', function(result)
@@ -274,7 +276,8 @@ RegisterNUICallback("getProfileData", function(data, cb)
         return Citizen.Await(pP)
     end
     local propertiesResult = getProfileProperties(id)
-    result.properties =propertiesResult
+    result.properties = propertiesResult
+     ]]
     local vehicles=result.vehicles
     for i=1,#vehicles do
         local vehicle=result.vehicles[i]

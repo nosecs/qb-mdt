@@ -73,7 +73,6 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 
 		local convictions = GetConvictions(citizenIds)
 		
-
 		if next(convictions) then
 			for _, conv in pairs(convictions) do
 				if conv.warrant then people[citizenIdIndexMap[conv.civ]].warrant = true end
@@ -167,6 +166,7 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		licences = target.metadata['licences'],
 		dob = target.charinfo.birthdate,
 		mdtinfo = '',
+		fingerprint = '',
 		tags = {},
 		vehicles = {},
 		properties = {},
@@ -202,6 +202,7 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 	local mdtData = GetPersonInformation(sentId, JobType)
 	if mdtData then
 		person.mdtinfo = mdtData.information
+		person.fingerprint = mdtData.fingerprint
 		person.profilepic = mdtData.pfp
 		person.tags = json.decode(mdtData.tags)
 		person.gallery = json.decode(mdtData.gallery)

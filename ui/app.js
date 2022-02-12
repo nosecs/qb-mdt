@@ -174,6 +174,8 @@ $(document).ready(() => {
     $(".manage-profile-url-input").val(result["profilepic"]);
     $(".manage-profile-info").val(result["mdtinfo"]);
     $(".manage-profile-info").removeAttr("disabled");
+    $(".manage-profile-fingerprint").val(result["fingerprint"]);
+    $(".manage-profile-fingerprint").removeAttr("disabled");
     $(".manage-profile-pic").attr("src", result["profilepic"]);
 
     const { vehicles, tags, gallery, convictions, properties } = result
@@ -438,6 +440,7 @@ $(document).ready(() => {
           pfp = newpfp;
         }
         let description = $(".manage-profile-info").val();
+        let fingerprint = $(".manage-profile-fingerprint").val();
         let id = $(".manage-profile-citizenid-input").val();
 
         const fName = $(".manage-profile-name-input-1").val();
@@ -453,6 +456,7 @@ $(document).ready(() => {
             sName: sName,
             tags: tags,
             gallery: gallery,
+            fingerprint: fingerprint
           })
         );
         $(".manage-profile-pic").attr("src", newpfp);
@@ -1003,8 +1007,7 @@ $(document).ready(() => {
                                     </div>
                                 </div>
                                 <div class="profile-bottom-info">
-                                    <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;<span style="color:#f2f2f2">|</span>&nbsp;
-                                    <div class="profile-id" style="float:right;">FP: ${metadata.fingerprint}</div>
+                                    <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
                                 </div>
                             </div>
                         </div>

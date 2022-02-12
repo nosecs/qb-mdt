@@ -15,7 +15,7 @@ end
 
 -- idk what this is used for either
 function GetPersonInformation(cid, jobtype)
-	local result = MySQL.query.await('SELECT information, tags, gallery, pfp FROM mdt_data WHERE cid = ? and jobtype = ?', { cid,  jobtype})
+	local result = MySQL.query.await('SELECT information, tags, gallery, pfp, fingerprint FROM mdt_data WHERE cid = ? and jobtype = ?', { cid,  jobtype})
 	return result[1]
 	-- return exports.oxmysql:executeSync('SELECT information, tags, gallery FROM mdt WHERE cid= ? and type = ?', { cid, jobtype })
 end
@@ -48,7 +48,6 @@ function GetPlayerVehicles(cid, cb)
 end
 
 function GetBulletins(JobType)
-	print(JobType)
 	return MySQL.query.await('SELECT * FROM `mdt_bulletin` WHERE `jobtype` = ? LIMIT 10', { JobType })
 	-- return exports.oxmysql:executeSync('SELECT * FROM `mdt_bulletin` WHERE `type`= ? LIMIT 10', { JobType })
 end

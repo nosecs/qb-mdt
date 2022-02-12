@@ -135,7 +135,6 @@ $(document).ready(() => {
 
   $(".profile-items").on("click", ".profile-item", async function () {
     let id = $(this).data("id");
-    console.log(id)
     let result = await $.post(
       `https://${GetParentResourceName()}/getProfileData`,
       JSON.stringify({
@@ -143,7 +142,6 @@ $(document).ready(() => {
       })
     );
 
-    console.log(JSON.stringify(result));
     if (!canInputTag) {
       if ($(".tags-add-btn").hasClass("fa-minus")) {
         $(".tags-add-btn")
@@ -176,6 +174,8 @@ $(document).ready(() => {
     $(".manage-profile-url-input").val(result["profilepic"]);
     $(".manage-profile-info").val(result["mdtinfo"]);
     $(".manage-profile-info").removeAttr("disabled");
+    $(".manage-profile-fingerprint").val(result["fingerprint"]);
+    $(".manage-profile-fingerprint").removeAttr("disabled");
     $(".manage-profile-pic").attr("src", result["profilepic"]);
 
     const { vehicles, tags, gallery, convictions, properties } = result
@@ -196,16 +196,13 @@ $(document).ready(() => {
     // convert key value pair object of licenses to array
     let licenses = Object.entries(result.licences);
 
-
     if (licenses.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
-      if (tags && tags.length > 0) {
         licencesHTML = '';
         for (const [lic, hasLic] of licenses) {
   
           let tagColour = hasLic == true ? "green-tag" : "red-tag";
           licencesHTML += `<span class="license-tag ${tagColour} ${lic}" data-type="${lic}">${lic}</span>`;
         }
-      }
       if (vehicles && vehicles.length > 0) {
 
         vehHTML = '';
@@ -232,10 +229,6 @@ $(document).ready(() => {
         tagsHTML += `<div class="tag">${tag}</div>`;
       })
     }
-    
-
-    
-
 
     if (gallery && gallery.length > 0) {
       galleryHTML = '';
@@ -243,9 +236,6 @@ $(document).ready(() => {
         galleryHTML += `<img src="${value}" class="gallery-img" onerror="this.src='img/not-found.jpg'">`;
       })
     }
-
-
-    
 
     if (result.isLimited) {
       $(".manage-profile-vehs-container").fadeOut(250);
@@ -390,13 +380,13 @@ $(document).ready(() => {
         );
         setTimeout(() => {
           URL = $("." + randomNum).attr("src");
-          $.post(
+          /* $.post(
             `https://${GetParentResourceName()}/addGalleryImg`,
             JSON.stringify({
               cid: cid,
               URL: URL,
             })
-          );
+          ); */
         }, 250);
         $("#gallery-upload-input").val("");
         $(".gallery-upload-input").slideUp(250);
@@ -421,7 +411,27 @@ $(document).ready(() => {
         $(".manage-profile-save").html("Save");
         canSaveProfile = true;
       }, 750);
+
       setTimeout(() => {
+        let tags = new Array();
+        let gallery = new Array();
+        
+        $(".tags-holder")
+          .find("div")
+          .each(function () {
+            if ($(this).text() != "" && $(this).text() != "No Tags") {
+              tags.push($(this).text());
+            }
+        });
+
+        $(".gallery-inner-container")
+        .find("img")
+        .each(function () {
+          if ($(this).attr("src") != "") {
+            gallery.push($(this).attr("src"));
+          }
+        });
+
         let pfp = $(".manage-profile-pic").attr("src");
         let newpfp = $(".manage-profile-url-input").val();
         if (newpfp.includes("base64")) {
@@ -430,6 +440,7 @@ $(document).ready(() => {
           pfp = newpfp;
         }
         let description = $(".manage-profile-info").val();
+        let fingerprint = $(".manage-profile-fingerprint").val();
         let id = $(".manage-profile-citizenid-input").val();
 
         const fName = $(".manage-profile-name-input-1").val();
@@ -443,6 +454,9 @@ $(document).ready(() => {
             id: id,
             fName: fName,
             sName: sName,
+            tags: tags,
+            gallery: gallery,
+            fingerprint: fingerprint
           })
         );
         $(".manage-profile-pic").attr("src", newpfp);
@@ -993,8 +1007,7 @@ $(document).ready(() => {
                                     </div>
                                 </div>
                                 <div class="profile-bottom-info">
-                                    <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;<span style="color:#f2f2f2">|</span>&nbsp;
-                                    <div class="profile-id" style="float:right;">FP: ${metadata.fingerprint}</div>
+                                    <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
                                 </div>
                             </div>
                         </div>
@@ -3870,7 +3883,22 @@ $(document).ready(() => {
       $(".name-shit").html(eventData.name);
       $(".header-location").html(" " + eventData.location);
       MyName = eventData.fullname;
-    } else if (eventData.type == "bulletin") {
+
+      $(".bulletin-items-continer").empty();
+      $.each(eventData.bulletin, function (index, value) {
+        $(
+          ".bulletin-items-continer"
+        ).prepend(`<div class="bulletin-item" data-id=${value.id}>
+                <div class="bulletin-item-title">${value.title}</div>
+                <div class="bulletin-item-info">${value.desc}</div>
+                <div class="bulletin-bottom-info">
+                    <div class="bulletin-id">ID: ${value.id}</div>
+                    <div class="bulletin-date">${value.author
+          } - ${timeAgo(Number(value.time))}</div>
+                </div>
+                </div>`);
+      });
+    /* } else if (eventData.type == "bulletin") {
       $(".bulletin-items-continer").empty();
       $.each(eventData.data, function (index, value) {
         $(
@@ -3884,7 +3912,7 @@ $(document).ready(() => {
           } - ${timeAgo(Number(value.time))}</div>
                 </div>
                 </div>`);
-      });
+      }); */
     } else if (eventData.type == "newBulletin") {
       const value = eventData.data;
       $(".bulletin-items-continer")

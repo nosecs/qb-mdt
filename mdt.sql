@@ -5,7 +5,10 @@ CREATE TABLE IF NOT EXISTS `mdt_data` (
   `tags` TEXT NOT NULL,
   `gallery` TEXT NOT NULL,
   `jobtype` VARCHAR(255) DEFAULT 'police',
-  PRIMARY KEY (`id`)
+  `pfp` TEXT DEFAULT NULL,
+  `fingerprint` VARCHAR(50) DEFAULT NULL,
+  PRIMARY KEY (`citizenid`),
+  KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `mdt_bulletin` (

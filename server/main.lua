@@ -25,9 +25,9 @@ local function openMDT(src)
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(src, PlayerData) then return end
 	local Radio = Player(src).state.radioChannel or 0
-	if Radio > 100 then
+	--[[ if Radio > 100 then
 		Radio = 0
-	end
+	end ]]
 
 	activeUnits[PlayerData.citizenid] = {
 		cid = PlayerData.citizenid,
@@ -38,7 +38,11 @@ local function openMDT(src)
 		unitType = PlayerData.job.name
 	}
 
-	TriggerClientEvent('mdt:client:open', src)
+	local JobType = GetJobType(PlayerData.job.name)
+	local bulletin = GetBulletins(JobType)
+
+	--TriggerClientEvent('mdt:client:dashboardbulletin', src, bulletin)
+	TriggerClientEvent('mdt:client:open', src, bulletin)
 	TriggerClientEvent('mdt:client:GetActiveUnits', src, activeUnits)
 end
 
@@ -69,7 +73,6 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 
 		local convictions = GetConvictions(citizenIds)
 		
-
 		if next(convictions) then
 			for _, conv in pairs(convictions) do
 				if conv.warrant then people[citizenIdIndexMap[conv.civ]].warrant = true end
@@ -99,17 +102,17 @@ end)
 
 QBCore.Functions.CreateCallback('mdt:server:OpenDashboard', function(source, cb)
 	local PlayerData = GetPlayerData(source)
-	if not PermCheck(source,PlayerData) then return end
-	local JobType = GetJobType(PlayerData)
+	if not PermCheck(source, PlayerData) then return end
+	local JobType = GetJobType(PlayerData.job.name)
 	local bulletin = GetBulletins(JobType)
 	cb(bulletin)
 end)
 
 RegisterNetEvent('mdt:server:NewBulletin', function(title, info, time)
 	local src = source
-	if not PermCheck(src) then return end
 	local PlayerData = GetPlayerData(src)
-	local JobType = GetJobType(PlayerData)
+	if not PermCheck(src, PlayerData) then return end
+	local JobType = GetJobType(PlayerData.job.name)
 	local playerName = GetNameFromPlayerData(PlayerData)
 	local newBulletin = MySQL.insert.await('INSERT INTO `mdt_bulletin` (`title`, `desc`, `author`, `time`, `jobtype`) VALUES (:title, :desc, :author, :time, :jt)', {
 		title = title,
@@ -123,16 +126,12 @@ RegisterNetEvent('mdt:server:NewBulletin', function(title, info, time)
 	TriggerClientEvent('mdt:client:newBulletin', -1, src, {id = newBulletin, title = title, info = info, time = time, author = PlayerData.CitizenId}, JobType)
 end)
 
-RegisterNetEvent('mdt:server:DeleteBulletin', function(id)
+RegisterNetEvent('mdt:server:deleteBulletin', function(id)
 	if not id then return false end
 	local src = source
 	local PlayerData = GetPlayerData(src)
-	if not PermCheck(src) then return end
-	local JobType = GetJobType(PlayerData)
-
-	local bulletin = MySQL.scalar.await('SELECT `title` from `mdt_bulletin WHERE id = ? LIMIT 1', {id})
-
-	if not bulletin then return false end
+	if not PermCheck(src, PlayerData) then return end
+	local JobType = GetJobType(PlayerData.job.name)
 
 	local deletion = MySQL.query.await('DELETE FROM `mdt_bulletin` where id = ?', {id})
 	AddLog("A bulletin was deleted by " .. GetNameFromPlayerData(PlayerData) .. " with the title: ".. bulletin.title ..".")
@@ -144,7 +143,7 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 	local src = source
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(src, PlayerData) then return cb({}) end
-	local JobType = GetJobType(PlayerData)
+	local JobType = GetJobType(PlayerData.job.name)
 	local target = GetPlayerDataById(sentId)
 	local JobName = PlayerData.job.name
 
@@ -154,7 +153,6 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 	if type(target.job) == 'string' then target.job = json.decode(target.job) end
 	if type(target.charinfo) == 'string' then target.charinfo = json.decode(target.charinfo) end
 	if type(target.metadata) == 'string' then target.metadata = json.decode(target.metadata) end
-
 
 	local job, grade = UnpackJob(target.job)
 
@@ -168,6 +166,7 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		licences = target.metadata['licences'],
 		dob = target.charinfo.birthdate,
 		mdtinfo = '',
+		fingerprint = '',
 		tags = {},
 		vehicles = {},
 		properties = {},
@@ -203,27 +202,27 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 	local mdtData = GetPersonInformation(sentId, JobType)
 	if mdtData then
 		person.mdtinfo = mdtData.information
-		person.tags = mdtData.tags
-		person.gallery = mdtData.gallery
+		person.fingerprint = mdtData.fingerprint
+		person.profilepic = mdtData.pfp
+		person.tags = json.decode(mdtData.tags)
+		person.gallery = json.decode(mdtData.gallery)
 	end
-
-	
 
 	return cb(person)
 end)
 
-RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName, sName)
+--[[ RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName, sName)
 	local src = source
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(src) then return cb({}) end
-	local JobType = GetJobType(PlayerData)
+	local JobType = GetJobType(PlayerData.job.name)
 	local target = GetPlayerDataById(sendId)
 	local JobName = PlayerData.job.name
 
 	local UglyFunc = function (id, pfp, desc, job)
 		-- exports.oxmysql:executeSync("UPDATE policemdtdata SET `information`=:information WHERE `id`=:id LIMIT 1", { id = id, information = information })
 		-- exports.oxmysql:executeSync("UPDATE users SET `profilepic`=:profilepic WHERE `id`=:id LIMIT 1", { id = cid, profilepic = pfp })
-		MySQL.update.await('UPDATE `mdtdata` SET information = ? where cid = ? LIMIT 1', {id, desc})
+		MySQL.update.await('UPDATE `mdt_data` SET information = ? where cid = ? LIMIT 1', {id, desc})
 		AddLog(("A user with the Citizen ID "..cid.." was updated by %s %s"):format(PlayerData.charinfo.firstname, PlayerData.charinfo.lastname))
 	end
 
@@ -231,12 +230,27 @@ RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName
 	if not person then
 		return cb({})
 	end
+end) ]]
 
+RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName, tags, gallery, fingerprint)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
 
-
+	if Player then
+		local incJobType = GetJobType(Player.PlayerData.job.name)
+		MySQL.Async.insert('INSERT INTO mdt_data (cid, information, pfp, jobtype, tags, gallery, fingerprint) VALUES (:cid, :information, :pfp, :jobtype, :tags, :gallery, :fingerprint) ON DUPLICATE KEY UPDATE cid = :cid, information = :information, pfp = :pfp, tags = :tags, gallery = :gallery, fingerprint = :fingerprint', {
+			cid = cid,
+			information = information,
+			pfp = pfp,
+			jobtype = incJobType,
+			tags = json.encode(tags),
+			gallery = json.encode(gallery),
+			fingerprint = fingerprint,
+		})
+	end
 end)
 
-RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName)
+--[[ RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName)
 	TriggerEvent('echorp:getplayerfromid', source, function(player)
 		if player then
 			if player.job and (player.job.isPolice or player.job.name == 'doj') then
@@ -278,7 +292,7 @@ RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName
 			end
 		end
 	end)
-end)
+end) ]]
 
 RegisterNetEvent("mdt:server:newTag", function(cid, tag)
 	TriggerEvent('echorp:getplayerfromid', source, function(result)
@@ -393,51 +407,30 @@ RegisterNetEvent("mdt:server:updateLicense", function(cid, type, status)
 end)
 
 RegisterNetEvent("mdt:server:addGalleryImg", function(cid, img)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or result.job.name == 'doj') then
-
-				local function UpdateGallery(id, gallery)
-					exports.oxmysql:executeSync("UPDATE policemdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." had their gallery updated (+) by "..result.fullname)
-				end
-
-				exports.oxmysql:execute('SELECT id, gallery FROM policemdtdata WHERE cid=:cid LIMIT 1', { cid = cid }, function(user)
-					if user and user[1] then
-						local imgs = json.decode(user[1]['gallery'])
-						table.insert(imgs, img)
-						UpdateGallery(user[1]['id'], imgs)
-					else
-						CreateUser(cid, 'policemdtdata', function(result)
-							local imgs = {}
-							table.insert(imgs, img)
-							UpdateGallery(result, imgs)
-						end)
-					end
-				end)
-			elseif result.job and (result.job.name == 'ambulance') then
-
-				local function UpdateGallery(id, gallery)
-					exports.oxmysql:executeSync("UPDATE emsmdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." had their gallery updated (+) by "..result.fullname)
-				end
-
-				exports.oxmysql:execute('SELECT id, gallery FROM emsmdtdata WHERE cid=:cid LIMIT 1', { cid = cid }, function(user)
-					if user and user[1] then
-						local imgs = json.decode(user[1]['gallery'])
-						table.insert(imgs, img)
-						UpdateGallery(user[1]['id'], imgs)
-					else
-						CreateUser(cid, 'emsmdtdata', function(result)
-							local imgs = {}
-							table.insert(imgs, img)
-							UpdateGallery(result, imgs)
-						end)
-					end
-				end)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			local function UpdateGallery(id, gallery)
+				exports.oxmysql:executeSync("UPDATE policemdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
+				TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." had their gallery updated (+) by "..result.fullname)
 			end
+
+			exports.oxmysql:execute('SELECT id, gallery FROM policemdtdata WHERE cid=:cid LIMIT 1', { cid = cid }, function(user)
+				if user and user[1] then
+					local imgs = json.decode(user[1]['gallery'])
+					table.insert(imgs, img)
+					UpdateGallery(user[1]['id'], imgs)
+				else
+					CreateUser(cid, 'policemdtdata', function(result)
+						local imgs = {}
+						table.insert(imgs, img)
+						UpdateGallery(result, imgs)
+					end)
+				end
+			end)
 		end
-	end)
+	end
 end)
 
 RegisterNetEvent("mdt:server:removeGalleryImg", function(cid, img)
@@ -502,15 +495,13 @@ end)
 
 
 RegisterNetEvent('mdt:server:getAllIncidents', function()
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or result.job.name == 'doj') then
-				exports.oxmysql:execute("SELECT * FROM `pd_incidents` ORDER BY `id` DESC LIMIT 30", {}, function(matches)
-					TriggerClientEvent('mdt:client:getAllIncidents', result.source, matches)
-				end)
-			end
-		end
-	end)
+	local src = source
+	local PlayerData = GetPlayerData(src)
+	if result then
+			exports.oxmysql:execute("SELECT * FROM `mdt_incidents` ORDER BY `id` DESC LIMIT 30", {}, function(matches)
+				TriggerClientEvent('mdt:client:getAllIncidents', result.source, matches)
+			end)
+	end
 end)
 
 RegisterNetEvent('mdt:server:searchIncidents', function(query)
@@ -1483,41 +1474,39 @@ end)
 
 RegisterNetEvent('mdt:server:sendMessage', function(message, time)
 	if message and time then
-		TriggerEvent('echorp:getplayerfromid', source, function(player)
-			if player then
-				exports.oxmysql:execute("SELECT id, profilepic, gender FROM `users` WHERE id=:id LIMIT 1", {
-					id = player['cid'] -- % wildcard, needed to search for all alike results
-				}, function(data)
-					if data and data[1] then
-						local ProfilePicture = ProfPic(data[1]['gender'], data[1]['profilepic'])
-						local callsign = GetResourceKvpString(player['cid']..'-callsign') or "000"
-						local Item = {
-							profilepic = ProfilePicture,
-							callsign = callsign,
-							cid = player['cid'],
-							name = '('..callsign..') '..player['fullname'],
-							message = message,
-							time = time,
-							job = player['job']['name']
-						}
-						table.insert(dispatchMessages, Item)
-						TriggerClientEvent('mdt:client:dashboardMessage', -1, Item)
-						-- Send to all clients, for auto updating stuff, ya dig.
-					end
-				end)
-			end
-		end)
+		local src = source
+		local PlayerData = GetPlayerData(src)
+		if PlayerData then
+			exports.oxmysql:execute("SELECT id, profilepic, gender FROM `users` WHERE id=:id LIMIT 1", {
+				id = player['cid'] -- % wildcard, needed to search for all alike results
+			}, function(data)
+				if data and data[1] then
+					local ProfilePicture = ProfPic(data[1]['gender'], data[1]['profilepic'])
+					local callsign = GetResourceKvpString(player['cid']..'-callsign') or "000"
+					local Item = {
+						profilepic = ProfilePicture,
+						callsign = callsign,
+						cid = player['cid'],
+						name = '('..callsign..') '..player['fullname'],
+						message = message,
+						time = time,
+						job = player['job']['name']
+					}
+					table.insert(dispatchMessages, Item)
+					TriggerClientEvent('mdt:client:dashboardMessage', -1, Item)
+					-- Send to all clients, for auto updating stuff, ya dig.
+				end
+			end)
+		end
 	end
 end)
 
 RegisterNetEvent('mdt:server:refreshDispatchMsgs', function()
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or (result.job.name == 'ambulance' or result.job.name == 'doj')) then
-				TriggerClientEvent('mdt:client:dashboardMessages', result['source'], dispatchMessages)
-			end
-		end
-	end)
+	local src = source
+	local PlayerData = GetPlayerData(src)
+	if IsJobAllowedToMDT(PlayerData.job.name) then
+		TriggerClientEvent('mdt:client:dashboardMessages', src, dispatchMessages)
+	end
 end)
 
 RegisterNetEvent('mdt:server:getCallResponses', function(callid)

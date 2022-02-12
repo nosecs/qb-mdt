@@ -1069,55 +1069,6 @@ QBCore.Functions.CreateCallback('mdt:server:SearchVehicles', function(source, cb
 
 end)
 
--- RegisterNetEvent('mdt:server:searchVehicles', function(search, hash)
--- 	if search then
--- 		TriggerEvent('echorp:getplayerfromid', source, function(result)
--- 			if result then
--- 				if result.job and (result.job.isPolice or result.job.name == 'doj') then
--- 					exports.oxmysql:execute("SELECT id, owner, plate, vehicle, code, stolen, image FROM `owned_vehicles` WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :hash LIMIT 25", {
--- 						query = string.lower('%'..search..'%'),
--- 						hash = string.lower('%'..hash..'%'),
--- 					}, function(vehicles)
--- 						for i=1, #vehicles do
-
--- 							-- Impound Status
--- 							GetImpoundStatus(vehicles[i]['id'], function(impoundStatus)
--- 								vehicles[i]['impound'] = impoundStatus
--- 							end)
-
--- 							vehicles[i]['bolo'] = false
-
--- 							if tonumber(vehicles[i]['code']) == 5 then
--- 								vehicles[i]['code'] = true
--- 							else
--- 								vehicles[i]['code'] = false
--- 							end
-
--- 							-- Bolo Status
--- 							GetBoloStatus(vehicles[i]['plate'], function(boloStatus)
--- 								if boloStatus and boloStatus[1] then
--- 									vehicles[i]['bolo'] = true
--- 								end
--- 							end)
-
--- 							GetOwnerName(vehicles[i]['owner'], function(name)
--- 								if name and name[1] then
--- 									vehicles[i]['owner'] = name[1]['firstname']..' '..name[1]['lastname']
--- 								end
--- 							end)
-
--- 							if vehicles[i]['image'] == nil then vehicles[i]['image'] = "img/not-found.jpg" end
-
--- 						end
-
--- 						TriggerClientEvent('mdt:client:searchVehicles', result.source, vehicles)
--- 					end)
--- 				end
--- 			end
--- 		end)
--- 	end
--- end)
-
 RegisterNetEvent('mdt:server:getVehicleData', function(plate)
 	if plate then
 		TriggerEvent('echorp:getplayerfromid', source, function(result)

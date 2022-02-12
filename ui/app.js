@@ -3883,7 +3883,22 @@ $(document).ready(() => {
       $(".name-shit").html(eventData.name);
       $(".header-location").html(" " + eventData.location);
       MyName = eventData.fullname;
-    } else if (eventData.type == "bulletin") {
+
+      $(".bulletin-items-continer").empty();
+      $.each(eventData.bulletin, function (index, value) {
+        $(
+          ".bulletin-items-continer"
+        ).prepend(`<div class="bulletin-item" data-id=${value.id}>
+                <div class="bulletin-item-title">${value.title}</div>
+                <div class="bulletin-item-info">${value.desc}</div>
+                <div class="bulletin-bottom-info">
+                    <div class="bulletin-id">ID: ${value.id}</div>
+                    <div class="bulletin-date">${value.author
+          } - ${timeAgo(Number(value.time))}</div>
+                </div>
+                </div>`);
+      });
+    /* } else if (eventData.type == "bulletin") {
       $(".bulletin-items-continer").empty();
       $.each(eventData.data, function (index, value) {
         $(
@@ -3897,7 +3912,7 @@ $(document).ready(() => {
           } - ${timeAgo(Number(value.time))}</div>
                 </div>
                 </div>`);
-      });
+      }); */
     } else if (eventData.type == "newBulletin") {
       const value = eventData.data;
       $(".bulletin-items-continer")

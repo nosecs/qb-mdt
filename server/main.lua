@@ -41,8 +41,8 @@ local function openMDT(src)
 	local JobType = GetJobType(PlayerData.job.name)
 	local bulletin = GetBulletins(JobType)
 
-	TriggerClientEvent('mdt:client:dashboardbulletin', src, bulletin)
-	TriggerClientEvent('mdt:client:open', src)
+	--TriggerClientEvent('mdt:client:dashboardbulletin', src, bulletin)
+	TriggerClientEvent('mdt:client:open', src, bulletin)
 	TriggerClientEvent('mdt:client:GetActiveUnits', src, activeUnits)
 end
 

@@ -106,7 +106,6 @@ end
 
 local function EnableGUI(enable)
     print("MDT Enable GUI", enable)
-    if enable then TriggerServerEvent('mdt:server:opendashboard') end
     SetNuiFocus(enable, enable)
     SendNUIMessage({ type = "show", enable = enable, job = PlayerData.job.name })
     isOpen = enable
@@ -133,6 +132,7 @@ end, false)
 
 RegisterNUICallback("deleteBulletin", function(data, cb)
     local id = data.id
+    print(id)
     TriggerServerEvent('mdt:server:deleteBulletin', id)
     cb(true)
 end)
@@ -177,9 +177,7 @@ end)
 
 RegisterNetEvent('mdt:client:deleteBulletin', function(ignoreId, sentData, job)
     if ignoreId == GetPlayerServerId(PlayerId()) then return end;
-    if PlayerData.job.name == 'police' then
-        SendNUIMessage({ type = "deleteBulletin", data = sentData })
-    elseif PlayerData.job.name == 'ambulance' then
+    if PlayerData.job.name == 'police' or PlayerData.job.name == 'ambulance'then
         SendNUIMessage({ type = "deleteBulletin", data = sentData })
     end
 end)
@@ -248,8 +246,9 @@ RegisterNUICallback("saveProfile", function(data, cb)
     local fName = data.fName
     local sName = data.sName
     local tags = data.tags
+    local gallery = data.gallery
 
-    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags)
+    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery)
     cb(true)
 end)
 

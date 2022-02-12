@@ -1,4 +1,4 @@
-QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports['qb-core']:GetCoreObject()
 
 function GetPlayerData(source)
 	local Player = QBCore.Functions.GetPlayer(source)
@@ -50,6 +50,19 @@ function GetJobType(job)
 		return nil
 	end
 end
+
+function IsJobAllowedToMDT(job)
+	if Config.PoliceJobs[job] then
+		return true
+	elseif Config.AmbulanceJobs[job] then
+		return true
+	elseif Config.DojJobs[job] then
+		return true
+	else
+		return false
+	end
+end
+
 
 function GetNameFromPlayerData(PlayerData)
 	return ('%s %s'):format(PlayerData.charinfo.firstname, PlayerData.charinfo.lastname)

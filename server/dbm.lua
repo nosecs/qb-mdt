@@ -48,6 +48,7 @@ function GetPlayerVehicles(cid, cb)
 end
 
 function GetBulletins(JobType)
+	print(JobType)
 	return MySQL.query.await('SELECT * FROM `mdt_bulletin` WHERE `jobtype` = ? LIMIT 10', { JobType })
 	-- return exports.oxmysql:executeSync('SELECT * FROM `mdt_bulletin` WHERE `type`= ? LIMIT 10', { JobType })
 end

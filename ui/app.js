@@ -378,13 +378,13 @@ $(document).ready(() => {
         );
         setTimeout(() => {
           URL = $("." + randomNum).attr("src");
-          $.post(
+          /* $.post(
             `https://${GetParentResourceName()}/addGalleryImg`,
             JSON.stringify({
               cid: cid,
               URL: URL,
             })
-          );
+          ); */
         }, 250);
         $("#gallery-upload-input").val("");
         $(".gallery-upload-input").slideUp(250);
@@ -412,7 +412,8 @@ $(document).ready(() => {
 
       setTimeout(() => {
         let tags = new Array();
-
+        let gallery = new Array();
+        
         $(".tags-holder")
           .find("div")
           .each(function () {
@@ -420,6 +421,15 @@ $(document).ready(() => {
               tags.push($(this).text());
             }
         });
+
+        $(".gallery-inner-container")
+        .find("img")
+        .each(function () {
+          if ($(this).attr("src") != "") {
+            gallery.push($(this).attr("src"));
+          }
+        });
+
         let pfp = $(".manage-profile-pic").attr("src");
         let newpfp = $(".manage-profile-url-input").val();
         if (newpfp.includes("base64")) {
@@ -442,6 +452,7 @@ $(document).ready(() => {
             fName: fName,
             sName: sName,
             tags: tags,
+            gallery: gallery,
           })
         );
         $(".manage-profile-pic").attr("src", newpfp);

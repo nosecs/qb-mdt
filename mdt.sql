@@ -93,7 +93,10 @@ CREATE TABLE IF NOT EXISTS `mdt_logs` (
 CREATE TABLE IF NOT EXISTS `mdt_vehicleinfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `plate` varchar(50) DEFAULT NULL,
-  `information` TEXT NOT NULL,
+  `information` text NOT NULL DEFAULT '',
+  `stolen` tinyint(1) NOT NULL DEFAULT 0,
+  `code5` tinyint(1) NOT NULL DEFAULT 0,
+  `image` text NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

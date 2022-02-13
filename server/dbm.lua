@@ -53,7 +53,14 @@ function GetBulletins(JobType)
 end
 
 function GetPlayerDataById(id)
-	return MySQL.single.await('SELECT citizenid, charinfo, job, metadata FROM players WHERE citizenid = ? LIMIT 1', { id })
+    local Player = QBCore.Functions.GetPlayerByCitizenId(id)
+    if Player ~= nil then
+		local response = {citizenid = Player.PlayerData.citizenid, charinfo = Player.PlayerData.charinfo, metadata = Player.PlayerData.metadata, job = Player.PlayerData.job}
+        return response
+    else
+        return MySQL.single.await('SELECT citizenid, charinfo, job, metadata FROM players WHERE citizenid = ? LIMIT 1', { id })
+    end
+	
 	-- return exports.oxmysql:executeSync('SELECT citizenid, charinfo, job FROM players WHERE citizenid = ? LIMIT 1', { id })
 end
 

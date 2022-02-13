@@ -1021,116 +1021,126 @@ QBCore.Functions.CreateCallback('mdt:server:SearchVehicles', function(source, cb
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(source, PlayerData) then return cb({}) end
 
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			local vehicles = MySQL.query.await("SELECT pv.id, pv.citizenid, pv.plate, pv.vehicle, pv.mods, p.charinfo FROM `player_vehicles` pv LEFT JOIN players p ON pv.citizenid = p.citizenid WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :query LIMIT 25", {
+				query = string.lower('%'..sentData..'%')
+			})
 
-	local JobName = PlayerData.job.name
+			if not next(vehicles) then cb({}) return end
 
-	if Config.PoliceJobs[JobName] then
-		local vehicles = MySQL.query.await("SELECT id, citizenid, plate, vehicle, image, state, mods FROM `player_vehicles` WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :hash LIMIT 25", {
-			query = string.lower('%'..sentData..'%')
-		})
+			for _, value in ipairs(vehicles) do
+				if value.state == 0 then
+					value.state = "Out"
+				elseif value.state == 1 then
+					value.state = "Garaged"
+				elseif value.state == 2 then
+					value.state = "Impounded"
+				end
 
-		if not next(vehicles) then cb({}) return end
+				value.bolo = false
+				local boloResult = GetBoloStatus(value.plate)
+				if boloResult then
+					value.bolo = true
+				end
 
-		for _, value in ipairs(vehicles) do
-			if value.state == 0 then
-				value.state = "Out"
-			elseif value.state == 1 then
-				value.state = "Garaged"
-			elseif value.state == 2 then
-				value.state = "Impounded"
+				value.code = false
+				value.stolen = false
+				value.image = "img/not-found.jpg"
+				local info = GetVehicleInformation(value.plate)
+				if info then
+					value.code = info['code5']
+					value.stolen = info['stolen']
+					value.image = info['image']
+				end
+
+				local ownerResult = json.decode(value.charinfo)
+
+				value.owner = ownerResult['firstname'] .. " " .. ownerResult['lastname']
 			end
-
-			value.bolo = false
-			local boloResult = GetBoloStatus(value.plate)
-			if boloResult then
-				value.bolo = true
-			end
-
-			local ownerResult = GetOwnerName(value.citizenid)
-			if type(ownerResult) ~= 'table' then ownerResult = json.decode(ownerResult) end
-
-			value.owner = ownerResult['firstname'] .. " " .. ownerResult['lastname']
-			value.image = "img/not-found.jpg"
+			-- idk if this works or I have to call cb first then return :shrug:
+			return cb(vehicles)
 		end
-		-- idk if this works or I have to call cb first then return :shrug:
-		return cb(vehicles)
-	end
 
-	return cb({})
+		return cb({})
+	end
 
 end)
 
 RegisterNetEvent('mdt:server:getVehicleData', function(plate)
 	if plate then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					exports.oxmysql:execute("SELECT id, owner, plate, vehicle, code, stolen, image FROM `owned_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")}, function(vehicle)
-						if vehicle and vehicle[1] then
-							vehicle[1]['impound'] = false
-							GetImpoundStatus(vehicle[1]['id'], function(impoundStatus)
-								vehicle[1]['impound'] = impoundStatus
-							end)
+		local src = source
+		local Player = QBCore.Functions.GetPlayer(src)
+		if Player then
+			if GetJobType(Player.PlayerData.job.name) == 'police' then
+				exports.oxmysql:execute("select pv.*, p.charinfo from player_vehicles pv LEFT JOIN players p ON pv.citizenid = p.citizenid where pv.plate = :plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")}, function(vehicle)
+					if vehicle and vehicle[1] then
+						vehicle[1]['impound'] = false
+						--[[ GetImpoundStatus(vehicle[1]['id'], function(impoundStatus)
+							vehicle[1]['impound'] = impoundStatus
+						end) ]]
 
-							vehicle[1]['bolo'] = false
-							vehicle[1]['information'] = ""
+						vehicle[1]['bolo'] = false
+						vehicle[1]['information'] = ""
 
-							if tonumber(vehicle[1]['code']) == 5 then vehicle[1]['code'] = true
-							else vehicle[1]['code'] = false end -- Used to get the code 5 status
+						-- Bolo Status
+						GetBoloStatus(vehicle[1]['plate'], function(boloStatus)
+							if boloStatus and boloStatus[1] then vehicle[1]['bolo'] = true end
+						end) -- Used to get BOLO status.
 
-							-- Bolo Status
-							GetBoloStatus(vehicle[1]['plate'], function(boloStatus)
-								if boloStatus and boloStatus[1] then vehicle[1]['bolo'] = true end
-							end) -- Used to get BOLO status.
+						vehicle[1]['name'] = "Unknown Person"		
 
-							vehicle[1]['name'] = "Unknown Person"
+						local ownerResult = json.decode(vehicle[1].charinfo)
+						vehicle[1]['name'] = ownerResult['firstname'] .. " " .. ownerResult['lastname']
 
-							GetOwnerName(vehicle[1]['owner'], function(name)
-								if name and name[1] then
-									vehicle[1]['name'] = name[1]['firstname']..' '..name[1]['lastname']
-								end
-							end) -- Get's vehicle owner name name.
+						local color1 = json.decode(vehicle[1].mods)
+						vehicle[1]['color1'] = color1['color1']
 
-							vehicle[1]['dbid'] = 0
+						vehicle[1]['dbid'] = 0
 
-							GetVehicleInformation(vehicle[1]['plate'], function(info)
-								if info and info[1] then
-									vehicle[1]['information'] = info[1]['information']
-									vehicle[1]['dbid'] = info[1]['id']
-								end
-							end) -- Vehicle notes and database ID if there is one.
-
-							if vehicle[1]['image'] == nil then vehicle[1]['image'] = "img/not-found.jpg" end -- Image
+						local info = GetVehicleInformation(vehicle[1]['plate'])
+						if info then
+							vehicle[1]['information'] = info['information']
+							vehicle[1]['dbid'] = info['id']
+							vehicle[1]['image'] = info['image']
+							vehicle[1]['code'] = info['code5']
+							vehicle[1]['stolen'] = info['stolen']
 						end
-						TriggerClientEvent('mdt:client:getVehicleData', result.source, vehicle)
-					end)
-				end
+
+						if vehicle[1]['image'] == nil then vehicle[1]['image'] = "img/not-found.jpg" end -- Image
+					end
+					
+					TriggerClientEvent('mdt:client:getVehicleData', src, vehicle)
+				end)
 			end
-		end)
+		end
 	end
 end)
 
-RegisterNetEvent('mdt:server:saveVehicleInfo', function(dbid, plate, imageurl, notes)
+RegisterNetEvent('mdt:server:saveVehicleInfo', function(dbid, plate, imageurl, notes, stolen, code5)
 	if plate then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					if dbid == nil then dbid = 0 end;
-					exports.oxmysql:executeSync("UPDATE owned_vehicles SET `image`=:image WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), image = imageurl })
-					TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") has a new image ("..imageurl..") edited by "..result['fullname'])
-					if tonumber(dbid) == 0 then
-						exports.oxmysql:insert('INSERT INTO `pd_vehicleinfo` (`plate`, `information`) VALUES (:plate, :information)', { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), information = notes }, function(infoResult)
-							if infoResult then
-								TriggerClientEvent('mdt:client:updateVehicleDbId', result.source, infoResult)
-								TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") was added to the vehicle information database by "..result['fullname'])
-							end
-						end)
-					elseif tonumber(dbid) > 0 then
-						exports.oxmysql:executeSync("UPDATE pd_vehicleinfo SET `information`=:information WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), information = notes })
-					end
+		local src = source
+		local Player = QBCore.Functions.GetPlayer(src)
+		if Player then
+			if GetJobType(Player.PlayerData.job.name) == 'police' then
+				if dbid == nil then dbid = 0 end;
+				local fullname = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
+				--exports.oxmysql:executeSync("UPDATE owned_vehicles SET `image`=:image WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), image = imageurl })
+				TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") has a new image ("..imageurl..") edited by "..fullname)
+				if tonumber(dbid) == 0 then
+					exports.oxmysql:insert('INSERT INTO `mdt_vehicleinfo` (`plate`, `information`, `image`, `code5`, `stolen`) VALUES (:plate, :information, :image, :code5, :stolen)', { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), information = notes, image = imageurl, code5 = code5, stolen = stolen }, function(infoResult)
+						if infoResult then
+							TriggerClientEvent('mdt:client:updateVehicleDbId', src, infoResult)
+							TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") was added to the vehicle information database by "..fullname)
+						end
+					end)
+				elseif tonumber(dbid) > 0 then
+					exports.oxmysql:executeSync("UPDATE mdt_vehicleinfo SET `information`= :information, `image`= :image, `code5`= :code5, `stolen`= :stolen WHERE `plate`= :plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), information = notes, image = imageurl, code5 = code5, stolen = stolen })
 				end
 			end
-		end)
+		end
 	end
 end)
 
@@ -1672,3 +1682,22 @@ RegisterNetEvent('mdt:server:statusImpound', function(plate)
 		end
 	end)
 end)
+
+function GetBoloStatus(plate)
+    exports.oxmysql:execute("SELECT * FROM mdt_bolos where plate = ?", {plate}, function(bolo)
+		if bolo and bolo[1] then
+			return true
+		else
+			return false
+		end
+	end)
+end
+
+function GetVehicleInformation(plate)
+	local result = MySQL.Sync.fetchAll('SELECT * FROM mdt_vehicleinfo WHERE plate = @plate', {['@plate'] = plate})
+    if result[1] then
+        return result[1]
+    else
+        return false
+    end
+end

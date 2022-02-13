@@ -736,7 +736,7 @@ $(document).ready(() => {
           e.which = 13; // # Some key code value
           e.keyCode = 13
           $("#dmv-search-input").trigger(e);
-          console.log(keydown)
+          //console.log(keydown)
         }, 250);
       }, 250);
     }, 250);
@@ -2759,6 +2759,18 @@ $(document).ready(() => {
           } else {
             imageurl = newImageurl;
           }
+          
+          let code5 = false;
+          let code5tag = $(".vehicle-tags").find(".code5-tag");
+          if (code5tag.hasClass("green-tag")) {
+            code5 = true
+          }
+
+          let stolen = false;
+          let stolentag = $(".vehicle-tags").find(".stolen-tag");
+          if (stolentag.hasClass("green-tag")) {
+            stolen = true
+          }
 
           $.post(
             `https://${GetParentResourceName()}/saveVehicleInfo`,
@@ -2767,6 +2779,8 @@ $(document).ready(() => {
               plate: plate,
               imageurl: imageurl,
               notes: notes,
+              stolen: stolen,
+              code5: code5,
             })
           );
 
@@ -2780,7 +2794,7 @@ $(document).ready(() => {
     let tag = $(".vehicle-tags").find(".code5-tag");
     if (tag.hasClass("red-tag")) {
       tag.removeClass("red-tag").addClass("green-tag");
-      $.post(
+      /* $.post(
         `https://${GetParentResourceName()}/knownInformation`,
         JSON.stringify({
           dbid: $(".vehicle-information-title-holder").data("dbid"),
@@ -2788,7 +2802,7 @@ $(document).ready(() => {
           status: true,
           plate: $(this).data("info"),
         })
-      );
+      ); */
     }
   });
 
@@ -2796,7 +2810,7 @@ $(document).ready(() => {
     let tag = $(".vehicle-tags").find(".code5-tag");
     if (tag.hasClass("green-tag")) {
       tag.removeClass("green-tag").addClass("red-tag");
-      $.post(
+      /* $.post(
         `https://${GetParentResourceName()}/knownInformation`,
         JSON.stringify({
           dbid: $(".vehicle-information-title-holder").data("dbid"),
@@ -2804,7 +2818,7 @@ $(document).ready(() => {
           status: false,
           plate: $(this).data("info"),
         })
-      );
+      ); */
     }
   });
 
@@ -2842,7 +2856,7 @@ $(document).ready(() => {
     let tag = $(".vehicle-tags").find(".stolen-tag");
     if (tag.hasClass("red-tag")) {
       tag.removeClass("red-tag").addClass("green-tag");
-      $.post(
+      /* $.post(
         `https://${GetParentResourceName()}/knownInformation`,
         JSON.stringify({
           dbid: $(".vehicle-information-title-holder").data("dbid"),
@@ -2850,7 +2864,7 @@ $(document).ready(() => {
           status: true,
           plate: $(this).data("info"),
         })
-      );
+      ); */
     }
   });
 
@@ -2858,7 +2872,7 @@ $(document).ready(() => {
     let tag = $(".vehicle-tags").find(".stolen-tag");
     if (tag.hasClass("green-tag")) {
       tag.removeClass("green-tag").addClass("red-tag");
-      $.post(
+      /* $.post(
         `https://${GetParentResourceName()}/knownInformation`,
         JSON.stringify({
           dbid: $(".vehicle-information-title-holder").data("dbid"),
@@ -2866,7 +2880,7 @@ $(document).ready(() => {
           status: false,
           plate: $(this).data("info"),
         })
-      );
+      ); */
     }
   });
 
@@ -4649,6 +4663,7 @@ $(document).ready(() => {
 
     } else if (eventData.type == "getVehicleData") {
       let table = eventData.data;
+      console.log(table)
 
       $(".vehicle-information-title-holder").data(
         "dbid",

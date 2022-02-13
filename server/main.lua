@@ -1022,91 +1022,93 @@ QBCore.Functions.CreateCallback('mdt:server:SearchVehicles', function(source, cb
 	if not PermCheck(source, PlayerData) then return cb({}) end
 
 
-	local JobName = PlayerData.job.name
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			local vehicles = MySQL.query.await("SELECT pv.id, pv.citizenid, pv.plate, pv.vehicle, pv.mods, p.charinfo FROM `player_vehicles` pv LEFT JOIN players p ON pv.citizenid = p.citizenid WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :query LIMIT 25", {
+				query = string.lower('%'..sentData..'%')
+			})
 
-	if Config.PoliceJobs[JobName] then
-		local vehicles = MySQL.query.await("SELECT id, citizenid, plate, vehicle, image, state, mods FROM `player_vehicles` WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :hash LIMIT 25", {
-			query = string.lower('%'..sentData..'%')
-		})
+			if not next(vehicles) then cb({}) return end
 
-		if not next(vehicles) then cb({}) return end
+			for _, value in ipairs(vehicles) do
+				if value.state == 0 then
+					value.state = "Out"
+				elseif value.state == 1 then
+					value.state = "Garaged"
+				elseif value.state == 2 then
+					value.state = "Impounded"
+				end
 
-		for _, value in ipairs(vehicles) do
-			if value.state == 0 then
-				value.state = "Out"
-			elseif value.state == 1 then
-				value.state = "Garaged"
-			elseif value.state == 2 then
-				value.state = "Impounded"
+				value.bolo = false
+				local boloResult = GetBoloStatus(value.plate)
+				if boloResult then
+					value.bolo = true
+				end
+
+				local ownerResult = json.decode(value.charinfo)
+
+				value.owner = ownerResult['firstname'] .. " " .. ownerResult['lastname']
+				value.image = "img/not-found.jpg"
 			end
-
-			value.bolo = false
-			local boloResult = GetBoloStatus(value.plate)
-			if boloResult then
-				value.bolo = true
-			end
-
-			local ownerResult = GetOwnerName(value.citizenid)
-			if type(ownerResult) ~= 'table' then ownerResult = json.decode(ownerResult) end
-
-			value.owner = ownerResult['firstname'] .. " " .. ownerResult['lastname']
-			value.image = "img/not-found.jpg"
+			-- idk if this works or I have to call cb first then return :shrug:
+			return cb(vehicles)
 		end
-		-- idk if this works or I have to call cb first then return :shrug:
-		return cb(vehicles)
-	end
 
-	return cb({})
+		return cb({})
+	end
 
 end)
 
 RegisterNetEvent('mdt:server:getVehicleData', function(plate)
 	if plate then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					exports.oxmysql:execute("SELECT id, owner, plate, vehicle, code, stolen, image FROM `owned_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")}, function(vehicle)
-						if vehicle and vehicle[1] then
-							vehicle[1]['impound'] = false
-							GetImpoundStatus(vehicle[1]['id'], function(impoundStatus)
-								vehicle[1]['impound'] = impoundStatus
-							end)
+		local src = source
+		local Player = QBCore.Functions.GetPlayer(src)
+		if Player then
+			if GetJobType(Player.PlayerData.job.name) == 'police' then
+				exports.oxmysql:execute("select pv.*, p.charinfo from player_vehicles pv LEFT JOIN players p ON pv.citizenid = p.citizenid where pv.plate = :plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")}, function(vehicle)
+					if vehicle and vehicle[1] then
+						vehicle[1]['impound'] = false
+						--[[ GetImpoundStatus(vehicle[1]['id'], function(impoundStatus)
+							vehicle[1]['impound'] = impoundStatus
+						end) ]]
 
-							vehicle[1]['bolo'] = false
-							vehicle[1]['information'] = ""
+						vehicle[1]['bolo'] = false
+						vehicle[1]['information'] = ""
 
-							if tonumber(vehicle[1]['code']) == 5 then vehicle[1]['code'] = true
-							else vehicle[1]['code'] = false end -- Used to get the code 5 status
+						--[[ if tonumber(vehicle[1]['code']) == 5 then vehicle[1]['code'] = true
+						else vehicle[1]['code'] = false end -- Used to get the code 5 status ]]
+						vehicle[1]['code'] = false
 
-							-- Bolo Status
-							GetBoloStatus(vehicle[1]['plate'], function(boloStatus)
-								if boloStatus and boloStatus[1] then vehicle[1]['bolo'] = true end
-							end) -- Used to get BOLO status.
+						-- Bolo Status
+						GetBoloStatus(vehicle[1]['plate'], function(boloStatus)
+							if boloStatus and boloStatus[1] then vehicle[1]['bolo'] = true end
+						end) -- Used to get BOLO status.
 
-							vehicle[1]['name'] = "Unknown Person"
+						vehicle[1]['name'] = "Unknown Person"		
 
-							GetOwnerName(vehicle[1]['owner'], function(name)
-								if name and name[1] then
-									vehicle[1]['name'] = name[1]['firstname']..' '..name[1]['lastname']
-								end
-							end) -- Get's vehicle owner name name.
+						local ownerResult = json.decode(vehicle[1].charinfo)
+						vehicle[1]['name'] = ownerResult['firstname'] .. " " .. ownerResult['lastname']
 
-							vehicle[1]['dbid'] = 0
+						local color1 = json.decode(vehicle[1].mods)
+						vehicle[1]['color1'] = color1['color1']
 
-							GetVehicleInformation(vehicle[1]['plate'], function(info)
-								if info and info[1] then
-									vehicle[1]['information'] = info[1]['information']
-									vehicle[1]['dbid'] = info[1]['id']
-								end
-							end) -- Vehicle notes and database ID if there is one.
+						vehicle[1]['dbid'] = 0
 
-							if vehicle[1]['image'] == nil then vehicle[1]['image'] = "img/not-found.jpg" end -- Image
-						end
-						TriggerClientEvent('mdt:client:getVehicleData', result.source, vehicle)
-					end)
-				end
+						--[[ GetVehicleInformation(vehicle[1]['plate'], function(info)
+							if info and info[1] then
+								vehicle[1]['information'] = info[1]['information']
+								vehicle[1]['dbid'] = info[1]['id']
+							end
+						end) ]] -- Vehicle notes and database ID if there is one.
+
+						if vehicle[1]['image'] == nil then vehicle[1]['image'] = "img/not-found.jpg" end -- Image
+					end
+					TriggerClientEvent('mdt:client:getVehicleData', src, vehicle)
+				end)
 			end
-		end)
+		end
 	end
 end)
 
@@ -1672,3 +1674,14 @@ RegisterNetEvent('mdt:server:statusImpound', function(plate)
 		end
 	end)
 end)
+
+
+function GetBoloStatus(plate)
+    exports.oxmysql:execute("SELECT * FROM mdt_bolos where plate = ?", {plate}, function(bolo)
+		if bolo and bolo[1] then
+			return true
+		else
+			return false
+		end
+	end)
+end

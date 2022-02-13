@@ -63,8 +63,6 @@ function IsJobAllowedToMDT(job)
 	end
 end
 
-
 function GetNameFromPlayerData(PlayerData)
 	return ('%s %s'):format(PlayerData.charinfo.firstname, PlayerData.charinfo.lastname)
 end
-

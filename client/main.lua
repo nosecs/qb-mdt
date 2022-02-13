@@ -600,10 +600,10 @@ RegisterNetEvent('mdt:client:getVehicleData', function(sentData)
     if sentData and sentData[1] then
         local vehicle = sentData[1]
         local vehData = json.decode(vehicle['vehicle'])
-        vehicle['color'] = ColorInformation[vehData['color1']]
-        vehicle['colorName'] = ColorNames[vehData['color1']]
-        vehicle['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehData['model']))
-        vehicle['class'] = classlist[GetVehicleClassFromName(vehData['model'])]
+        vehicle['color'] = Config.ColorInformation[vehicle['color1']]
+        vehicle['colorName'] = Config.ColorNames[vehicle['color1']]
+        vehicle['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehicle['model']))
+        vehicle['class'] = Config.ClassList[GetVehicleClassFromName(vehicle['model'])]
         vehicle['vehicle'] = nil
         SendNUIMessage({ type = "getVehicleData", data = vehicle })
     end

@@ -736,7 +736,7 @@ $(document).ready(() => {
           e.which = 13; // # Some key code value
           e.keyCode = 13
           $("#dmv-search-input").trigger(e);
-          console.log(keydown)
+          //console.log(keydown)
         }, 250);
       }, 250);
     }, 250);
@@ -4649,6 +4649,7 @@ $(document).ready(() => {
 
     } else if (eventData.type == "getVehicleData") {
       let table = eventData.data;
+      console.log(table)
 
       $(".vehicle-information-title-holder").data(
         "dbid",

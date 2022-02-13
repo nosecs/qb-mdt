@@ -548,7 +548,9 @@ RegisterNUICallback("saveVehicleInfo", function(data, cb)
     local plate = data.plate
     local imageurl = data.imageurl
     local notes = data.notes
-    TriggerServerEvent('mdt:server:saveVehicleInfo', dbid, plate, imageurl, notes)
+    local stolen = data.stolen
+    local code5 = data.code5
+    TriggerServerEvent('mdt:server:saveVehicleInfo', dbid, plate, imageurl, notes, stolen, code5)
     cb(true)
 end)
 

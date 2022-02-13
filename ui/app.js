@@ -3440,14 +3440,7 @@ $(document).ready(() => {
       if (cid) {
         args = [
           {
-            className: "call-dispatch-detach",
-            icon: "fas fa-sign-out-alt",
-            text: "Detach",
-            info: cid,
-            status: "",
-          },
-          {
-            className: "Set-Dispatch-Waypoint",
+            className: "set-waypoint",
             icon: "fas fa-map-marker-alt",
             text: "Set Waypoint",
             info: cid,

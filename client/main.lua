@@ -132,7 +132,6 @@ end, false)
 
 RegisterNUICallback("deleteBulletin", function(data, cb)
     local id = data.id
-    print(id)
     TriggerServerEvent('mdt:server:deleteBulletin', id)
     cb(true)
 end)

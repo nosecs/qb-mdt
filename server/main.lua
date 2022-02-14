@@ -1149,16 +1149,8 @@ RegisterNetEvent('mdt:server:toggleDuty', function(cid, status)
 end)
 
 RegisterNetEvent('mdt:server:setCallsign', function(cid, newcallsign)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		local player = exports['echorp']:GetPlayerFromCid(tonumber(cid))
-		if player then
-			if player.job.isPolice or player.job.name == 'ambulance' or player.job.name == 'doj' then
-				SetResourceKvp(cid..'-callsign', newcallsign)
-				TriggerClientEvent('mdt:client:updateCallsign', player.source, newcallsign)
-				TriggerEvent('mdt:server:AddLog', result['fullname'].." set "..player['fullname']..'\'s callsign to '..newcallsign)
-			end
-		end
-	end)
+	local Player = QBCore.Functions.GetPlayerByCitizenId(cid)
+	Player.Functions.SetMetaData("callsign", newcallsign)
 end)
 
 RegisterNetEvent('mdt:server:saveIncident', function(id, title, information, tags, officers, civilians, evidence, associated, time)

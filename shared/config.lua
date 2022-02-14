@@ -1,5 +1,12 @@
 Config = Config or {}
 
+Config.RosterLink = {
+    ['police'] = '',
+    ['ambulance'] = '',
+    ['bcso'] = '',
+    ['doj'] = '',
+}
+
 Config.PenalCodeTitles = {
     [1] = 'OFFENSES AGAINST PERSONS',
     [2] = 'OFFENSES INVOLVING THEFT',

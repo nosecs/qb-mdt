@@ -2560,7 +2560,7 @@ $(document).ready(() => {
       let id = $(".manage-reports-editing-title").data("id");
       let title = $("#reporttitle").val();
       let type = $("#reporttype").val();
-      let detail = $("#reportdetail").val();
+      let details = $("#reportdetail").val();
       let tags = new Array();
       let gallery = new Array();
       let officers = new Array();
@@ -2607,7 +2607,7 @@ $(document).ready(() => {
           id: id,
           title: title,
           type: type,
-          detail: detail,
+          details: details,
           tags: tags,
           gallery: gallery,
           officers: officers,
@@ -4636,7 +4636,7 @@ $(document).ready(() => {
 
       $(".manage-reports-input-title").val(table["title"]);
       $(".manage-reports-input-type").val(table["type"]);
-      $(".manage-reports-reports-content").val(table["detail"]);
+      $(".manage-reports-reports-content").val(table["details"]);
 
       $(".manage-reports-tags-holder").empty();
       $.each(table["tags"], function (index, value) {

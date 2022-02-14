@@ -479,13 +479,14 @@ RegisterNUICallback("newReport", function(data, cb)
     local id = data.id
     local title = data.title
     local reporttype = data.type
-    local detail = data.detail
+    local details = data.details
     local tags = data.tags
     local gallery = data.gallery
     local officers = data.officers
     local civilians = data.civilians
     local time = data.time
-    TriggerServerEvent('mdt:server:newReport', existing, id, title, reporttype, detail, tags, gallery, officers, civilians, time)
+
+    TriggerServerEvent('mdt:server:newReport', existing, id, title, reporttype, details, tags, gallery, officers, civilians, time)
     cb(true)
 end)
 

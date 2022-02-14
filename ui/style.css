@@ -419,7 +419,7 @@ input::-webkit-inner-spin-button {
 .bulletin-item-title {
     color: white;
     margin-left: 5px;
-    font-size: 16px;
+    font-size: 20px;
     text-align: left;
 }
 
@@ -434,9 +434,9 @@ span.bulletin-item-title[contenteditable]:empty::before {
 
 .bulletin-item-info {
     color: #cccccc;
-    font-size: 12px;
+    font-size: 15px;
     margin-left: 5px;
-    margin-top: 5px;
+    margin-top: 10px;
     text-align: left;
     padding-bottom: 0.8vh;
     overflow-wrap: break-word;

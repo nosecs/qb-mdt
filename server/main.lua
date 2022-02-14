@@ -44,7 +44,8 @@ local function openMDT(src)
 		firstName = PlayerData.charinfo.firstname,
 		lastName = PlayerData.charinfo.lastname,
 		radio = Radio,
-		unitType = PlayerData.job.name
+		unitType = PlayerData.job.name,
+		duty = PlayerData.job.onduty
 	}
 
 	local JobType = GetJobType(PlayerData.job.name)
@@ -244,7 +245,6 @@ end) ]]
 RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName, tags, gallery, fingerprint)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
-
 	if Player then
 		local incJobType = GetJobType(Player.PlayerData.job.name)
 		MySQL.Async.insert('INSERT INTO mdt_data (cid, information, pfp, jobtype, tags, gallery, fingerprint) VALUES (:cid, :information, :pfp, :jobtype, :tags, :gallery, :fingerprint) ON DUPLICATE KEY UPDATE cid = :cid, information = :information, pfp = :pfp, tags = :tags, gallery = :gallery, fingerprint = :fingerprint', {
@@ -1395,22 +1395,22 @@ end)
 RegisterNetEvent('mdt:server:sendMessage', function(message, time)
 	if message and time then
 		local src = source
-		local PlayerData = GetPlayerData(src)
-		if PlayerData then
-			exports.oxmysql:execute("SELECT id, profilepic, gender FROM `users` WHERE id=:id LIMIT 1", {
-				id = player['cid'] -- % wildcard, needed to search for all alike results
+		local Player = QBCore.Functions.GetPlayer(src)
+		if Player then
+			exports.oxmysql:execute("SELECT pfp FROM `mdt_data` WHERE cid=:id LIMIT 1", {
+				id = Player.PlayerData.citizenid -- % wildcard, needed to search for all alike results
 			}, function(data)
 				if data and data[1] then
-					local ProfilePicture = ProfPic(data[1]['gender'], data[1]['profilepic'])
-					local callsign = GetResourceKvpString(player['cid']..'-callsign') or "000"
+					local ProfilePicture = ProfPic(Player.PlayerData.charinfo.gender, data[1]['profilepic'])
+					local callsign = GetResourceKvpString(Player.PlayerData.metadata.callsign..'-callsign') or "000"
 					local Item = {
 						profilepic = ProfilePicture,
-						callsign = callsign,
-						cid = player['cid'],
-						name = '('..callsign..') '..player['fullname'],
+						callsign = Player.PlayerData.metadata.callsign,
+						cid = Player.PlayerData.citizenid,
+						name = '('..callsign..') '..Player.PlayerData.charinfo.firstname.. " "..Player.PlayerData.charinfo.lastname,
 						message = message,
 						time = time,
-						job = player['job']['name']
+						job = Player.PlayerData.job.name
 					}
 					table.insert(dispatchMessages, Item)
 					TriggerClientEvent('mdt:client:dashboardMessage', -1, Item)

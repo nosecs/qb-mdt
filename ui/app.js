@@ -255,6 +255,7 @@ $(document).ready(() => {
     $(".gallery-inner-container").html(galleryHTML);
     $(".houses-holder").html(propertyHTML);
   });
+  // <div class="bulletin-id">ID: ${BulletinId}</div>
 
   $(".bulletin-add-btn").click(function () {
     if (canCreateBulletin == 0) {
@@ -269,7 +270,6 @@ $(document).ready(() => {
                 <span contenteditable="true" class="bulletin-item-title"></span>
                 <span contenteditable="true" class="bulletin-item-info"></span>
                 <div class="bulletin-bottom-info">
-                <div class="bulletin-id">ID: ${BulletinId}</div>
                 <div class="bulletin-date">${MyName} - Just Now</div>
                 </div>
             </div>`);
@@ -281,6 +281,7 @@ $(document).ready(() => {
       canCreateBulletin = 0;
     }
   });
+  // <div class="bulletin-id">ID: ${canCreateBulletin}</div>
   $(".bulletin-items-continer").on("keydown", ".bulletin-item", function (e) {
     if (e.keyCode === 13) {
       $(".bulletin-add-btn").removeClass("fa-minus").addClass("fa-plus");
@@ -305,7 +306,7 @@ $(document).ready(() => {
                 <div class="bulletin-item-title">${title}</div>
                 <div class="bulletin-item-info">${info}</div>
                 <div class="bulletin-bottom-info">
-                    <div class="bulletin-id">ID: ${canCreateBulletin}</div>
+                    
                     <div class="bulletin-date">${MyName} - ${timeAgo(
           Number(time.getTime())
         )}</div>
@@ -3844,7 +3845,7 @@ $(document).ready(() => {
       }
     }
   }
-
+{/* <div class="bulletin-id">ID: ${value.id}</div> */}
   window.addEventListener("message", function (event) {
     let eventData = event.data;
     $(".dispatch-msg-notif").fadeIn(500);
@@ -3892,7 +3893,6 @@ $(document).ready(() => {
                 <div class="bulletin-item-title">${value.title}</div>
                 <div class="bulletin-item-info">${value.desc}</div>
                 <div class="bulletin-bottom-info">
-                    <div class="bulletin-id">ID: ${value.id}</div>
                     <div class="bulletin-date">${value.author
           } - ${timeAgo(Number(value.time))}</div>
                 </div>

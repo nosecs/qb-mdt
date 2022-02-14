@@ -20,6 +20,7 @@ let canSaveVehicle = true;
 var LastName = "";
 var DispatchNum = 0;
 var playerJob = "";
+let rosterLink  = "";
 
 
 // TEMP CONFIG OF JOBS
@@ -2560,7 +2561,7 @@ $(document).ready(() => {
       let id = $(".manage-reports-editing-title").data("id");
       let title = $("#reporttitle").val();
       let type = $("#reporttype").val();
-      let detail = $("#reportdetail").val();
+      let details = $("#reportdetail").val();
       let tags = new Array();
       let gallery = new Array();
       let officers = new Array();
@@ -2607,7 +2608,7 @@ $(document).ready(() => {
           id: id,
           title: title,
           type: type,
-          detail: detail,
+          details: details,
           tags: tags,
           gallery: gallery,
           officers: officers,
@@ -3632,7 +3633,7 @@ $(document).ready(() => {
   function JobColors(sentJob) {
     if (sentJob) {
       if (
-        sentJob == "lspd" ||
+        sentJob == "police" ||
         sentJob == "bcso" ||
         sentJob == "sast" ||
         sentJob == "sasp" ||
@@ -3710,10 +3711,7 @@ $(document).ready(() => {
         $("#reports-officers-involved-tag-title").html(
           "Officers Involved"
         );
-        $(".roster-iframe").attr(
-          "src",
-          "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdoer41P1HV_ErH6W2oYblUdsrNY92FtBKq1kZ32x1BhGLxUnnlcB_cNkML5zodI_bkPvmecw27Uiv/pubhtml?widget=true&amp;headers=false"
-        );
+        $(".roster-iframe").attr("src", rosterLink);
       } else if (sentJob == "ambulance") {
         $("#home-warrants-container").fadeOut(0);
         $("#home-reports-container").fadeIn(0);
@@ -3798,10 +3796,7 @@ $(document).ready(() => {
         $(".dispatch-comms-container").fadeIn(0);
         $(".manage-profile-name-input-1").attr("readonly", true);
         $(".manage-profile-name-input-2").attr("readonly", true);
-        $(".roster-iframe").attr(
-          "src",
-          "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIzcmRoaChLj8r25FtoUe2xpbghdFMk9Qxbxk1vwbI59MlFKqoIu2_KOsI5DclLMEzpx8rr6OLaZch/pubhtml?widget=true&amp;headers=false%22%3E"
-        );
+        $(".roster-iframe").attr("src", rosterLink);
       } else if (sentJob == "doj") {
         document.documentElement.style.setProperty(
           "--color-1",
@@ -3845,10 +3840,7 @@ $(document).ready(() => {
         $(".manage-profile-name-input-1").attr("readonly", false);
         $(".manage-profile-name-input-2").attr("readonly", false);
         $("#home-warrants-container").css("height", "98%");
-        $(".roster-iframe").attr(
-          "src",
-          "https://docs.google.com/spreadsheets/d/e/2PACX-1vSPpNFIu-mCere8nDMvMUwd7jvKpTLVbhs5P64a1FecI21Dtv3vLTy8UaAMokUHp_NDb1lDOIKvl9z9/pubhtml?widget=true&amp;headers=false"
-        );
+        $(".roster-iframe").attr("src", rosterLink);
       }
     }
   }
@@ -3858,8 +3850,9 @@ $(document).ready(() => {
     $(".dispatch-msg-notif").fadeIn(500);
     if (eventData.type == "show") {
       if (eventData.enable == true) {
+        rosterLink = eventData.rosterLink;
         JobColors(eventData.job);
-        playerJob = eventData.job
+        playerJob = eventData.job;
         if (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined) {
           $(".manage-profile-licenses-container").removeClass("display_hidden");
           $(".manage-convictions-container").removeClass("display_hidden");
@@ -4297,7 +4290,7 @@ $(document).ready(() => {
                     </div>
                     <div style="display: flex; flex-direction: row; width: 100%; margin: auto; margin-bottom: 0vh; padding-top: 0.75vh;">
                         <div class="offense-item-id">${v.id}</div>
-                        <div class="offfense-item-months">${v.months} Months - $${v.fine} - 0 Points(s)</div>
+                        <div class="offfense-item-months">${v.months} Months - $${v.fine}</div>
                     </div>
                     `);
         });
@@ -4629,7 +4622,7 @@ $(document).ready(() => {
 
       $(".manage-reports-input-title").val(table["title"]);
       $(".manage-reports-input-type").val(table["type"]);
-      $(".manage-reports-reports-content").val(table["detail"]);
+      $(".manage-reports-reports-content").val(table["details"]);
 
       $(".manage-reports-tags-holder").empty();
       $.each(table["tags"], function (index, value) {
@@ -4656,7 +4649,6 @@ $(document).ready(() => {
 
     } else if (eventData.type == "getVehicleData") {
       let table = eventData.data;
-      console.log(table)
 
       $(".vehicle-information-title-holder").data(
         "dbid",
@@ -4771,10 +4763,10 @@ $(document).ready(() => {
 
       let localDate = new Date(time);
       const impoundDate = localDate.toLocaleDateString("en-US", {
-        timeZone: "America/New_York",
+        timeZone: "UTC",
       });
       const impoundTime = localDate.toLocaleTimeString("en-US", {
-        timeZone: "America/New_York",
+        timeZone: "UTC",
       });
 
       $(".impound-plate").val(plate).attr("disabled", "disabled");
@@ -4884,11 +4876,12 @@ function fidgetSpinner(page) {
 
 function timeShit() {
   let localDate = new Date();
+  const myTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
   date = localDate.toLocaleDateString("en-US", {
-    timeZone: "America/New_York",
+    timeZone: myTimeZone,
   });
   time = localDate.toLocaleTimeString("en-US", {
-    timeZone: "America/New_York",
+    timeZone: myTimeZone,
   });
   $(".date").html(date);
   $(".time").html(time);

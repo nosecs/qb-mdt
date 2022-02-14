@@ -1,5 +1,12 @@
 Config = Config or {}
 
+Config.RosterLink = {
+    ['police'] = '',
+    ['ambulance'] = '',
+    ['bcso'] = '',
+    ['doj'] = '',
+}
+
 Config.PenalCodeTitles = {
     [1] = 'OFFENSES AGAINST PERSONS',
     [2] = 'OFFENSES INVOLVING THEFT',
@@ -267,7 +274,7 @@ Config.LogPerms = {
 	['doj'] = {
 		[11] = true,
 	},
-	['lspd'] = {
+	['police'] = {
 		[6] = true,
 		[7] = true,
 		[8] = true,

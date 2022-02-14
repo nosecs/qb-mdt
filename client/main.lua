@@ -107,14 +107,14 @@ end
 local function EnableGUI(enable)
     print("MDT Enable GUI", enable)
     SetNuiFocus(enable, enable)
-    SendNUIMessage({ type = "show", enable = enable, job = PlayerData.job.name })
+    SendNUIMessage({ type = "show", enable = enable, job = PlayerData.job.name, rosterLink = Config.RosterLink[PlayerData.job.name] })
     isOpen = enable
     doAnimation()
 end
 
 local function RefreshGUI()
     SetNuiFocus(false, false)
-    SendNUIMessage({ type = "show", enable = false, job = PlayerData.job.name })
+    SendNUIMessage({ type = "show", enable = false, job = PlayerData.job.name, rosterLink = Config.RosterLink[PlayerData.job.name] })
     isOpen = false
 end
 
@@ -479,13 +479,14 @@ RegisterNUICallback("newReport", function(data, cb)
     local id = data.id
     local title = data.title
     local reporttype = data.type
-    local detail = data.detail
+    local details = data.details
     local tags = data.tags
     local gallery = data.gallery
     local officers = data.officers
     local civilians = data.civilians
     local time = data.time
-    TriggerServerEvent('mdt:server:newReport', existing, id, title, reporttype, detail, tags, gallery, officers, civilians, time)
+
+    TriggerServerEvent('mdt:server:newReport', existing, id, title, reporttype, details, tags, gallery, officers, civilians, time)
     cb(true)
 end)
 

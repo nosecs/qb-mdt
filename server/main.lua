@@ -7,8 +7,19 @@ local bolos = {}
 -- TODO make it departments compatible
 local activeUnits = {}
 
+local QBCore = exports['qb-core']:GetCoreObject()
+
 local impound = {}
 local dispatchMessages = {}
+
+function IsPolice(job)
+	for k, v in pairs(Config.PoliceJobs) do
+        if job == k then
+            return true
+        end
+    end
+    return false
+end
 
 AddEventHandler("onResourceStart", function(resourceName)
 	if (resourceName == 'qb-mdt') then
@@ -1258,109 +1269,120 @@ end)
 -- Dispatch
 
 RegisterNetEvent('mdt:server:setWaypoint', function(callid)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			if player.job.isPolice or player.job.name == 'ambulance' then
-				if callid then
-					local calls = exports['erp_dispatch']:GetDispatchCalls()
-					TriggerClientEvent('mdt:client:setWaypoint', player.source, calls[callid])
-				end
-			end
+	print(callid)
+	local source = source
+	local player = QBCore.Functions.GetPlayer(source)
+	print(player.PlayerData.job.name)
+	if IsPolice(player.PlayerData.job.name) or player.PlayerData.job.name == 'ambulance' then
+		if callid then
+			local calls = exports['qb-dispatch']:GetDispatchCalls()
+			TriggerClientEvent('mdt:client:setWaypoint', source, calls[callid])
 		end
-	end)
+	end
 end)
 
 RegisterNetEvent('mdt:server:callDetach', function(callid)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			if player.job.isPolice or player.job.name == 'ambulance' then
-				if callid then
-					TriggerEvent('dispatch:removeUnit', callid, player, function(newNum)
-						TriggerClientEvent('mdt:client:callDetach', -1, callid, newNum)
-					end)
-				end
-			end
+	local source = source
+	local player = QBCore.Functions.GetPlayer(source)
+	local playerdata = {
+		fullname = player.PlayerData.charinfo.firstname.. " "..player.PlayerData.charinfo.lastname,
+		job = player.PlayerData.job,
+		cid = player.PlayerData.citizenid,
+		callsign = player.PlayerData.metadata.callsign
+	}
+	if IsPolice(player.PlayerData.job.name) or player.PlayerData.job.name == 'ambulance' then
+		if callid then
+			TriggerEvent('dispatch:removeUnit', callid, playerdata, function(newNum)
+				TriggerClientEvent('mdt:client:callDetach', -1, callid, newNum)
+			end)
 		end
-	end)
+	end
 end)
 
 RegisterNetEvent('mdt:server:callAttach', function(callid)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			if player.job.isPolice or player.job.name == 'ambulance' then
-				if callid then
-					TriggerEvent('dispatch:addUnit', callid, player, function(newNum)
-						TriggerClientEvent('mdt:client:callAttach', -1, callid, newNum)
-					end)
-				end
-			end
+	local player = QBCore.Functions.GetPlayer(source)
+	local playerdata = {
+		fullname = player.PlayerData.charinfo.firstname.. " "..player.PlayerData.charinfo.lastname,
+		job = player.PlayerData.job,
+		cid = player.PlayerData.citizenid,
+		callsign = player.PlayerData.metadata.callsign
+	}
+	if IsPolice(player.PlayerData.job.name) or player.PlayerData.job.name == 'ambulance' then
+		if callid then
+			TriggerEvent('dispatch:addUnit', callid, playerdata, function(newNum)
+				TriggerClientEvent('mdt:client:callAttach', -1, callid, newNum)
+			end)
 		end
-	end)
+	end
+		
 end)
 
 RegisterNetEvent('mdt:server:attachedUnits', function(callid)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			if player.job.isPolice or player.job.name == 'ambulance' then
-				if callid then
-					local calls = exports['erp_dispatch']:GetDispatchCalls()
-					TriggerClientEvent('mdt:client:attachedUnits', player.source, calls[callid]['units'], callid)
-				end
-			end
+	local source = source
+	local player = QBCore.Functions.GetPlayer(source)
+	if IsPolice(player.PlayerData.job.name) or player.PlayerData.job.name == 'ambulance' then
+		if callid then
+			local calls = exports['qb-dispatch']:GetDispatchCalls()
+			TriggerClientEvent('mdt:client:attachedUnits', source, calls[callid]['units'], callid)
 		end
-	end)
+	end
 end)
 
 RegisterNetEvent('mdt:server:callDispatchDetach', function(callid, cid)
-	local player = exports['echorp']:GetPlayerFromCid(cid)
+	local source = source
+	local player = QBCore.Functions.GetPlayer(source)
+	local playerdata = {
+		fullname = player.PlayerData.charinfo.firstname.. " "..player.PlayerData.charinfo.lastname,
+		job = player.PlayerData.job,
+		cid = player.PlayerData.citizenid,
+		callsign = player.PlayerData.metadata.callsign
+	}
 	local callid = tonumber(callid)
-	if player then
-		if player.job.isPolice or player.job.name == 'ambulance' then
-			if callid then
-				TriggerEvent('dispatch:removeUnit', callid, player, function(newNum)
-					TriggerClientEvent('mdt:client:callDetach', -1, callid, newNum)
-				end)
-			end
+	if IsPolice(player.PlayerData.job.name) or player.PlayerData.job.name == 'ambulance' then
+		if callid then
+			TriggerEvent('dispatch:removeUnit', callid, playerdata, function(newNum)
+				TriggerClientEvent('mdt:client:callDetach', -1, callid, newNum)
+			end)
 		end
 	end
 end)
 
 RegisterNetEvent('mdt:server:setDispatchWaypoint', function(callid, cid)
-	local player = exports['echorp']:GetPlayerFromCid(cid)
+	print("is this being called?", callid, cid)
+	local player = QBCore.Functions.GetPlayer(source)
 	local callid = tonumber(callid)
-	if player then
-		if player.job.isPolice or player.job.name == 'ambulance' then
-			if callid then
-				local calls = exports['erp_dispatch']:GetDispatchCalls()
-				TriggerClientEvent('mdt:client:setWaypoint', player.source, calls[callid])
-			end
+	if IsPolice(player.PlayerData.job.name) or player.PlayerData.job.name == 'ambulance' then
+		if callid then
+			local calls = exports['qb-dispatch']:GetDispatchCalls()
+			TriggerClientEvent('mdt:client:setWaypoint', player.source, calls[callid])
 		end
 	end
+	
 end)
 
 RegisterNetEvent('mdt:server:callDragAttach', function(callid, cid)
-	local player = exports['echorp']:GetPlayerFromCid(cid)
+	local player = QBCore.Functions.GetPlayer(source)
+	local playerdata = {
+		name = player.PlayerData.charinfo.firstname.. " "..player.PlayerData.charinfo.lastname,
+		job = player.PlayerData.job.name,
+		cid = player.PlayerData.citizenid,
+		callsign = player.PlayerData.metadata.callsign
+	}
 	local callid = tonumber(callid)
-	if player then
-		if player.job.isPolice or player.job.name == 'ambulance' then
-			if callid then
-				TriggerEvent('dispatch:addUnit', callid, player, function(newNum)
-					TriggerClientEvent('mdt:client:callAttach', -1, callid, newNum)
-				end)
-			end
+	if IsPolice(player.PlayerData.job.name) or player.PlayerData.job.name == 'ambulance' then
+		if callid then
+			TriggerEvent('dispatch:addUnit', callid, playerdata, function(newNum)
+				TriggerClientEvent('mdt:client:callAttach', -1, callid, newNum)
+			end)
 		end
 	end
 end)
 
 RegisterNetEvent('mdt:server:setWaypoint:unit', function(cid)
 	local source = source
-	TriggerEvent('echorp:getplayerfromid', source, function(me)
-		local player = exports['echorp']:GetPlayerFromCid(cid)
-		if player then
-			TriggerClientEvent('erp_notifications:client:SendAlert', player.source, { type = 'inform', text = me['fullname']..' set a waypoint on you!', length = 5000 })
-			TriggerClientEvent('mdt:client:setWaypoint:unit', source, GetEntityCoords(GetPlayerPed(player.source)))
-		end
-	end)
+	local xPlayer = QBCore.Functions.GetPlayerByCitizenId(cid)
+	local xPlayerCoords = GetEntityCoords(GetPlayerPed(xPlayer.PlayerData.source))
+	TriggerClientEvent("mdt:client:setWaypoint:unit", source, xPlayerCoords)
 end)
 
 -- Dispatch chat
@@ -1406,7 +1428,7 @@ RegisterNetEvent('mdt:server:getCallResponses', function(callid)
 	TriggerEvent('echorp:getplayerfromid', source, function(result)
 		if result then
 			if result.job and (result.job.isPolice or (result.job.name == 'ambulance')) then
-				local calls = exports['erp_dispatch']:GetDispatchCalls()
+				local calls = exports['qb-dispatch']:GetDispatchCalls()
 				TriggerClientEvent('mdt:client:getCallResponses', result.source, calls[callid]['responses'], callid)
 			end
 		end
@@ -1434,7 +1456,7 @@ RegisterNetEvent('mdt:server:setRadio', function(cid, newcallsign)
 				local tgtPlayer = exports['echorp']:GetPlayerFromCid(tonumber(cid))
 				if tgtPlayer then
 					TriggerClientEvent('mdt:client:setRadio', tgtPlayer['source'], newcallsign, result['fullname'])
-					TriggerClientEvent('erp_notifications:client:SendAlert', result['source'], { type = 'success', text = 'Radio updated.', length = 5000 })
+					TriggerClientEvent("QBCore:Notify", source, 'Radio updated.', 'success')
 				end
 			end
 		end

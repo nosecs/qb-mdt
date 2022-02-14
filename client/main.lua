@@ -239,6 +239,7 @@ RegisterNetEvent('mdt:client:searchProfile', function(sentData, isLimited)
 end)
 
 RegisterNUICallback("saveProfile", function(data, cb)
+    print(json.encode(data))
     local profilepic = data.pfp
     local information = data.description
     local cid = data.id
@@ -247,7 +248,7 @@ RegisterNUICallback("saveProfile", function(data, cb)
     local tags = data.tags
     local gallery = data.gallery
     local fingerprint = data.fingerprint
-
+    print(cid, fName, sName, tags, gallery, fingerprint)
     TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery, fingerprint)
     cb(true)
 end)
@@ -575,7 +576,7 @@ RegisterNUICallback("getPenalCode", function(data, cb)
 end)
 
 RegisterNUICallback("toggleDuty", function(data, cb)
-    TriggerServerEvent('mdt:server:toggleDuty', data.cid, data.status)
+    TriggerServerEvent('QBCore:ToggleDuty')
     cb(true)
 end)
 
@@ -643,7 +644,8 @@ end)
 
 RegisterNetEvent('mdt:client:sig100', function(radio, type)
     local job = PlayerData.job.name
-    if (job == "police" or job == "ambulance") and job.duty == 1 then
+    local duty = PlayerData.job.onduty
+    if (job == "police" or job == "ambulance") and duty == 1 then
         if type == true then
             exports['erp_notifications']:PersistentAlert("START", "signall100-"..radio, "inform", "Radio "..radio.." is currently signal 100!")
         end

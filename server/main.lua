@@ -1059,15 +1059,18 @@ end)
 
 
 RegisterNetEvent('mdt:server:getAllLogs', function()
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if LogPerms[result.job.name][result.job.grade] then
-				exports.oxmysql:execute('SELECT * FROM pd_logs ORDER BY `id` DESC LIMIT 250', {}, function(infoResult)
-					TriggerLatentClientEvent('mdt:server:getAllLogs', result.source, 30000, infoResult)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		if Config.LogPerms[Player.PlayerData.job.name] then
+			if Config.LogPerms[Player.PlayerData.job.name][Player.PlayerData.job.grade.level] then
+				local JobType = GetJobType(Player.PlayerData.job.name)
+				exports.oxmysql:execute('SELECT * FROM mdt_logs WHERE `jobtype` = :jobtype ORDER BY `id` DESC LIMIT 250', {jobtype = JobType}, function(infoResult)
+					TriggerLatentClientEvent('mdt:client:getAllLogs', src, 30000, infoResult)
 				end)
 			end
 		end
-	end)
+	end
 end)
 
 -- Penal Code

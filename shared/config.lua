@@ -267,7 +267,7 @@ Config.LogPerms = {
 	['doj'] = {
 		[11] = true,
 	},
-	['lspd'] = {
+	['police'] = {
 		[6] = true,
 		[7] = true,
 		[8] = true,

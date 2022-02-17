@@ -63,48 +63,38 @@ end)
 
 QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb, sentData)
 	if not sentData then  return cb({}) end
-	local PlayerData = GetPlayerData(source)
-	if not PermCheck(source, PlayerData) then return cb({}) end
-	local JobName = PlayerData.job.name
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		local JobType = GetJobType(Player.PlayerData.job.name)
+		if JobType == 'police' then
+			local people = MySQL.query.await("SELECT p.*, md.pfp FROM players p LEFT JOIN mdt_data md on p.citizenid = md.cid WHERE LOWER(`charinfo`) LIKE :query OR LOWER(`citizenid`) LIKE :query AND jobtype = :jobtype LIMIT 20", { query = string.lower('%'..sentData..'%'), jobtype = JobType })
+			local citizenIds = {}
+			local citizenIdIndexMap = {}
+			if not next(people) then cb({}) return end
 
-	if Config.PoliceJobs[JobName] then
-		local people = MySQL.query.await("SELECT * FROM `players` WHERE LOWER(`charinfo`) LIKE :query OR LOWER(`citizenid`) LIKE :query LIMIT 20", { query = string.lower('%'..sentData..'%') })
-		local citizenIds = {}
-		local citizenIdIndexMap = {}
-		if not next(people) then cb({}) return end
-
-		for index, data in pairs(people) do
-			people[index]['warrant'] = false
-			people[index]['convictions'] = 0
-			people[index]['pp'] = ProfPic(data.gender)
-			citizenIds[#citizenIds+1] = data.citizenid
-			citizenIdIndexMap[data.citizenid] = index
-		end
-
-		local convictions = GetConvictions(citizenIds)
-		
-		if next(convictions) then
-			for _, conv in pairs(convictions) do
-				if conv.warrant then people[citizenIdIndexMap[conv.cid]].warrant = true end
-
-				local charges = json.decode(conv.charges)
-				people[citizenIdIndexMap[conv.cid]].convictions = people[citizenIdIndexMap[conv.cid]].convictions + #charges
+			for index, data in pairs(people) do
+				people[index]['warrant'] = false
+				people[index]['convictions'] = 0
+				people[index]['pp'] = ProfPic(data.gender, data.pfp)
+				citizenIds[#citizenIds+1] = data.citizenid
+				citizenIdIndexMap[data.citizenid] = index
 			end
+
+			local convictions = GetConvictions(citizenIds)
+			
+			if next(convictions) then
+				for _, conv in pairs(convictions) do
+					if conv.warrant then people[citizenIdIndexMap[conv.cid]].warrant = true end
+
+					local charges = json.decode(conv.charges)
+					people[citizenIdIndexMap[conv.cid]].convictions = people[citizenIdIndexMap[conv.cid]].convictions + #charges
+				end
+			end
+
+			-- idk if this works or I have to call cb first then return :shrug:
+			return cb(people)
 		end
-
-		-- idk if this works or I have to call cb first then return :shrug:
-		return cb(people)
-	elseif Config.AmbulanceJobs[JobName] then
-		local people = MySQL.query.await("SELECT * FROM `players` WHERE LOWER(`charinfo`) LIKE :query OR LOWER(`metadata`) LIKE :query LIMIT 20", { query = string.lower('%'..sentData..'%') })
-
-		if not next(people) then cb({}) return end
-
-		for index, data in pairs(people) do
-			people[index]['warrant'] = false
-			people[index]['pp'] = ProfPic(data.gender)
-		end
-
-		return cb(people)
 	end
 
 	return cb({})

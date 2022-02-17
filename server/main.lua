@@ -570,199 +570,190 @@ RegisterNetEvent('mdt:server:getIncidentData', function(sentId)
 end)
 
 RegisterNetEvent('mdt:server:getAllBolos', function()
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or result.job.name == 'doj') then
-				exports.oxmysql:execute("SELECT * FROM `pd_bolos`", {}, function(matches)
-					TriggerClientEvent('mdt:client:getAllBolos', result.source, matches)
-				end)
-			elseif result.job and (result.job.name == 'ambulance') then
-				exports.oxmysql:execute("SELECT * FROM `ems_icu`", {}, function(matches)
-					TriggerClientEvent('mdt:client:getAllBolos', result.source, matches)
-				end)
-			end
-		end
-	end)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if GetJobType(Player.PlayerData.job.name) == 'police' then
+		exports.oxmysql:execute("SELECT * FROM `mdt_bolos`", {}, function(matches)
+			TriggerClientEvent('mdt:client:getAllBolos', src, matches)
+		end)
+	elseif GetJobType(Player.PlayerData.job.name) == 'ambulance' then
+		exports.oxmysql:execute("SELECT * FROM `ems_icu`", {}, function(matches)
+			TriggerClientEvent('mdt:client:getAllBolos', src, matches)
+		end)
+	end
 end)
 
 RegisterNetEvent('mdt:server:searchBolos', function(sentSearch)
 	if sentSearch then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					exports.oxmysql:execute("SELECT * FROM `pd_bolos` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR `plate` LIKE :query OR LOWER(`owner`) LIKE :query OR LOWER(`individual`) LIKE :query OR LOWER(`detail`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`author`) LIKE :query", {
-						query = string.lower('%'..sentSearch..'%') -- % wildcard, needed to search for all alike results
-					}, function(matches)
-						TriggerClientEvent('mdt:client:getBolos', result.source, matches)
-					end)
-				elseif result.job and (result.job.name == 'ambulance') then
-					exports.oxmysql:execute("SELECT * FROM `ems_icu` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR `plate` LIKE :query OR LOWER(`owner`) LIKE :query OR LOWER(`individual`) LIKE :query OR LOWER(`detail`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`author`) LIKE :query", {
-						query = string.lower('%'..sentSearch..'%') -- % wildcard, needed to search for all alike results
-					}, function(matches)
-						TriggerClientEvent('mdt:client:getBolos', result.source, matches)
-					end)
-				end
-			end
-		end)
+		local src = source
+		local Player = QBCore.Functions.GetPlayer(src)
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			exports.oxmysql:execute("SELECT * FROM `mdt_bolos` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR `plate` LIKE :query OR LOWER(`owner`) LIKE :query OR LOWER(`individual`) LIKE :query OR LOWER(`detail`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`author`) LIKE :query", {
+				query = string.lower('%'..sentSearch..'%') -- % wildcard, needed to search for all alike results
+			}, function(matches)
+				TriggerClientEvent('mdt:client:getBolos', src, matches)
+			end)
+		elseif GetJobType(Player.PlayerData.job.name) == 'ambulance' then
+			exports.oxmysql:execute("SELECT * FROM `ems_icu` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR `plate` LIKE :query OR LOWER(`owner`) LIKE :query OR LOWER(`individual`) LIKE :query OR LOWER(`detail`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`author`) LIKE :query", {
+				query = string.lower('%'..sentSearch..'%') -- % wildcard, needed to search for all alike results
+			}, function(matches)
+				TriggerClientEvent('mdt:client:getBolos', src, matches)
+			end)
+		end
 	end
 end)
 
 RegisterNetEvent('mdt:server:getBoloData', function(sentId)
 	if sentId then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					exports.oxmysql:execute("SELECT * FROM `pd_bolos` WHERE `id` = :id LIMIT 1", {
-						id = sentId
-					}, function(matches)
-						local data = matches[1]
-						data['tags'] = json.decode(data['tags'])
-						data['officersinvolved'] = json.decode(data['officersinvolved'])
-						data['gallery'] = json.decode(data['gallery'])
-						TriggerClientEvent('mdt:client:getBoloData', result.source, data)
-					end)
+		local src = source
+		local Player = QBCore.Functions.GetPlayer(src)
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			exports.oxmysql:execute("SELECT * FROM `mdt_bolos` WHERE `id` = :id LIMIT 1", {
+				id = sentId
+			}, function(matches)
+				local data = matches[1]
+				data['tags'] = json.decode(data['tags'])
+				data['officersinvolved'] = json.decode(data['officersinvolved'])
+				data['gallery'] = json.decode(data['gallery'])
+				TriggerClientEvent('mdt:client:getBoloData', src, data)
+			end)
 
-				elseif result.job and (result.job.name == 'ambulance') then
-					exports.oxmysql:execute("SELECT * FROM `ems_icu` WHERE `id` = :id LIMIT 1", {
-						id = sentId
-					}, function(matches)
-						local data = matches[1]
-						data['tags'] = json.decode(data['tags'])
-						data['officersinvolved'] = json.decode(data['officersinvolved'])
-						data['gallery'] = json.decode(data['gallery'])
-						TriggerClientEvent('mdt:client:getBoloData', result.source, data)
-					end)
-				end
-			end
-		end)
+		elseif GetJobType(Player.PlayerData.job.name) == 'ambulance' then
+			exports.oxmysql:execute("SELECT * FROM `ems_icu` WHERE `id` = :id LIMIT 1", {
+				id = sentId
+			}, function(matches)
+				local data = matches[1]
+				data['tags'] = json.decode(data['tags'])
+				data['officersinvolved'] = json.decode(data['officersinvolved'])
+				data['gallery'] = json.decode(data['gallery'])
+				TriggerClientEvent('mdt:client:getBoloData', src, data)
+			end)
+		end
 	end
 end)
 
 RegisterNetEvent('mdt:server:newBolo', function(existing, id, title, plate, owner, individual, detail, tags, gallery, officersinvolved, time)
 	if id then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
+		local src = source 
+		local Player = QBCore.Functions.GetPlayer(src)
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			local fullname = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
 
-					local function InsertBolo()
-						exports.oxmysql:insert('INSERT INTO `pd_bolos` (`title`, `author`, `plate`, `owner`, `individual`, `detail`, `tags`, `gallery`, `officersinvolved`, `time`) VALUES (:title, :author, :plate, :owner, :individual, :detail, :tags, :gallery, :officersinvolved, :time)', {
-							title = title,
-							author = result.fullname,
-							plate = plate,
-							owner = owner,
-							individual = individual,
-							detail = detail,
-							tags = json.encode(tags),
-							gallery = json.encode(gallery),
-							officersinvolved = json.encode(officersinvolved),
-							time = tostring(time),
-						}, function(r)
-							if r then
-								TriggerClientEvent('mdt:client:boloComplete', result.source, r)
-								TriggerEvent('mdt:server:AddLog', "A new BOLO was created by "..result.fullname.." with the title ("..title..") and ID ("..id..")")
-							end
-						end)
+			local function InsertBolo()
+				exports.oxmysql:insert('INSERT INTO `mdt_bolos` (`title`, `author`, `plate`, `owner`, `individual`, `detail`, `tags`, `gallery`, `officersinvolved`, `time`) VALUES (:title, :author, :plate, :owner, :individual, :detail, :tags, :gallery, :officersinvolved, :time)', {
+					title = title,
+					author = fullname,
+					plate = plate,
+					owner = owner,
+					individual = individual,
+					detail = detail,
+					tags = json.encode(tags),
+					gallery = json.encode(gallery),
+					officersinvolved = json.encode(officersinvolved),
+					time = tostring(time),
+				}, function(r)
+					if r then
+						TriggerClientEvent('mdt:client:boloComplete', src, r)
+						TriggerEvent('mdt:server:AddLog', "A new BOLO was created by "..fullname.." with the title ("..title..") and ID ("..id..")")
 					end
-
-					local function UpdateBolo()
-						exports.oxmysql:update("UPDATE pd_bolos SET `title`=:title, plate=:plate, owner=:owner, individual=:individual, detail=:detail, tags=:tags, gallery=:gallery, officersinvolved=:officersinvolved WHERE `id`=:id LIMIT 1", {
-							title = title,
-							plate = plate,
-							owner = owner,
-							individual = individual,
-							detail = detail,
-							tags = json.encode(tags),
-							gallery = json.encode(gallery),
-							officersinvolved = json.encode(officersinvolved),
-							id = id
-						}, function(r)
-							if r then
-								TriggerClientEvent('mdt:client:boloComplete', result.source, id)
-								TriggerEvent('mdt:server:AddLog', "A BOLO was updated by "..result.fullname.." with the title ("..title..") and ID ("..id..")")
-							end
-						end)
-					end
-
-					if existing then
-						UpdateBolo()
-					elseif not existing then
-						InsertBolo()
-					end
-				elseif result.job and (result.job.name == 'ambulance') then
-
-					local function InsertBolo()
-						exports.oxmysql:insert('INSERT INTO `ems_icu` (`title`, `author`, `plate`, `owner`, `individual`, `detail`, `tags`, `gallery`, `officersinvolved`, `time`) VALUES (:title, :author, :plate, :owner, :individual, :detail, :tags, :gallery, :officersinvolved, :time)', {
-							title = title,
-							author = result.fullname,
-							plate = plate,
-							owner = owner,
-							individual = individual,
-							detail = detail,
-							tags = json.encode(tags),
-							gallery = json.encode(gallery),
-							officersinvolved = json.encode(officersinvolved),
-							time = tostring(time),
-						}, function(r)
-							if r then
-								TriggerClientEvent('mdt:client:boloComplete', result.source, r)
-								TriggerEvent('mdt:server:AddLog', "A new ICU Check-in was created by "..result.fullname.." with the title ("..title..") and ID ("..id..")")
-							end
-						end)
-					end
-
-					local function UpdateBolo()
-						exports.oxmysql:update("UPDATE `ems_icu` SET `title`=:title, plate=:plate, owner=:owner, individual=:individual, detail=:detail, tags=:tags, gallery=:gallery, officersinvolved=:officersinvolved WHERE `id`=:id LIMIT 1", {
-							title = title,
-							plate = plate,
-							owner = owner,
-							individual = individual,
-							detail = detail,
-							tags = json.encode(tags),
-							gallery = json.encode(gallery),
-							officersinvolved = json.encode(officersinvolved),
-							id = id
-						}, function(affectedRows)
-							if affectedRows > 0 then
-								TriggerClientEvent('mdt:client:boloComplete', result.source, id)
-								TriggerEvent('mdt:server:AddLog', "A ICU Check-in was updated by "..result.fullname.." with the title ("..title..") and ID ("..id..")")
-							end
-						end)
-					end
-
-					if existing then
-						UpdateBolo()
-					elseif not existing then
-						InsertBolo()
-					end
-				end
+				end)
 			end
-		end)
+
+			local function UpdateBolo()
+				exports.oxmysql:update("UPDATE mdt_bolos SET `title`=:title, plate=:plate, owner=:owner, individual=:individual, detail=:detail, tags=:tags, gallery=:gallery, officersinvolved=:officersinvolved WHERE `id`=:id LIMIT 1", {
+					title = title,
+					plate = plate,
+					owner = owner,
+					individual = individual,
+					detail = detail,
+					tags = json.encode(tags),
+					gallery = json.encode(gallery),
+					officersinvolved = json.encode(officersinvolved),
+					id = id
+				}, function(r)
+					if r then
+						TriggerClientEvent('mdt:client:boloComplete', src, id)
+						TriggerEvent('mdt:server:AddLog', "A BOLO was updated by "..fullname.." with the title ("..title..") and ID ("..id..")")
+					end
+				end)
+			end
+
+			if existing then
+				UpdateBolo()
+			elseif not existing then
+				InsertBolo()
+			end
+		elseif GetJobType(Player.PlayerData.job.name) == 'ambulance' then
+
+			local function InsertBolo()
+				exports.oxmysql:insert('INSERT INTO `ems_icu` (`title`, `author`, `plate`, `owner`, `individual`, `detail`, `tags`, `gallery`, `officersinvolved`, `time`) VALUES (:title, :author, :plate, :owner, :individual, :detail, :tags, :gallery, :officersinvolved, :time)', {
+					title = title,
+					author = fullname,
+					plate = plate,
+					owner = owner,
+					individual = individual,
+					detail = detail,
+					tags = json.encode(tags),
+					gallery = json.encode(gallery),
+					officersinvolved = json.encode(officersinvolved),
+					time = tostring(time),
+				}, function(r)
+					if r then
+						TriggerClientEvent('mdt:client:boloComplete', src, r)
+						TriggerEvent('mdt:server:AddLog', "A new ICU Check-in was created by "..fullname.." with the title ("..title..") and ID ("..id..")")
+					end
+				end)
+			end
+
+			local function UpdateBolo()
+				exports.oxmysql:update("UPDATE `ems_icu` SET `title`=:title, plate=:plate, owner=:owner, individual=:individual, detail=:detail, tags=:tags, gallery=:gallery, officersinvolved=:officersinvolved WHERE `id`=:id LIMIT 1", {
+					title = title,
+					plate = plate,
+					owner = owner,
+					individual = individual,
+					detail = detail,
+					tags = json.encode(tags),
+					gallery = json.encode(gallery),
+					officersinvolved = json.encode(officersinvolved),
+					id = id
+				}, function(affectedRows)
+					if affectedRows > 0 then
+						TriggerClientEvent('mdt:client:boloComplete', src, id)
+						TriggerEvent('mdt:server:AddLog', "A ICU Check-in was updated by "..fullname.." with the title ("..title..") and ID ("..id..")")
+					end
+				end)
+			end
+
+			if existing then
+				UpdateBolo()
+			elseif not existing then
+				InsertBolo()
+			end
+		end
 	end
 end)
 
 RegisterNetEvent('mdt:server:deleteBolo', function(id)
 	if id then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					exports.oxmysql:executeSync("DELETE FROM `pd_bolos` WHERE id=:id", { id = id })
-					TriggerEvent('mdt:server:AddLog', "A BOLO was deleted by "..result.fullname.." with the ID ("..id..")")
-				end
-			end
-		end)
+		local src = source 
+		local Player = QBCore.Functions.GetPlayer(src)
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			local fullname = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
+			exports.oxmysql:executeSync("DELETE FROM `mdt_bolos` WHERE id=:id", { id = id })
+			TriggerEvent('mdt:server:AddLog', "A BOLO was deleted by "..fullname.." with the ID ("..id..")")
+		end
 	end
 end)
 
 RegisterNetEvent('mdt:server:deleteICU', function(id)
 	if id then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.name == 'ambulance') then
-					exports.oxmysql:executeSync("DELETE FROM `ems_icu` WHERE id=:id", { id = id })
-					TriggerEvent('mdt:server:AddLog', "A ICU Check-in was deleted by "..result.fullname.." with the ID ("..id..")")
-				end
-			end
-		end)
+		local src = source 
+		local Player = QBCore.Functions.GetPlayer(src)
+		if GetJobType(Player.PlayerData.job.name) == 'ambulance' then
+			local fullname = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
+			exports.oxmysql:executeSync("DELETE FROM `ems_icu` WHERE id=:id", { id = id })
+			TriggerEvent('mdt:server:AddLog', "A ICU Check-in was deleted by "..fullname.." with the ID ("..id..")")
+		end
 	end
 end)
 

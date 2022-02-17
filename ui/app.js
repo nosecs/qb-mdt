@@ -1155,7 +1155,7 @@ $(document).ready(() => {
         $(".incidents-charges-table").fadeOut(500);
         setTimeout(() => {
           $(".close-all").css("filter", "none");
-        }, 250);
+        }, 550);
       }
 
       if ($(".dispatch-attached-units").css("display") != "none") {
@@ -1164,7 +1164,7 @@ $(document).ready(() => {
         $(".dispatch-attached-units").fadeOut(500);
         setTimeout(() => {
           $(".close-all").css("filter", "none");
-        }, 250);
+        }, 550);
       }
 
       if ($(".impound-form").css("display") != "none") {
@@ -1173,7 +1173,7 @@ $(document).ready(() => {
         $(".impound-form").fadeOut(250);
         setTimeout(() => {
           $(".close-all").css("filter", "none");
-        }, 250);
+        }, 550);
       }
 
       if (shouldClose == true) {

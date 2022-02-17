@@ -85,10 +85,10 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 		
 		if next(convictions) then
 			for _, conv in pairs(convictions) do
-				if conv.warrant then people[citizenIdIndexMap[conv.civ]].warrant = true end
+				if conv.warrant then people[citizenIdIndexMap[conv.cid]].warrant = true end
 
-				local charges = JSON.decode(conv.charges)
-				people[citizenIdIndexMap[conv.civ]].convictions = people[citizenIdIndexMap[conv.civ]].convictions + #charges
+				local charges = json.decode(conv.charges)
+				people[citizenIdIndexMap[conv.cid]].convictions = people[citizenIdIndexMap[conv.cid]].convictions + #charges
 			end
 		end
 
@@ -190,9 +190,9 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		if next(convictions) then
 			for _, conv in pairs(convictions) do
 				if conv.warrant then person.warrant = true end
-				local charges = JSON.decode(conv.charges)
+				local charges = json.decode(conv.charges)
 				for _, charge in pairs(charges) do
-					person.convictions[#person.convictions] = charge
+					person.convictions[_] = charge
 				end
 			end
 		end

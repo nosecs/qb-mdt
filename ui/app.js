@@ -580,8 +580,6 @@ $(document).ready(() => {
               }
             });
 
-          console.log($(".associated-incidents-user-holder").children("div"))
-
           associated.push({
             Cid: $(this).data("id"),
             Warrant: warrant,
@@ -603,8 +601,6 @@ $(document).ready(() => {
               .val(),
           });
         });
-
-        console.log(associated)
 
         $.post(
           `https://${GetParentResourceName()}/saveIncident`,
@@ -1081,39 +1077,103 @@ $(document).ready(() => {
       })
     );
   });
-  $(".manage-incidents-civilians-holder").on(
-    "click",
-    ".manage-incidents-civilians",
-    function () {
+  $(".manage-incidents-civilians-holder").on("click", ".manage-incidents-civilians", async function () {
       const name = $(this).text();
       fidgetSpinner(".profile-page-container");
       currentTab = ".profile-page-container";
-      setTimeout(() => {
-        $(".profile-search-input").slideDown(250);
-        $(".profile-search-input").css("display", "block");
-        setTimeout(() => {
-          $("#profile-search-input:text").val(name);
-          canSearchForProfiles = false;
-          $.post(
-            `https://${GetParentResourceName()}/searchProfiles`,
-            JSON.stringify({
-              name: name,
-            })
-          );
-          $(".profile-items").empty();
-          $(".profile-items").prepend(
-            `<div class="profile-loader"></div>`
-          );
-          setTimeout(() => {
-            $.post(
-              `https://${GetParentResourceName()}/getProfileData`,
-              JSON.stringify({
-                id: name,
-              })
-            );
-          }, 250);
-        }, 250);
-      }, 250);
+      $(".profile-search-input").slideDown(250);
+      $(".profile-search-input").css("display", "block");
+      $("#profile-search-input:text").val(name);
+      canSearchForProfiles = false;
+      let result = await $.post(
+        `https://${GetParentResourceName()}/searchProfiles`,
+        JSON.stringify({
+          name: name,
+        })
+      );
+
+      canSearchForProfiles = true;
+      $(".profile-items").empty();
+
+      if (result.length < 1) {
+        $(".profile-items").html(
+          `
+                          <div class="profile-item" data-id="0">
+
+                              <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                              <div style="display: flex; flex-direction: column;">
+                                  <div class="profile-item-title">No Users Matching that search</div>
+                                  </div>
+                                  <div class="profile-bottom-info">
+                                  </div>
+                              </div>
+                          </div>
+                  `
+        );
+        return true;
+      }
+
+      let profileHTML = "";
+
+      result.forEach((value) => {
+        let charinfo = value.charinfo;
+        let metadata = value.metadata;
+
+        if (typeof value.charinfo == "string") {
+          charinfo = JSON.parse(charinfo);
+        }
+
+        if (typeof value.metadata == "string") {
+          metadata = JSON.parse(metadata);
+        }
+
+        let name = charinfo.firstname + " " + charinfo.lastname;
+        let warrant = "red-tag";
+        let convictions = "red-tag";
+
+        let licences = "";
+        let licArr = Object.entries(metadata.licences);
+
+        if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
+          for (const [lic, hasLic] of licArr) {
+            let tagColour =
+              hasLic == true ? "green-tag" : "red-tag";
+            licences += `<span class="license-tag ${tagColour}">${lic}</span>`;
+          }
+        }
+
+        if (value.warrant == true) {
+          warrant = "green-tag";
+        }
+
+        if (value.convictions < 5) {
+          convictions = "green-tag";
+        } else if (
+          value.convictions > 4 &&
+          value.convictions < 15
+        ) {
+          convictions = "orange-tag";
+        }
+
+        profileHTML += `
+                      <div class="profile-item" data-id="${value.citizenid}">
+                          <img src="${value.pp}" class="profile-image">
+                          <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                          <div style="display: flex; flex-direction: column;">
+                              <div class="profile-item-title">${name}</div>
+                                  <div class="profile-tags">
+                                      ${licences}
+                                  </div>
+                              </div>
+                              <div class="profile-bottom-info">
+                                  <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
+                              </div>
+                          </div>
+                      </div>
+                  `;
+      });
+
+      $(".profile-items").html(profileHTML);
     }
   );
   document.onkeyup = function (data) {
@@ -3075,36 +3135,103 @@ $(document).ready(() => {
     }
   });
 
-  $(".contextmenu").on("click", ".view-profile", function () {
+  $(".contextmenu").on("click", ".view-profile", async function () {
     const cid = $(this).data("info");
     fidgetSpinner(".profile-page-container");
     currentTab = ".profile-page-container";
-    setTimeout(() => {
-      $(".profile-search-input").slideDown(250);
-      $(".profile-search-input").css("display", "block");
-      setTimeout(() => {
-        $("#profile-search-input:text").val(cid.toString());
-        canSearchForProfiles = false;
-        $.post(
-          `https://${GetParentResourceName()}/searchProfiles`,
-          JSON.stringify({
-            name: cid.toString(),
-          })
-        );
-        $(".profile-items").empty();
-        $(".profile-items").prepend(
-          `<div class="profile-loader"></div>`
-        );
-        setTimeout(() => {
-          $.post(
-            `https://${GetParentResourceName()}/getProfileData`,
-            JSON.stringify({
-              id: cid.toString(),
-            })
-          );
-        }, 250);
-      }, 250);
-    }, 250);
+    $(".profile-search-input").slideDown(250);
+    $(".profile-search-input").css("display", "block");
+    $("#profile-search-input:text").val(cid.toString());
+    canSearchForProfiles = false;
+    let result = await $.post(
+      `https://${GetParentResourceName()}/searchProfiles`,
+      JSON.stringify({
+        name: cid,
+      })
+    );
+
+    canSearchForProfiles = true;
+    $(".profile-items").empty();
+
+    if (result.length < 1) {
+      $(".profile-items").html(
+        `
+                        <div class="profile-item" data-id="0">
+
+                            <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                            <div style="display: flex; flex-direction: column;">
+                                <div class="profile-item-title">No Users Matching that search</div>
+                                </div>
+                                <div class="profile-bottom-info">
+                                </div>
+                            </div>
+                        </div>
+                `
+      );
+      return true;
+    }
+
+    let profileHTML = "";
+
+    result.forEach((value) => {
+      let charinfo = value.charinfo;
+      let metadata = value.metadata;
+
+      if (typeof value.charinfo == "string") {
+        charinfo = JSON.parse(charinfo);
+      }
+
+      if (typeof value.metadata == "string") {
+        metadata = JSON.parse(metadata);
+      }
+
+      let name = charinfo.firstname + " " + charinfo.lastname;
+      let warrant = "red-tag";
+      let convictions = "red-tag";
+
+      let licences = "";
+      let licArr = Object.entries(metadata.licences);
+
+      if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
+        for (const [lic, hasLic] of licArr) {
+          let tagColour =
+            hasLic == true ? "green-tag" : "red-tag";
+          licences += `<span class="license-tag ${tagColour}">${lic}</span>`;
+        }
+      }
+
+      if (value.warrant == true) {
+        warrant = "green-tag";
+      }
+
+      if (value.convictions < 5) {
+        convictions = "green-tag";
+      } else if (
+        value.convictions > 4 &&
+        value.convictions < 15
+      ) {
+        convictions = "orange-tag";
+      }
+
+      profileHTML += `
+                    <div class="profile-item" data-id="${value.citizenid}">
+                        <img src="${value.pp}" class="profile-image">
+                        <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                        <div style="display: flex; flex-direction: column;">
+                            <div class="profile-item-title">${name}</div>
+                                <div class="profile-tags">
+                                    ${licences}
+                                </div>
+                            </div>
+                            <div class="profile-bottom-info">
+                                <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                `;
+    });
+
+    $(".profile-items").html(profileHTML);
   });
 
   $(".contextmenu").on("click", ".view-incident", function () {

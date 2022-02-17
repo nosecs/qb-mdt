@@ -9,7 +9,10 @@ end
 
 function GetNameFromId(cid)
 	-- Should be a scalar?
-	return MySQL.scalar.await('SELECT charinfo FROM `users` WHERE cid = ? LIMIT 1', { cid })
+	local result = MySQL.scalar.await('SELECT charinfo FROM players WHERE citizenid = @citizenid', { ['@citizenid'] = cid })
+	local charinfo = json.decode(result)
+	local fullname = charinfo['firstname']..' '..charinfo['lastname']
+	return fullname
 	-- return exports.oxmysql:executeSync('SELECT firstname, lastname FROM `users` WHERE id = :id LIMIT 1', { id = cid })
 end
 
@@ -33,7 +36,8 @@ function GetConvictions(cids)
 end
 
 function GetLicenseInfo(cid)
-	return MySQL.query.await('SELECT * FROM `licenses` WHERE `cid` = ?', { cid })
+	local result = MySQL.query.await('SELECT * FROM `licenses` WHERE `cid` = ?', { cid })
+	return result
 	-- return exports.oxmysql:executeSync('SELECT * FROM `licenses` WHERE `cid`=:cid', { cid = cid })
 end
 
@@ -70,12 +74,14 @@ function GetImpoundStatus(vehicleid, cb)
 end
 
 function GetBoloStatus(plate)
-	return MySQL.scalar.await('SELECT id FROM `mdt_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)})
+	local result = MySQL.scalar.await('SELECT id FROM `mdt_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)})
+	return result
 	-- return exports.oxmysql:scalarSync('SELECT id FROM `mdt_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)})
 end
 
 function GetOwnerName(cid)
-	return MySQL.scalar.await('SELECT charinfo FROM `players` WHERE LOWER(`citizenid`) = ? LIMIT 1', {cid})
+	local result = MySQL.scalar.await('SELECT charinfo FROM `players` WHERE LOWER(`citizenid`) = ? LIMIT 1', {cid})
+	return result
 	-- return exports.oxmysql:scalarSync('SELECT charinfo FROM `players` WHERE id=:cid LIMIT 1', { cid = cid})
 end
 

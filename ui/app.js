@@ -3934,23 +3934,20 @@ $(document).ready(() => {
         .find("[data-id='" + eventData.data + "']")
         .remove();
     } else if (eventData.type == "warrants") {
-      const value = eventData.data;
-      if (value.firsttime) {
-        $(".warrants-items").empty();
-      }
-      $(".warrants-items").prepend(`<div class="warrants-item" data-cid=${value.cid
-        } data-id=${value.linkedincident
-        }><div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 0.75vh; width: 100%;">
-                <div style="display: flex; flex-direction: column;">
-                    <div class="warrant-title">${value.name}</div>
-                    <div class="warrant-item-info">${value.reporttitle
-        } - ${timeAgo(Number(value.time))}</div>
-                </div>
-                <div class="warrant-bottom-info">
-                    <div class="warrant-id">ID: ${value.linkedincident}</div>
-                    <div class="warrant-expiry-date">Expires in TODO days</div>
-                </div>
-            </div></div>`);
+      // const value = eventData.data;
+      // console.log(JSON.stringify(value));
+      // console.log(value[0]["name"])
+      $(".warrants-items").empty();
+      $.each(eventData.data, function (index, value) {
+        $('.warrants-items').prepend(`<div class="warrants-item" data-cid=${value.cid} data-id=${value.linkedincident}><div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 0.75vh; width: 100%;">
+            <div style="display: flex; flex-direction: column;">
+                <div class="warrant-title">${value.name}</div>
+            </div>
+            <div class="warrant-bottom-info">
+                <div class="warrant-id">Incident ID: ${value.linkedincident}</div>
+            </div>
+        </div></div>`)
+    })
     } else if (eventData.type == "dispatchmessages") {
       const table = eventData.data;
       LastName = "";
@@ -4861,6 +4858,9 @@ $(document).ready(() => {
 function fidgetSpinner(page) {
   $(".close-all").fadeOut(0);
   $(".container-load").fadeIn(0);
+  if (page == ".dashboard-page-container"){
+    $.post(`https://${GetParentResourceName()}/getAllDashboardData`, JSON.stringify({}));
+  }
   if (page == ".bolos-page-container") {
     $.post(`https://${GetParentResourceName()}/getAllBolos`, JSON.stringify({}));
   }

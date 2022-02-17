@@ -153,9 +153,20 @@ RegisterNetEvent('mdt:client:dashboardbulletin', function(sentData)
     SendNUIMessage({ type = "bulletin", data = sentData })
 end)
 
-RegisterNetEvent('mdt:client:dashboardWarrants', function(sentData)
-    SendNUIMessage({ type = "warrants", data = sentData })
+RegisterNetEvent('mdt:client:dashboardWarrants', function()
+    QBCore.Functions.TriggerCallback("mdt:server:getWarrants", function(data)
+        if data then
+            SendNUIMessage({ type = "warrants", data = data })
+        end
+    end)
+    -- SendNUIMessage({ type = "warrants",})
 end)
+
+RegisterNUICallback("getAllDashboardData", function(data, cb)
+    TriggerEvent("mdt:client:dashboardWarrants")
+    cb(true)
+end)
+
 
 RegisterNetEvent('mdt:client:dashboardReports', function(sentData)
     SendNUIMessage({ type = "reports", data = sentData })
@@ -201,6 +212,7 @@ RegisterNetEvent('mdt:client:open', function(bulletin)
     -- local grade = PlayerData.job.grade.name
 
     SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.grade.name..' '..PlayerData.charinfo.lastname, location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname, bulletin = bulletin })
+    TriggerEvent("mdt:client:dashboardWarrants")
 end)
 
 RegisterNetEvent('mdt:client:exitMDT', function()

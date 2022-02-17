@@ -110,6 +110,23 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 	return cb({})
 end)
 
+QBCore.Functions.CreateCallback("mdt:server:getWarrants", function(source, cb)
+    local WarrantData = {}
+    local data = MySQL.query.await("SELECT * FROM mdt_convictions", {})
+    for _, value in pairs(data) do
+        print(value.warrant)
+        if value.warrant == "1" then
+            table.insert(WarrantData, {
+                cid = value.cid,
+                linkedincident = value.linkedincident,
+                name = GetNameFromId(value.cid),
+                time = value.time
+            })
+        end
+    end
+    cb(WarrantData)
+end)
+
 QBCore.Functions.CreateCallback('mdt:server:OpenDashboard', function(source, cb)
 	local PlayerData = GetPlayerData(source)
 	if not PermCheck(source, PlayerData) then return end

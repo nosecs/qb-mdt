@@ -4943,13 +4943,13 @@ $(document).ready(() => {
         let radio = unit.radio ? unit.radio : "0";
         let callSign = unit.callSign ? unit.callSign : "000";
         let activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
-
+        console.log(unit.unitType)
         if (unit.duty == 1) {
-          if (unit.unitType == "Police") {
+          if (unit.unitType == "police") {
             policeCount++;
           }
-          if (unit.unitType == "EMS") {
-            activeInfoJob = `<div class="unit-job active-info-job-ambulance">AMBALAMCE</div>`
+          if (unit.unitType == "ambulance") {
+            activeInfoJob = `<div class="unit-job active-info-job-ambulance">Ambulance</div>`
             emsCount++;
           }
           if (unit.unitType == "Fire") {

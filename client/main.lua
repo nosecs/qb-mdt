@@ -226,23 +226,15 @@ end)
 --====================================================================================
 
 RegisterNUICallback("searchProfiles", function(data, cb)
-    local name = data.name
-    local p = nil
+    local p = promise.new()
 
-    local searchProfilePromise = function(data)
-        if p then return end
-        p = promise.new()
+    QBCore.Functions.TriggerCallback('mdt:server:SearchProfile', function(result)
+        p:resolve(result)
+    end, data.name)
 
-        QBCore.Functions.TriggerCallback('mdt:server:SearchProfile', function(result)
-            p:resolve(result)
-        end, data)
+    local data = Citizen.Await(p)
 
-        return Citizen.Await(p)
-    end
-
-    local result = searchProfilePromise(name)
-    p = nil
-    return cb(result)
+    cb(data)
 end)
 
 
@@ -521,24 +513,14 @@ end)
 ------------------------------------------
 --====================================================================================
 RegisterNUICallback("searchVehicles", function(data, cb)
-    local plate = data.name
-    local p = nil
 
-    -- TriggerServerEvent('mdt:server:searchVehicles', name, GetHashKey(name))
+    local p = promise.new()
 
-    local searchVehiclesPromise = function(data)
-        if p then return end
-        p = promise.new()
+    QBCore.Functions.TriggerCallback('mdt:server:SearchVehicles', function(result)
+        p:resolve(result)
+    end, data.name)
 
-        QBCore.Functions.TriggerCallback('mdt:server:SearchVehicles', function(result)
-            p:resolve(result)
-        end, data)
-
-        return Citizen.Await(p)
-    end
-
-    local result = searchVehiclesPromise(plate)
-
+    local result = Citizen.Await(p)
     for i=1, #result do
         local vehicle = result[i]
         local mods = json.decode(result[i].mods)
@@ -547,8 +529,8 @@ RegisterNUICallback("searchVehicles", function(data, cb)
         result[i]['colorName'] = Config.ColorNames[mods['color1']]
         result[i]['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehicle['vehicle']))
     end
+    cb(result)
 
-    return cb(result)
 end)
 
 RegisterNUICallback("getVehicleData", function(data, cb)

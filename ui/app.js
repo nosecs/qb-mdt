@@ -534,7 +534,7 @@ $(document).ready(() => {
         $(".associated-incidents-user-container").each(function (
           index
         ) {
-          var cid = Number($(this).data("id"));
+          var cid = $(this).data("id");
           var guilty = false;
           var warrant = false;
           var processed = false;
@@ -544,7 +544,7 @@ $(document).ready(() => {
           $(".associated-incidents-user-tags-holder")
             .children("div")
             .each(function (index) {
-              if (Number($(this).data("id")) == cid) {
+              if ($(this).data("id") == cid) {
                 if ($(this).hasClass("green-tag")) {
                   if ($(this).text() == "Guilty") {
                     guilty = true;
@@ -566,12 +566,10 @@ $(document).ready(() => {
             .children("div")
             .each(function (index) {
               if (
-                Number(
-                  $(".associated-incidents-user-holder")
+                  ( $(".associated-incidents-user-holder")
                     .children()
                     .eq(index)
-                    .data("id")
-                ) == cid
+                    .data("id") == cid )
               ) {
                 charges.push(
                   $(".associated-incidents-user-holder")
@@ -581,6 +579,8 @@ $(document).ready(() => {
                 );
               }
             });
+
+          console.log($(".associated-incidents-user-holder").children("div"))
 
           associated.push({
             Cid: $(this).data("id"),
@@ -603,6 +603,8 @@ $(document).ready(() => {
               .val(),
           });
         });
+
+        console.log(associated)
 
         $.post(
           `https://${GetParentResourceName()}/saveIncident`,
@@ -2483,6 +2485,7 @@ $(document).ready(() => {
       //if ($(".manage-bolos-editing-title").html() == 'You are currently creating a new BOLO') {
       //$(".manage-bolos-new").effect("shake", { times: 2, distance: 2 }, 500)
       //} else {
+      let template = "";
       if ($(".badge-logo").attr("src") == "img/ems_badge.png") {
         template =
           "Submitted to ICU?: [Yes/No]\n\nIncident Report:\n[ Brief summary of what happened and who did what while on scene. Note anything that stood out about the scene as well as what was done to treat the patient ]\n\n\nList of Injuries:\n- [ State what injury or injuries occurred ]\n\n\n💉 Surgical Report:\n[ Full report on what was done in surgery, list any complications or anything that was found while in operation. Note who was attending and what they did during the surgery. At the end of the report be sure to note the state of the patient after ]\n\n\nAttending:\n- [ List Any Attending Here ]\n\n\nMedications Applied:\n- [ List Any Attending Here ]\n\n\nNotes:\n[ Additional Notes Here ]";
@@ -4448,6 +4451,7 @@ $(document).ready(() => {
         $(".fine-amount")
           .filter("[data-id='" + value.cid + "']")
           .val(value.fine);
+
         $(".sentence-amount")
           .filter("[data-id='" + value.cid + "']")
           .val(value.sentence);
@@ -4455,6 +4459,7 @@ $(document).ready(() => {
         $(".fine-recommended-amount")
           .filter("[data-id='" + value.cid + "']")
           .val(value.recfine);
+          
         $(".sentence-recommended-amount")
           .filter("[data-id='" + value.cid + "']")
           .val(value.recsentence);

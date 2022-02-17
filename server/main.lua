@@ -68,7 +68,7 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 	local JobName = PlayerData.job.name
 
 	if Config.PoliceJobs[JobName] then
-		local people = MySQL.query.await("SELECT * FROM `players` WHERE LOWER(`charinfo`) LIKE :query OR LOWER(`metadata`) LIKE :query LIMIT 20", { query = string.lower('%'..sentData..'%') })
+		local people = MySQL.query.await("SELECT * FROM `players` WHERE LOWER(`charinfo`) LIKE :query OR LOWER(`citizenid`) LIKE :query LIMIT 20", { query = string.lower('%'..sentData..'%') })
 		local citizenIds = {}
 		local citizenIdIndexMap = {}
 		if not next(people) then cb({}) return end

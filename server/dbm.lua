@@ -74,9 +74,9 @@ function GetPlayerDataById(id)
 end
 
 -- Probs also best not to use
-function GetImpoundStatus(vehicleid, cb)
+--[[ function GetImpoundStatus(vehicleid, cb)
 	cb( #(exports.oxmysql:executeSync('SELECT id FROM `impound` WHERE `vehicleid`=:vehicleid', {['vehicleid'] = vehicleid })) > 0 )
-end
+end ]]
 
 function GetBoloStatus(plate)
 	local result = MySQL.scalar.await('SELECT id FROM `mdt_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)})
@@ -91,7 +91,8 @@ function GetOwnerName(cid)
 end
 
 function GetVehicleInformation(plate, cb)
-	cb(exports.oxmysql:executeSync('SELECT id, information FROM `mdt_vehicleinfo` WHERE plate=:plate', { plate = plate}))
+    local result = MySQL.query.await('SELECT id, information FROM `mdt_vehicleinfo` WHERE plate=:plate', { plate = plate})
+	cb(result)
 end
 
 function GetPlayerLicenses(identifier)

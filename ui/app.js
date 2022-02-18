@@ -935,88 +935,7 @@ $(document).ready(() => {
           })
         );
 
-        canSearchForProfiles = true;
-        $(".profile-items").empty();
-
-        if (result.length < 1) {
-          $(".profile-items").html(
-            `
-                            <div class="profile-item" data-id="0">
-
-                                <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                                <div style="display: flex; flex-direction: column;">
-                                    <div class="profile-item-title">No Users Matching that search</div>
-                                    </div>
-                                    <div class="profile-bottom-info">
-                                    </div>
-                                </div>
-                            </div>
-                    `
-          );
-          return true;
-        }
-
-        let profileHTML = "";
-
-        result.forEach((value) => {
-          let charinfo = value.charinfo;
-          let metadata = value.licences;
-
-          if (typeof value.charinfo == "string") {
-            charinfo = JSON.parse(charinfo);
-          }
-
-          if (typeof value.metadata == "string") {
-            metadata = JSON.parse(metadata);
-          }
-
-          let name = charinfo.firstname + " " + charinfo.lastname;
-          let warrant = "red-tag";
-          let convictions = "red-tag";
-
-          let licences = "";
-          let licArr = Object.entries(value.licences);
-
-          if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
-            for (const [lic, hasLic] of licArr) {
-              let tagColour =
-                hasLic == true ? "green-tag" : "red-tag";
-              licences += `<span class="license-tag ${tagColour}">${titleCase(lic)}</span>`;
-            }
-          }
-
-          if (value.warrant == true) {
-            warrant = "green-tag";
-          }
-
-          if (value.convictions < 5) {
-            convictions = "green-tag";
-          } else if (
-            value.convictions > 4 &&
-            value.convictions < 15
-          ) {
-            convictions = "orange-tag";
-          }
-
-          profileHTML += `
-                        <div class="profile-item" data-id="${value.citizenid}">
-                            <img src="${value.pp}" class="profile-image">
-                            <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                            <div style="display: flex; flex-direction: column;">
-                                <div class="profile-item-title">${name}</div>
-                                    <div class="profile-tags">
-                                        ${licences}
-                                    </div>
-                                </div>
-                                <div class="profile-bottom-info">
-                                    <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
-                                </div>
-                            </div>
-                        </div>
-                    `;
-        });
-
-        $(".profile-items").html(profileHTML);
+        searchProfilesResults(result);
       }
     }
   });
@@ -1094,88 +1013,7 @@ $(document).ready(() => {
         })
       );
 
-      canSearchForProfiles = true;
-      $(".profile-items").empty();
-
-      if (result.length < 1) {
-        $(".profile-items").html(
-          `
-                          <div class="profile-item" data-id="0">
-
-                              <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                              <div style="display: flex; flex-direction: column;">
-                                  <div class="profile-item-title">No Users Matching that search</div>
-                                  </div>
-                                  <div class="profile-bottom-info">
-                                  </div>
-                              </div>
-                          </div>
-                  `
-        );
-        return true;
-      }
-
-      let profileHTML = "";
-
-      result.forEach((value) => {
-        let charinfo = value.charinfo;
-        let metadata = value.metadata;
-
-        if (typeof value.charinfo == "string") {
-          charinfo = JSON.parse(charinfo);
-        }
-
-        if (typeof value.metadata == "string") {
-          metadata = JSON.parse(metadata);
-        }
-
-        let name = charinfo.firstname + " " + charinfo.lastname;
-        let warrant = "red-tag";
-        let convictions = "red-tag";
-
-        let licences = "";
-        let licArr = Object.entries(metadata.licences);
-
-        if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
-          for (const [lic, hasLic] of licArr) {
-            let tagColour =
-              hasLic == true ? "green-tag" : "red-tag";
-            licences += `<span class="license-tag ${tagColour}">${lic}</span>`;
-          }
-        }
-
-        if (value.warrant == true) {
-          warrant = "green-tag";
-        }
-
-        if (value.convictions < 5) {
-          convictions = "green-tag";
-        } else if (
-          value.convictions > 4 &&
-          value.convictions < 15
-        ) {
-          convictions = "orange-tag";
-        }
-
-        profileHTML += `
-                      <div class="profile-item" data-id="${value.citizenid}">
-                          <img src="${value.pp}" class="profile-image">
-                          <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                          <div style="display: flex; flex-direction: column;">
-                              <div class="profile-item-title">${name}</div>
-                                  <div class="profile-tags">
-                                      ${licences}
-                                  </div>
-                              </div>
-                              <div class="profile-bottom-info">
-                                  <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
-                              </div>
-                          </div>
-                      </div>
-                  `;
-      });
-
-      $(".profile-items").html(profileHTML);
+      searchProfilesResults(result);
     }
   );
   document.onkeyup = function (data) {
@@ -3152,88 +2990,7 @@ $(document).ready(() => {
       })
     );
 
-    canSearchForProfiles = true;
-    $(".profile-items").empty();
-
-    if (result.length < 1) {
-      $(".profile-items").html(
-        `
-                        <div class="profile-item" data-id="0">
-
-                            <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                            <div style="display: flex; flex-direction: column;">
-                                <div class="profile-item-title">No Users Matching that search</div>
-                                </div>
-                                <div class="profile-bottom-info">
-                                </div>
-                            </div>
-                        </div>
-                `
-      );
-      return true;
-    }
-
-    let profileHTML = "";
-
-    result.forEach((value) => {
-      let charinfo = value.charinfo;
-      let metadata = value.metadata;
-
-      if (typeof value.charinfo == "string") {
-        charinfo = JSON.parse(charinfo);
-      }
-
-      if (typeof value.metadata == "string") {
-        metadata = JSON.parse(metadata);
-      }
-
-      let name = charinfo.firstname + " " + charinfo.lastname;
-      let warrant = "red-tag";
-      let convictions = "red-tag";
-
-      let licences = "";
-      let licArr = Object.entries(metadata.licences);
-
-      if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
-        for (const [lic, hasLic] of licArr) {
-          let tagColour =
-            hasLic == true ? "green-tag" : "red-tag";
-          licences += `<span class="license-tag ${tagColour}">${lic}</span>`;
-        }
-      }
-
-      if (value.warrant == true) {
-        warrant = "green-tag";
-      }
-
-      if (value.convictions < 5) {
-        convictions = "green-tag";
-      } else if (
-        value.convictions > 4 &&
-        value.convictions < 15
-      ) {
-        convictions = "orange-tag";
-      }
-
-      profileHTML += `
-                    <div class="profile-item" data-id="${value.citizenid}">
-                        <img src="${value.pp}" class="profile-image">
-                        <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                        <div style="display: flex; flex-direction: column;">
-                            <div class="profile-item-title">${name}</div>
-                                <div class="profile-tags">
-                                    ${licences}
-                                </div>
-                            </div>
-                            <div class="profile-bottom-info">
-                                <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
-                            </div>
-                        </div>
-                    </div>
-                `;
-    });
-
-    $(".profile-items").html(profileHTML);
+    searchProfilesResults(result);
   });
 
   $(".contextmenu").on("click", ".view-incident", function () {
@@ -5116,6 +4873,91 @@ function titleCase(str) {
     .split(' ')
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
+}
+
+function searchProfilesResults(result) {
+  canSearchForProfiles = true;
+  $(".profile-items").empty();
+
+  if (result.length < 1) {
+    $(".profile-items").html(
+      `
+                      <div class="profile-item" data-id="0">
+
+                          <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                          <div style="display: flex; flex-direction: column;">
+                              <div class="profile-item-title">No Users Matching that search</div>
+                              </div>
+                              <div class="profile-bottom-info">
+                              </div>
+                          </div>
+                      </div>
+              `
+    );
+    return true;
+  }
+
+  let profileHTML = "";
+
+  result.forEach((value) => {
+    let charinfo = value.charinfo;
+    let metadata = value.licences;
+
+    if (typeof value.charinfo == "string") {
+      charinfo = JSON.parse(charinfo);
+    }
+
+    if (typeof value.metadata == "string") {
+      metadata = JSON.parse(metadata);
+    }
+
+    let name = charinfo.firstname + " " + charinfo.lastname;
+    let warrant = "red-tag";
+    let convictions = "red-tag";
+
+    let licences = "";
+    let licArr = Object.entries(value.licences);
+
+    if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
+      for (const [lic, hasLic] of licArr) {
+        let tagColour =
+          hasLic == true ? "green-tag" : "red-tag";
+        licences += `<span class="license-tag ${tagColour}">${titleCase(lic)}</span>`;
+      }
+    }
+
+    if (value.warrant == true) {
+      warrant = "green-tag";
+    }
+
+    if (value.convictions < 5) {
+      convictions = "green-tag";
+    } else if (
+      value.convictions > 4 &&
+      value.convictions < 15
+    ) {
+      convictions = "orange-tag";
+    }
+
+    profileHTML += `
+                  <div class="profile-item" data-id="${value.citizenid}">
+                      <img src="${value.pp}" class="profile-image">
+                      <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                      <div style="display: flex; flex-direction: column;">
+                          <div class="profile-item-title">${name}</div>
+                              <div class="profile-tags">
+                                  ${licences}
+                              </div>
+                          </div>
+                          <div class="profile-bottom-info">
+                              <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
+                          </div>
+                      </div>
+                  </div>
+              `;
+  });
+
+  $(".profile-items").html(profileHTML);
 }
 
 window.addEventListener("load", function () {

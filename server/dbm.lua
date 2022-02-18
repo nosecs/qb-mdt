@@ -94,22 +94,6 @@ function GetVehicleInformation(plate, cb)
 	cb(exports.oxmysql:executeSync('SELECT id, information FROM `mdt_vehicleinfo` WHERE plate=:plate', { plate = plate}))
 end
 
-function GetTags(identifier)
-    local response = false
-    local Player = QBCore.Functions.GetPlayerByCitizenId(identifier)
-    if Player ~= nil then
-        return Player.PlayerData.metadata.licences
-    --[[ else
-        local result = SQL('SELECT * FROM players WHERE citizenid = @identifier', {['@identifier'] = identifier})
-        if result[1] ~= nil then
-            local metadata = json.decode(result[1].metadata)
-            if metadata["licences"][type] ~= nil and metadata["licences"][type] then
-                return true
-            end
-        end ]]
-    end
-end
-
 function GetPlayerLicenses(identifier)
     local response = false
     local Player = QBCore.Functions.GetPlayerByCitizenId(identifier)

@@ -181,7 +181,7 @@ $(document).ready(() => {
 
     const { vehicles, tags, gallery, convictions, properties } = result
 
-    $(".licences-holder").empty();
+    $(".licenses-holder").empty();
     $(".tags-holder").empty();
     $(".vehs-holder").empty();
     $(".gallery-inner-container").empty();
@@ -202,7 +202,7 @@ $(document).ready(() => {
         for (const [lic, hasLic] of licenses) {
   
           let tagColour = hasLic == true ? "green-tag" : "red-tag";
-          licencesHTML += `<span class="license-tag ${tagColour} ${lic}" data-type="${lic}">${lic}</span>`;
+          licencesHTML += `<span class="license-tag ${tagColour} ${lic}" data-type="${lic}">${titleCase(lic)}</span>`;
         }
       if (vehicles && vehicles.length > 0) {
 
@@ -819,8 +819,8 @@ $(document).ready(() => {
     }
   );
 
-  $(".licences-holder").on("contextmenu", ".license-tag", function (e) {
-    const fuckyou = $(this).data("type");
+  $(".licenses-holder").on("contextmenu", ".license-tag", function (e) {
+    const status = $(this).data("type");
     let type = $(this).html();
 
     if (type == "Theory") {
@@ -848,7 +848,7 @@ $(document).ready(() => {
           icon: "fas fa-times",
           text: "Revoke License",
           info: info,
-          status: fuckyou,
+          status: status,
         },
       ]);
     } else if ($(this).hasClass("red-tag")) {
@@ -858,18 +858,19 @@ $(document).ready(() => {
           icon: "fas fa-check",
           text: "Give License",
           info: info,
-          status: fuckyou,
+          status: status,
         },
       ]);
     }
   });
 
   $(".contextmenu").on("click", ".revoke-licence", function () {
+    console.log($(this).data("status"))
     $.post(
       `https://${GetParentResourceName()}/updateLicence`,
       JSON.stringify({
         cid: $(".manage-profile-citizenid-input").val(),
-        type: $(this).data("info"),
+        type: $(this).data("status"),
         status: "revoke",
       })
     );
@@ -884,11 +885,12 @@ $(document).ready(() => {
   });
 
   $(".contextmenu").on("click", ".give-licence", function () {
+    console.log($(this).data("status"))
     $.post(
       `https://${GetParentResourceName()}/updateLicence`,
       JSON.stringify({
         cid: $(".manage-profile-citizenid-input").val(),
-        type: $(this).data("info"),
+        type: $(this).data("status"),
         status: "give",
       })
     );
@@ -958,7 +960,7 @@ $(document).ready(() => {
 
         result.forEach((value) => {
           let charinfo = value.charinfo;
-          let metadata = value.metadata;
+          let metadata = value.licences;
 
           if (typeof value.charinfo == "string") {
             charinfo = JSON.parse(charinfo);
@@ -973,13 +975,13 @@ $(document).ready(() => {
           let convictions = "red-tag";
 
           let licences = "";
-          let licArr = Object.entries(metadata.licences);
+          let licArr = Object.entries(value.licences);
 
           if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
             for (const [lic, hasLic] of licArr) {
               let tagColour =
                 hasLic == true ? "green-tag" : "red-tag";
-              licences += `<span class="license-tag ${tagColour}">${lic}</span>`;
+              licences += `<span class="license-tag ${tagColour}">${titleCase(lic)}</span>`;
             }
           }
 
@@ -5107,6 +5109,13 @@ function hideIcidentsMenu() {
 function onMouseDownIcidents(e) {
   hideIcidentsMenu();
   document.removeEventListener("mouseup", onMouseDownIcidents);
+}
+
+function titleCase(str) {
+  return str
+    .split(' ')
+    .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 
 window.addEventListener("load", function () {

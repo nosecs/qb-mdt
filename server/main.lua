@@ -68,7 +68,7 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 	if Player then
 		local JobType = GetJobType(Player.PlayerData.job.name)
 		if JobType == 'police' then
-			local people = MySQL.query.await("SELECT p.*, md.pfp FROM players p LEFT JOIN mdt_data md on p.citizenid = md.cid WHERE LOWER(`charinfo`) LIKE :query OR LOWER(`citizenid`) LIKE :query AND jobtype = :jobtype LIMIT 20", { query = string.lower('%'..sentData..'%'), jobtype = JobType })
+			local people = MySQL.query.await("SELECT p.citizenid, p.charinfo, md.pfp FROM players p LEFT JOIN mdt_data md on p.citizenid = md.cid WHERE LOWER(`charinfo`) LIKE :query OR LOWER(`citizenid`) LIKE :query AND jobtype = :jobtype LIMIT 20", { query = string.lower('%'..sentData..'%'), jobtype = JobType })
 			local citizenIds = {}
 			local citizenIdIndexMap = {}
 			if not next(people) then cb({}) return end
@@ -76,6 +76,7 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 			for index, data in pairs(people) do
 				people[index]['warrant'] = false
 				people[index]['convictions'] = 0
+				people[index]['licences'] = GetPlayerLicenses(data.citizenid)
 				people[index]['pp'] = ProfPic(data.gender, data.pfp)
 				citizenIds[#citizenIds+1] = data.citizenid
 				citizenIdIndexMap[data.citizenid] = index
@@ -91,8 +92,8 @@ QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb,
 					people[citizenIdIndexMap[conv.cid]].convictions = people[citizenIdIndexMap[conv.cid]].convictions + #charges
 				end
 			end
+			
 
-			-- idk if this works or I have to call cb first then return :shrug:
 			return cb(people)
 		end
 	end
@@ -104,7 +105,6 @@ QBCore.Functions.CreateCallback("mdt:server:getWarrants", function(source, cb)
     local WarrantData = {}
     local data = MySQL.query.await("SELECT * FROM mdt_convictions", {})
     for _, value in pairs(data) do
-        print(value.warrant)
         if value.warrant == "1" then
             table.insert(WarrantData, {
                 cid = value.cid,
@@ -409,17 +409,13 @@ RegisterNetEvent("mdt:server:removeProfileTag", function(cid, tagtext)
 end)
 
 RegisterNetEvent("mdt:server:updateLicense", function(cid, type, status)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or (result.job.name == 'doj' and result.job.grade == 11)) then
-				if status == 'give' then
-					TriggerEvent('erp-license:addLicense', type, cid)
-				elseif status == 'revoke' then
-					TriggerEvent('erp-license:removeLicense', type, cid)
-				end
-			end
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			ManageLicense(cid, type, status)
 		end
-	end)
+	end
 end)
 
 RegisterNetEvent("mdt:server:addGalleryImg", function(cid, img)

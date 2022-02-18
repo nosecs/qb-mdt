@@ -104,3 +104,40 @@ function GetTags(identifier)
         end ]]
     end
 end
+
+function GetPlayerLicenses(identifier)
+    local response = false
+    local Player = QBCore.Functions.GetPlayerByCitizenId(identifier)
+    if Player ~= nil then
+        return Player.PlayerData.metadata.licences
+    else
+        local result = MySQL.query.await('SELECT metadata FROM players WHERE citizenid = @identifier', {['@identifier'] = identifier})
+        if result[1] ~= nil then
+            local metadata = json.decode(result[1])
+            if metadata["licences"] ~= nil and metadata["licences"] then
+                return true
+            end
+        end
+    end
+end
+
+function ManageLicense(identifier, type, status)
+    local Player = QBCore.Functions.GetPlayerByCitizenId(identifier)
+    local licenseStatus = nil
+    if status == "give" then licenseStatus = true elseif status == "revoke" then licenseStatus = false end
+    if Player ~= nil then
+        local licences = Player.PlayerData.metadata["licences"]
+        local newLicenses = {}
+        for k, v in pairs(licences) do
+            local status = v
+            if k == type then
+                status = licenseStatus
+            end
+            newLicenses[k] = status
+        end
+        Player.Functions.SetMetaData("licences", newLicenses)
+    else
+        local licenseType = '$.licences.'..type
+        local result = MySQL.query.await('UPDATE `players` SET `metadata` = JSON_REPLACE(`metadata`, ?, ?) WHERE `citizenid` = ?', {licenseType, licenseStatus, identifier}) --seems to not work on older MYSQL versions, think about alternative
+    end
+end

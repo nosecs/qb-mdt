@@ -25,11 +25,6 @@ AddEventHandler("onResourceStart", function(resourceName)
     end
 end)
 
-CreateThread(function()
-	Wait(1800000)
-	dispatchMessages = {}
-end)
-
 local function openMDT(src)
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(src, PlayerData) then return end

@@ -376,7 +376,11 @@ end)
 
 
 RegisterNUICallback('SetHouseLocation', function(data, cb)
-    SetNewWaypoint(data.coord[1], data.coord[2])
+    local coords = {}
+    for word in data.coord[1]:gmatch('[^,%s]+') do
+        coords[#coords+1] = tonumber(word)
+    end
+    SetNewWaypoint(coords[1], coords[2])
     QBCore.Functions.Notify('GPS has been set!', 'success')
 end)
 

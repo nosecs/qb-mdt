@@ -74,9 +74,9 @@ function GetPlayerDataById(id)
 end
 
 -- Probs also best not to use
-function GetImpoundStatus(vehicleid, cb)
+--[[ function GetImpoundStatus(vehicleid, cb)
 	cb( #(exports.oxmysql:executeSync('SELECT id FROM `impound` WHERE `vehicleid`=:vehicleid', {['vehicleid'] = vehicleid })) > 0 )
-end
+end ]]
 
 function GetBoloStatus(plate)
 	local result = MySQL.scalar.await('SELECT id FROM `mdt_bolos` WHERE LOWER(`plate`)=:plate', { plate = string.lower(plate)})
@@ -91,21 +91,43 @@ function GetOwnerName(cid)
 end
 
 function GetVehicleInformation(plate, cb)
-	cb(exports.oxmysql:executeSync('SELECT id, information FROM `mdt_vehicleinfo` WHERE plate=:plate', { plate = plate}))
+    local result = MySQL.query.await('SELECT id, information FROM `mdt_vehicleinfo` WHERE plate=:plate', { plate = plate})
+	cb(result)
 end
 
-function GetTags(identifier)
+function GetPlayerLicenses(identifier)
     local response = false
     local Player = QBCore.Functions.GetPlayerByCitizenId(identifier)
     if Player ~= nil then
         return Player.PlayerData.metadata.licences
-    --[[ else
-        local result = SQL('SELECT * FROM players WHERE citizenid = @identifier', {['@identifier'] = identifier})
+    else
+        local result = MySQL.query.await('SELECT metadata FROM players WHERE citizenid = @identifier', {['@identifier'] = identifier})
         if result[1] ~= nil then
-            local metadata = json.decode(result[1].metadata)
-            if metadata["licences"][type] ~= nil and metadata["licences"][type] then
+            local metadata = json.decode(result[1])
+            if metadata["licences"] ~= nil and metadata["licences"] then
                 return true
             end
-        end ]]
+        end
+    end
+end
+
+function ManageLicense(identifier, type, status)
+    local Player = QBCore.Functions.GetPlayerByCitizenId(identifier)
+    local licenseStatus = nil
+    if status == "give" then licenseStatus = true elseif status == "revoke" then licenseStatus = false end
+    if Player ~= nil then
+        local licences = Player.PlayerData.metadata["licences"]
+        local newLicenses = {}
+        for k, v in pairs(licences) do
+            local status = v
+            if k == type then
+                status = licenseStatus
+            end
+            newLicenses[k] = status
+        end
+        Player.Functions.SetMetaData("licences", newLicenses)
+    else
+        local licenseType = '$.licences.'..type
+        local result = MySQL.query.await('UPDATE `players` SET `metadata` = JSON_REPLACE(`metadata`, ?, ?) WHERE `citizenid` = ?', {licenseType, licenseStatus, identifier}) --seems to not work on older MYSQL versions, think about alternative
     end
 end

@@ -243,7 +243,6 @@ RegisterNetEvent('mdt:client:searchProfile', function(sentData, isLimited)
 end)
 
 RegisterNUICallback("saveProfile", function(data, cb)
-    print(json.encode(data))
     local profilepic = data.pfp
     local information = data.description
     local cid = data.id

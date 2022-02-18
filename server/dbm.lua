@@ -101,11 +101,11 @@ function GetPlayerLicenses(identifier)
     if Player ~= nil then
         return Player.PlayerData.metadata.licences
     else
-        local result = MySQL.query.await('SELECT metadata FROM players WHERE citizenid = @identifier', {['@identifier'] = identifier})
-        if result[1] ~= nil then
-            local metadata = json.decode(result[1])
+        local result = MySQL.scalar.await('SELECT metadata FROM players WHERE citizenid = @identifier', {['@identifier'] = identifier})
+        if result ~= nil then
+            local metadata = json.decode(result)
             if metadata["licences"] ~= nil and metadata["licences"] then
-                return true
+                return metadata["licences"]
             end
         end
     end

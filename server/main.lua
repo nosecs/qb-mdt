@@ -209,12 +209,27 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		if vehicles then
 			person.vehicles = vehicles
 		end
-
-		-- local properties=GetPlayerProperties(person.cid)
+		local Coords = {}
+		local Houses = {}
+		local properties= GetPlayerProperties(person.cid)
+		for k, v in pairs(properties) do
+			print("twice", v.label, json.decode(v["coords"]))
+			table.insert(Coords, {
+                coords = json.decode(v["coords"]),
+            })
+		end
+		print("number of coords", #Coords)
+		for index = 1, #Coords, 1 do
+            table.insert(Houses, {
+                label = properties[index]["label"],
+                coords = tostring(Coords[index]["coords"]["enter"]["x"]..",".. Coords[index]["coords"]["enter"]["y"].. ",".. Coords[index]["coords"]["enter"]["z"]),
+            })
+        end
+		print(Houses, json.encode(Houses), Houses.label)
 		-- if properties then
-		-- 	person.properties = properties
+			person.properties = Houses
 		-- end
-	end
+	end 
 
 	local mdtData = GetPersonInformation(sentId, JobType)
 	if mdtData then
@@ -1070,14 +1085,14 @@ RegisterNetEvent('mdt:server:getAllLogs', function()
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	if Player then
-		if Config.LogPerms[Player.PlayerData.job.name] then
-			if Config.LogPerms[Player.PlayerData.job.name][Player.PlayerData.job.grade.level] then
+		-- if Config.LogPerms[Player.PlayerData.job.name] then
+		-- 	if Config.LogPerms[Player.PlayerData.job.name][Player.PlayerData.job.grade.level] then
 				local JobType = GetJobType(Player.PlayerData.job.name)
 				exports.oxmysql:execute('SELECT * FROM mdt_logs WHERE `jobtype` = :jobtype ORDER BY `id` DESC LIMIT 250', {jobtype = JobType}, function(infoResult)
 					TriggerLatentClientEvent('mdt:client:getAllLogs', src, 30000, infoResult)
 				end)
-			end
-		end
+		-- 	end
+		-- end
 	end
 end)
 

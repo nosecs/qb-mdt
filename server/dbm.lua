@@ -56,6 +56,11 @@ function GetBulletins(JobType)
 	-- return exports.oxmysql:executeSync('SELECT * FROM `mdt_bulletin` WHERE `type`= ? LIMIT 10', { JobType })
 end
 
+function GetPlayerProperties(cid, cb)
+	local result =  MySQL.query.await('SELECT houselocations.label, houselocations.coords FROM player_houses INNER JOIN houselocations ON player_houses.house = houselocations.name where player_houses.citizenid = ?', {cid})
+	return result
+end
+
 function GetPlayerDataById(id)
     local Player = QBCore.Functions.GetPlayerByCitizenId(id)
     if Player ~= nil then

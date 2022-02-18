@@ -220,7 +220,7 @@ $(document).ready(() => {
       if (properties && properties.length > 0) {
         propertyHTML = '';
         properties.forEach(value => {
-          propertyHTML += `<div class="white-tag" data-location="${value.coords.x}===${value.coords.y}">${value.label} </div>`;
+          propertyHTML += `<div class="white-tag" data-location="${value.coords}">${value.label} </div>`;
         })
       }
     }

@@ -3597,7 +3597,7 @@ $(document).ready(() => {
         );
         $(".badge-logo").attr("src", "img/sasp_badge.png");
         $(".header-title").html("SAN ANDREAS STATE POLICE");
-        $(".bolo-nav-item").html("BOLOs");
+        $(".bolo-nav-item").html("<p class='fas fa-house-user nav-icon'></p><h4>Warrants</h4>");
         $(".bolos-search-title").html("Bolos");
         $("#bolos-search-input").attr("placeholder", "Search Bolo...");
         $(".manage-bolos-title").html("Manage Bolo");
@@ -3682,7 +3682,7 @@ $(document).ready(() => {
         $(".quote-span").html(
           "The simplest explanation is almost always somebody screwed up."
         );
-        $(".bolo-nav-item").html("ICU");
+        $(".bolo-nav-item").html("<p class='fas fa-house-user nav-icon'></p><h4>ICU</h4>");
         $(".bolos-search-title").html("ICU Check-ins");
         $("#bolos-search-input").attr(
           "placeholder",

@@ -212,7 +212,7 @@ input::-webkit-inner-spin-button {
     height: 79.5%;
     position: absolute;
     display: grid;
-    grid-auto-flow: column;
+    grid-template-columns: 10vh 1fr 1fr 1fr;
     grid-gap: 1vh;
     bottom: 0;
 }
@@ -264,8 +264,8 @@ input::-webkit-inner-spin-button {
     border: 2px solid var(--color-3);
     display: flex;
     flex-direction: column;
-    height: 74.7vh;
-    width: 63.5vh;
+    width: auto;
+    margin-top: var(--small-margin);
     /* margin-top: 1vh;
     margin-left: 1vh; */
 }
@@ -356,10 +356,9 @@ input::-webkit-inner-spin-button {
 
 .quotes-container {
     background-color: var(--color-1);
-    width: 50vh;
+    width: auto;
     height: 8rem;
-    margin-top: 1vh;
-    margin-left: 1vh;
+    margin-bottom: var(--small-margin);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -389,14 +388,10 @@ input::-webkit-inner-spin-button {
 
 .bulletin-container {
     background-color: var(--color-1);
-    border: 2px solid var(--color-3);
     display: flex;
     flex-direction: column;
     height: 100%;
-    width: 50vh;
-     margin-top: 10px;
-    margin-bottom: 8px;
-    margin-left: 10px;
+    margin-bottom: var(--small-margin);
     user-select: none;
     overflow: hidden;
 }
@@ -3561,11 +3556,11 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
 }
 
 #home-reports-container {
-    height: 50%;
+    height: -webkit-fill-available;
 }
 
 #home-warrants-container {
-    height: 50%;
+    height: -webkit-fill-available;
 }
 
 .dispatch-comms-container {

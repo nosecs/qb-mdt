@@ -256,9 +256,9 @@ input::-webkit-inner-spin-button {
     display: flex;
     flex-direction: column;
     height: 74.7vh;
-    width: 50vh;
-    margin-top: 10px;
-    margin-left: 10px;
+    width: 63.5vh;
+    margin-top: 1vh;
+    margin-left: 1vh;
 }
 
 .warrants-title {
@@ -3576,9 +3576,9 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
     display: flex;
     flex-direction: column;
     height: 45.5%;
-    width: 50vh;
+    width: 63.5vh;
     margin-top: 1vh;
-    margin-left: 10px;
+    margin-left: 1vh;
 }
 
 .reports-title {

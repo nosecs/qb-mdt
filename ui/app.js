@@ -3563,6 +3563,14 @@ $(document).ready(() => {
           "--color-8",
           "#2554cc"
         );
+        document.documentElement.style.setProperty(
+          "--color-9",
+          "#6E707C"
+        );
+        document.documentElement.style.setProperty(
+          "--color-10",
+          "#8f741b"
+        );
         $(".badge-logo").attr("src", "img/sasp_badge.png");
         $(".header-title").html("SAN ANDREAS STATE POLICE");
         $(".bolo-nav-item").html("BOLOs");

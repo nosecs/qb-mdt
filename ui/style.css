@@ -220,7 +220,7 @@ input::-webkit-inner-spin-button {
 
 .nav-menu {
     background-color: var(--color-1);
-    border-right: 5px solid var(--color-3);
+    /* border-right: 5px solid var(--color-3); */
     min-width: 9vh;
     height: 100%;
     display: flex;

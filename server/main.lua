@@ -138,15 +138,15 @@ RegisterNetEvent('mdt:server:NewBulletin', function(title, info, time)
 	TriggerClientEvent('mdt:client:newBulletin', -1, src, {id = newBulletin, title = title, info = info, time = time, author = PlayerData.CitizenId}, JobType)
 end)
 
-RegisterNetEvent('mdt:server:deleteBulletin', function(id)
+RegisterNetEvent('mdt:server:deleteBulletin', function(id, title)
 	if not id then return false end
 	local src = source
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(src, PlayerData) then return end
 	local JobType = GetJobType(PlayerData.job.name)
 
-	local deletion = MySQL.query.await('DELETE FROM `mdt_bulletin` where id = ?', {id})
-	AddLog("Bulletin "..id.." was deleted by " .. GetNameFromPlayerData(PlayerData) .. ".")
+	local deletion = MySQL.query.await('DELETE FROM `mdt_bulletin` where title = ?', {title})
+	AddLog("Bulletin with Title: "..title.." was deleted by " .. GetNameFromPlayerData(PlayerData) .. ".")
 end)
 
 QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb, sentId)

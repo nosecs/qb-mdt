@@ -325,24 +325,26 @@ $(document).ready(() => {
           icon: "fas fa-times",
           text: "Remove Item",
           info: $(this).data("id"),
-          status: "",
+          status: $(this).data("title"),
         },
       ];
       openContextMenu(e, args);
     }
   );
   $(".contextmenu").on("click", ".remove-bulletin", function () {
-    let BulletinId = $(this).data("info");
+    let id = $(this).data("info");
+    let title = $(this).data("status")
     $(".bulletin-items-continer")
-      .find("[data-id='" + BulletinId + "']")
+      .find("[data-id='" + id + "']")
       .remove();
     $.post(
       `https://${GetParentResourceName()}/deleteBulletin`,
       JSON.stringify({
-        id: BulletinId,
+        id: id,
+        title: title
       })
     );
-    if (canCreateBulletin == BulletinId) {
+    if (canCreateBulletin == id) {
       canCreateBulletin = 0;
     }
     if ($(".bulletin-add-btn").hasClass("fa-minus")) {
@@ -3810,7 +3812,7 @@ $(document).ready(() => {
       $.each(eventData.bulletin, function (index, value) {
         $(
           ".bulletin-items-continer"
-        ).prepend(`<div class="bulletin-item" data-id=${value.id}>
+        ).prepend(`<div class="bulletin-item" data-id=${value.id} data-title=${value.title}>
                 <div class="bulletin-item-title">${value.title}</div>
                 <div class="bulletin-item-info">${value.desc}</div>
                 <div class="bulletin-bottom-info">

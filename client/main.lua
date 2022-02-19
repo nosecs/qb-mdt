@@ -251,8 +251,9 @@ RegisterNUICallback("saveProfile", function(data, cb)
     local tags = data.tags
     local gallery = data.gallery
     local fingerprint = data.fingerprint
-    print(cid, fName, sName, tags, gallery, fingerprint)
-    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery, fingerprint)
+    local licenses = data.licenses
+    print(json.encode(data.licenses))
+    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery, fingerprint, licenses)
     cb(true)
 end)
 

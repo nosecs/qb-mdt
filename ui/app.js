@@ -417,6 +417,7 @@ $(document).ready(() => {
       setTimeout(() => {
         let tags = new Array();
         let gallery = new Array();
+        let licenses = new Array();
         
         $(".tags-holder")
           .find("div")
@@ -444,7 +445,29 @@ $(document).ready(() => {
         let description = $(".manage-profile-info").val();
         let fingerprint = $(".manage-profile-fingerprint").val();
         let id = $(".manage-profile-citizenid-input").val();
-
+        
+        $(".licenses-holder")
+          .find("span")
+          .each(function(){
+            let test = $(this).attr('class')
+            if (test.includes('green-tag')){
+              licenses.push([$(this).data("type"), true])
+            }
+            else{
+              licenses.push([$(this).data("type"), false])
+            }
+            // licenses.push($(this).data("type"))
+            // console.log("test", $(this).data("type"));
+            // console.log("test2", $(this).attr('class'));
+          })
+        // console.log(JSON.stringify(test))
+      //   .find("div")
+      //   .each(function () {
+      //     console.log($(this).data("lic"));
+      //     // if ($(this).text() != "" && $(this).text() != "No Tags") {
+      //     //   tags.push($(this).text());
+      //     // }
+      // });
         const fName = $(".manage-profile-name-input-1").val();
         const sName = $(".manage-profile-name-input-2").val();
 
@@ -458,7 +481,8 @@ $(document).ready(() => {
             sName: sName,
             tags: tags,
             gallery: gallery,
-            fingerprint: fingerprint
+            fingerprint: fingerprint,
+            licenses:licenses
           })
         );
         $(".manage-profile-pic").attr("src", newpfp);
@@ -866,14 +890,14 @@ $(document).ready(() => {
 
   $(".contextmenu").on("click", ".revoke-licence", function () {
     console.log($(this).data("status"))
-    $.post(
-      `https://${GetParentResourceName()}/updateLicence`,
-      JSON.stringify({
-        cid: $(".manage-profile-citizenid-input").val(),
-        type: $(this).data("status"),
-        status: "revoke",
-      })
-    );
+    // $.post(
+    //   `https://${GetParentResourceName()}/updateLicence`,
+    //   JSON.stringify({
+    //     cid: $(".manage-profile-citizenid-input").val(),
+    //     type: $(this).data("status"),
+    //     status: "revoke",
+    //   })
+    // );
 
     const Elem = $(this).data("status");
     $(".license-tag")
@@ -886,14 +910,14 @@ $(document).ready(() => {
 
   $(".contextmenu").on("click", ".give-licence", function () {
     console.log($(this).data("status"))
-    $.post(
-      `https://${GetParentResourceName()}/updateLicence`,
-      JSON.stringify({
-        cid: $(".manage-profile-citizenid-input").val(),
-        type: $(this).data("status"),
-        status: "give",
-      })
-    );
+    // $.post(
+    //   `https://${GetParentResourceName()}/updateLicence`,
+    //   JSON.stringify({
+    //     cid: $(".manage-profile-citizenid-input").val(),
+    //     type: $(this).data("status"),
+    //     status: "give",
+    //   })
+    // );
 
     const Elem = $(this).data("status");
     $(".license-tag")

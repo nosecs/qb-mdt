@@ -131,3 +131,25 @@ function ManageLicense(identifier, type, status)
         local result = MySQL.query.await('UPDATE `players` SET `metadata` = JSON_REPLACE(`metadata`, ?, ?) WHERE `citizenid` = ?', {licenseType, licenseStatus, identifier}) --seems to not work on older MYSQL versions, think about alternative
     end
 end
+
+function TestSavingLicenses(identifier, licensestable)
+    print("Saving Licenses")
+    print(identifier, json.encode(licensestable[1]), licensestable[2])
+    local Player = QBCore.Functions.GetPlayerByCitizenId(identifier)
+    local c = {}
+    for k, v in pairs(licensestable) do
+        newLicenses[v[1]] = v[2]
+    end
+    print(json.encode(newLicenses))
+    if Player ~= nil then
+        Player.Functions.SetMetaData("licences", newLicenses)
+    else
+        for k, v in pairs(licensestable) do
+            local licenseType = '$.licences.'..v[1]
+            MySQL.query.await('UPDATE `players` SET `metadata` = JSON_REPLACE(`metadata`, ? , ?) WHERE `citizenid` = ?', {licenseType, v[2], identifier})
+        end
+        
+        -- MySQL.query.await('UPDATE `players` SET `metadata` = JSON_REPLACE(`metadata`, $.license , ?) WHERE `citizenid` = ?', {newLicenses, identifier})
+
+    end
+end

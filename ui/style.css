@@ -236,7 +236,8 @@ input::-webkit-inner-spin-button {
 }
 
 .nav-item h4 {
-    font-size: var(--text-normal);
+    font-size: var(--text-small);
+    margin: 0;
 }
 
 .active-nav {

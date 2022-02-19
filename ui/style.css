@@ -211,7 +211,9 @@ input::-webkit-inner-spin-button {
     width: 100%;
     height: 79.5%;
     position: absolute;
-    display: flex;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 1vh;
     bottom: 0;
 }
 
@@ -264,8 +266,8 @@ input::-webkit-inner-spin-button {
     flex-direction: column;
     height: 74.7vh;
     width: 63.5vh;
-    margin-top: 1vh;
-    margin-left: 1vh;
+    /* margin-top: 1vh;
+    margin-left: 1vh; */
 }
 
 .warrants-title {
@@ -354,38 +356,27 @@ input::-webkit-inner-spin-button {
 
 .quotes-container {
     background-color: var(--color-1);
-    border: 2px solid var(--color-3);
     width: 50vh;
-    height: 75px;
+    height: 8rem;
     margin-top: 1vh;
     margin-left: 1vh;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     user-select: none;
 }
 
 .quote-title {
-    font-size: 14px;
     background-color: var(--color-4);
-    padding: 5px;
-    margin: 10px 0px 10px 10px;
-    text-align: center;
     color: white;
-    font-weight: bolder;
-    width: 85px;
-    /* height: 30px; */
     text-shadow: black 1px 1px;
 }
 
 .quote {
-    margin-right: 10px;
-    margin-left: 10px;
-    /* margin-bottom: 25px; */
-    width: 100%;
+    width: -webkit-fill-available;
     background-color: var(--color-5);
-    height: 30px;
-    padding: 10px;
-    text-align: center;
+    padding: var(--medium-padding);
+    text-align: left;
     display: flex;
     font-style: italic;
 }
@@ -3584,8 +3575,8 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
     flex-direction: column;
     height: 45.5%;
     width: 63.5vh;
-    margin-top: 1vh;
-    margin-left: 1vh;
+    /* margin-top: 1vh;
+    margin-left: 1vh; */
 }
 
 .reports-title {

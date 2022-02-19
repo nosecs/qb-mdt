@@ -146,7 +146,7 @@ RegisterNetEvent('mdt:server:deleteBulletin', function(id)
 	local JobType = GetJobType(PlayerData.job.name)
 
 	local deletion = MySQL.query.await('DELETE FROM `mdt_bulletin` where id = ?', {id})
-	AddLog("A bulletin was deleted by " .. GetNameFromPlayerData(PlayerData) .. " with the title: ".. bulletin.title ..".")
+	AddLog("Bulletin "..id.." was deleted by " .. GetNameFromPlayerData(PlayerData) .. ".")
 end)
 
 QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb, sentId)

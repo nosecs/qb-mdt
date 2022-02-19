@@ -13,11 +13,26 @@
     --color-10: #8f741b;
 }
 
+:root {
+    --text-small: 1rem;
+    --text-normal: 1.5rem;
+    --text-large: 2rem;
+}
+
 body {
     font-family: 'Montserrat', sans-serif;
     overflow: hidden;
     display: none;
 }
+
+/****** TYPOGRAPHY ******/
+
+h1,h2,h3,h4,h5 {
+    font-weight: bold;
+}
+
+
+/****** TYPOGRAPHY ******/
 
 textarea {
     font-family: 'Montserrat', sans-serif;
@@ -205,20 +220,31 @@ input::-webkit-inner-spin-button {
 }
 
 .nav-item {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    place-content: center;
     background-color: var(--color-4);
     margin-top: 10px;
     padding: 10px;
     color: white;
-    font-size: 18px;
-    font-weight: bolder;
+    font-size: var(--text-normal);
 }
 
 .nav-item:hover {
     background-color: var(--color-3);
 }
 
+.nav-item h4 {
+    font-size: var(--text-normal);
+}
+
 .active-nav {
     background-color: var(--color-3);
+}
+
+.nav-icon { 
+    font-size: var(--text-large);
 }
 
 .warrants-container {

@@ -19,6 +19,13 @@
     --text-large: 2rem;
 }
 
+:root {
+    --small-margin: 1vh;
+    --medium-margin: 3vh;
+    --small-padding: 1vh;
+    --medium-padding: 3vh;
+}
+
 body {
     font-family: 'Montserrat', sans-serif;
     overflow: hidden;
@@ -350,8 +357,8 @@ input::-webkit-inner-spin-button {
     border: 2px solid var(--color-3);
     width: 50vh;
     height: 75px;
-    margin-top: 10px;
-    margin-left: 10px;
+    margin-top: 1vh;
+    margin-left: 1vh;
     display: flex;
     align-items: center;
     user-select: none;

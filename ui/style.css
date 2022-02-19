@@ -213,8 +213,9 @@ input::-webkit-inner-spin-button {
     position: absolute;
     display: grid;
     grid-template-columns: 10vh 1fr 1fr 1fr;
-    grid-gap: 1vh;
+    grid-gap: var(--small-margin);
     bottom: 0;
+    padding: var(--small-padding) var(--small-padding) var(--small-padding) 0;
 }
 
 .nav-menu {
@@ -496,14 +497,14 @@ span.bulletin-item-info[contenteditable]:empty::before {
 
 .dispatch-container {
     background-color: var(--color-1);
-    border: 2px solid var(--color-3);
+    /* border: 2px solid var(--color-3); */
     display: flex;
     flex-direction: column;
-    height: 74.7vh;
+    height: 100%;
     width: 50vh;
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-right: 15px;
+    /* margin-top: 10px;
+    margin-left: 10px;*/
+    /* margin-right: var(--small-margin);  */
 }
 
 .dispatch-title {

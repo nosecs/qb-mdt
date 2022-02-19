@@ -297,16 +297,16 @@ input::-webkit-inner-spin-button {
     flex-direction: column;
     overflow: auto;
     margin: auto;
-    margin-top: 10px;
+    margin-top: var(--small-margin);
     width: 95%;
-    height: 55vh;
+    height: auto;
 }
 
 .warrants-item {
     background-color: var(--color-5);
     width: 100%;
     margin: auto;
-    margin-bottom: 10px;
+    margin-bottom: var(--small-margin);
     margin-top: 0px;
     display: flex;
     user-select: none;
@@ -392,7 +392,6 @@ input::-webkit-inner-spin-button {
     display: flex;
     flex-direction: column;
     height: 100%;
-    margin-bottom: var(--small-margin);
     user-select: none;
     overflow: hidden;
 }
@@ -3570,7 +3569,7 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
     display: flex;
     flex-direction: column;
     height: 45.5%;
-    width: 63.5vh;
+    width: auto;
     /* margin-top: 1vh;
     margin-left: 1vh; */
 }

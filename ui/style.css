@@ -211,12 +211,12 @@ input::-webkit-inner-spin-button {
 .nav-menu {
     background-color: var(--color-1);
     border-right: 5px solid var(--color-3);
-    min-width: 22.5vh;
+    min-width: 9vh;
     height: 100%;
     display: flex;
     flex-direction: column;
     user-select: none;
-    border-bottom-left-radius: 15px;
+    /* border-bottom-left-radius: 15px; */
 }
 
 .nav-item {
@@ -246,6 +246,8 @@ input::-webkit-inner-spin-button {
 
 .nav-icon { 
     font-size: var(--text-large);
+    margin-bottom: 1rem;
+    margin-top: 0;
 }
 
 .warrants-container {

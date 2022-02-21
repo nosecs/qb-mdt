@@ -419,7 +419,7 @@ $(document).ready(() => {
       setTimeout(() => {
         let tags = new Array();
         let gallery = new Array();
-        let licenses = new Array();
+        let licenses = {};
         
         $(".tags-holder")
           .find("div")
@@ -449,27 +449,17 @@ $(document).ready(() => {
         let id = $(".manage-profile-citizenid-input").val();
         
         $(".licenses-holder")
-          .find("span")
-          .each(function(){
-            let test = $(this).attr('class')
-            if (test.includes('green-tag')){
-              licenses.push([$(this).data("type"), true])
-            }
-            else{
-              licenses.push([$(this).data("type"), false])
-            }
-            // licenses.push($(this).data("type"))
-            // console.log("test", $(this).data("type"));
-            // console.log("test2", $(this).attr('class'));
-          })
-        // console.log(JSON.stringify(test))
-      //   .find("div")
-      //   .each(function () {
-      //     console.log($(this).data("lic"));
-      //     // if ($(this).text() != "" && $(this).text() != "No Tags") {
-      //     //   tags.push($(this).text());
-      //     // }
-      // });
+        .find("span")
+        .each(function(){
+          let type = $(this).data("type")
+          if ($(this).attr('class').includes('green-tag')){
+            licenses[type] = true
+          }
+          else{
+            licenses[type] = false
+          }
+        })
+
         const fName = $(".manage-profile-name-input-1").val();
         const sName = $(".manage-profile-name-input-2").val();
 
@@ -484,7 +474,7 @@ $(document).ready(() => {
             tags: tags,
             gallery: gallery,
             fingerprint: fingerprint,
-            licenses:licenses
+            licenses: licenses
           })
         );
         $(".manage-profile-pic").attr("src", newpfp);
@@ -891,7 +881,6 @@ $(document).ready(() => {
   });
 
   $(".contextmenu").on("click", ".revoke-licence", function () {
-    console.log($(this).data("status"))
     // $.post(
     //   `https://${GetParentResourceName()}/updateLicence`,
     //   JSON.stringify({
@@ -911,7 +900,6 @@ $(document).ready(() => {
   });
 
   $(".contextmenu").on("click", ".give-licence", function () {
-    console.log($(this).data("status"))
     // $.post(
     //   `https://${GetParentResourceName()}/updateLicence`,
     //   JSON.stringify({
@@ -4736,7 +4724,6 @@ $(document).ready(() => {
         let radio = unit.radio ? unit.radio : "0";
         let callSign = unit.callSign ? unit.callSign : "000";
         let activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
-        console.log(unit.unitType)
         if (unit.duty == 1) {
           if (unit.unitType == "police") {
             policeCount++;

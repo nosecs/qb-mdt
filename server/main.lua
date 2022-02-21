@@ -208,19 +208,16 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		local Houses = {}
 		local properties= GetPlayerProperties(person.cid)
 		for k, v in pairs(properties) do
-			print("twice", v.label, json.decode(v["coords"]))
 			table.insert(Coords, {
                 coords = json.decode(v["coords"]),
             })
 		end
-		print("number of coords", #Coords)
 		for index = 1, #Coords, 1 do
             table.insert(Houses, {
                 label = properties[index]["label"],
                 coords = tostring(Coords[index]["coords"]["enter"]["x"]..",".. Coords[index]["coords"]["enter"]["y"].. ",".. Coords[index]["coords"]["enter"]["z"]),
             })
         end
-		print(Houses, json.encode(Houses), Houses.label)
 		-- if properties then
 			person.properties = Houses
 		-- end
@@ -262,7 +259,7 @@ end) ]]
 RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName, tags, gallery, fingerprint, licenses)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
-	TestSavingLicenses(cid, licenses)
+	ManageLicenses(cid, licenses)
 	if Player then
 		local incJobType = GetJobType(Player.PlayerData.job.name)
 		MySQL.Async.insert('INSERT INTO mdt_data (cid, information, pfp, jobtype, tags, gallery, fingerprint) VALUES (:cid, :information, :pfp, :jobtype, :tags, :gallery, :fingerprint) ON DUPLICATE KEY UPDATE cid = :cid, information = :information, pfp = :pfp, tags = :tags, gallery = :gallery, fingerprint = :fingerprint', {

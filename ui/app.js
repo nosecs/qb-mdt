@@ -325,24 +325,26 @@ $(document).ready(() => {
           icon: "fas fa-times",
           text: "Remove Item",
           info: $(this).data("id"),
-          status: "",
+          status: $(this).data("title"),
         },
       ];
       openContextMenu(e, args);
     }
   );
   $(".contextmenu").on("click", ".remove-bulletin", function () {
-    let BulletinId = $(this).data("info");
+    let id = $(this).data("info");
+    let title = $(this).data("status")
     $(".bulletin-items-continer")
-      .find("[data-id='" + BulletinId + "']")
+      .find("[data-id='" + id + "']")
       .remove();
     $.post(
       `https://${GetParentResourceName()}/deleteBulletin`,
       JSON.stringify({
-        id: BulletinId,
+        id: id,
+        title: title
       })
     );
-    if (canCreateBulletin == BulletinId) {
+    if (canCreateBulletin == id) {
       canCreateBulletin = 0;
     }
     if ($(".bulletin-add-btn").hasClass("fa-minus")) {
@@ -417,7 +419,7 @@ $(document).ready(() => {
       setTimeout(() => {
         let tags = new Array();
         let gallery = new Array();
-        let licenses = new Array();
+        let licenses = {};
         
         $(".tags-holder")
           .find("div")
@@ -447,27 +449,17 @@ $(document).ready(() => {
         let id = $(".manage-profile-citizenid-input").val();
         
         $(".licenses-holder")
-          .find("span")
-          .each(function(){
-            let test = $(this).attr('class')
-            if (test.includes('green-tag')){
-              licenses.push([$(this).data("type"), true])
-            }
-            else{
-              licenses.push([$(this).data("type"), false])
-            }
-            // licenses.push($(this).data("type"))
-            // console.log("test", $(this).data("type"));
-            // console.log("test2", $(this).attr('class'));
-          })
-        // console.log(JSON.stringify(test))
-      //   .find("div")
-      //   .each(function () {
-      //     console.log($(this).data("lic"));
-      //     // if ($(this).text() != "" && $(this).text() != "No Tags") {
-      //     //   tags.push($(this).text());
-      //     // }
-      // });
+        .find("span")
+        .each(function(){
+          let type = $(this).data("type")
+          if ($(this).attr('class').includes('green-tag')){
+            licenses[type] = true
+          }
+          else{
+            licenses[type] = false
+          }
+        })
+
         const fName = $(".manage-profile-name-input-1").val();
         const sName = $(".manage-profile-name-input-2").val();
 
@@ -482,7 +474,7 @@ $(document).ready(() => {
             tags: tags,
             gallery: gallery,
             fingerprint: fingerprint,
-            licenses:licenses
+            licenses: licenses
           })
         );
         $(".manage-profile-pic").attr("src", newpfp);
@@ -889,7 +881,6 @@ $(document).ready(() => {
   });
 
   $(".contextmenu").on("click", ".revoke-licence", function () {
-    console.log($(this).data("status"))
     // $.post(
     //   `https://${GetParentResourceName()}/updateLicence`,
     //   JSON.stringify({
@@ -909,7 +900,6 @@ $(document).ready(() => {
   });
 
   $(".contextmenu").on("click", ".give-licence", function () {
-    console.log($(this).data("status"))
     // $.post(
     //   `https://${GetParentResourceName()}/updateLicence`,
     //   JSON.stringify({
@@ -3810,7 +3800,7 @@ $(document).ready(() => {
       $.each(eventData.bulletin, function (index, value) {
         $(
           ".bulletin-items-continer"
-        ).prepend(`<div class="bulletin-item" data-id=${value.id}>
+        ).prepend(`<div class="bulletin-item" data-id=${value.id} data-title=${value.title}>
                 <div class="bulletin-item-title">${value.title}</div>
                 <div class="bulletin-item-info">${value.desc}</div>
                 <div class="bulletin-bottom-info">
@@ -4734,7 +4724,6 @@ $(document).ready(() => {
         let radio = unit.radio ? unit.radio : "0";
         let callSign = unit.callSign ? unit.callSign : "000";
         let activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
-        console.log(unit.unitType)
         if (unit.duty == 1) {
           if (unit.unitType == "police") {
             policeCount++;

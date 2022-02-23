@@ -132,7 +132,7 @@ end, false)
 
 RegisterNUICallback("deleteBulletin", function(data, cb)
     local id = data.id
-    TriggerServerEvent('mdt:server:deleteBulletin', id)
+    TriggerServerEvent('mdt:server:deleteBulletin', id, data.title)
     cb(true)
 end)
 
@@ -252,7 +252,7 @@ RegisterNUICallback("saveProfile", function(data, cb)
     local gallery = data.gallery
     local fingerprint = data.fingerprint
     local licenses = data.licenses
-    print(json.encode(data.licenses))
+
     TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery, fingerprint, licenses)
     cb(true)
 end)

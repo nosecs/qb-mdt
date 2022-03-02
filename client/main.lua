@@ -627,16 +627,13 @@ RegisterNetEvent('mdt:client:GetActiveUnits', function(activeUnits)
     SendNUIMessage({type  = NUI_FUNCS.GET_ACTIVE_UNITS, activeUnits = activeUnits})
 end)
 
-RegisterNetEvent('mdt:client:setRadio', function(radio, name)
-    if radio then
-        -- Replace with your inventory check
-        --[[if (not exports["erp-inventory"]:hasEnoughOfItem('radio',1,false)) then
-            exports['erp_notifications']:SendAlert('inform', 'Missing radio, '..name..' tried to set your radio frequency.', 7500)
-            return
-        end]]
+RegisterNetEvent('mdt:client:setRadio', function(radio)
+    if type(tonumber(radio)) == "number" then
         exports["pma-voice"]:setVoiceProperty("radioEnabled", true)
         exports["pma-voice"]:setRadioChannel(tonumber(radio))
-        exports['erp_notifications']:SendAlert('inform', 'Your radio frequency was set to: '.. radio .. ' MHz, by '..name..'', 7500)
+        QBCore.Functions.Notify("You have set your radio frequency to "..radio..".", "success")
+    else
+        QBCore.Functions.Notify("Invalid Station(Please enter a number)", "error")
     end
 end)
 

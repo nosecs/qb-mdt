@@ -1078,14 +1078,14 @@ RegisterNetEvent('mdt:server:getAllLogs', function()
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	if Player then
-		-- if Config.LogPerms[Player.PlayerData.job.name] then
-		-- 	if Config.LogPerms[Player.PlayerData.job.name][Player.PlayerData.job.grade.level] then
-				local JobType = GetJobType(Player.PlayerData.job.name)
-				exports.oxmysql:execute('SELECT * FROM mdt_logs WHERE `jobtype` = :jobtype ORDER BY `id` DESC LIMIT 250', {jobtype = JobType}, function(infoResult)
-					TriggerLatentClientEvent('mdt:client:getAllLogs', src, 30000, infoResult)
-				end)
-		-- 	end
-		-- end
+		if Config.LogPerms[Player.PlayerData.job.name] then
+			if Config.LogPerms[Player.PlayerData.job.name][Player.PlayerData.job.grade.level] then
+			local JobType = GetJobType(Player.PlayerData.job.name)
+			exports.oxmysql:execute('SELECT * FROM mdt_logs WHERE `jobtype` = :jobtype ORDER BY `id` DESC LIMIT 250', {jobtype = JobType}, function(infoResult)
+				TriggerLatentClientEvent('mdt:client:getAllLogs', src, 30000, infoResult)
+			end)
+			end
+		end
 	end
 end)
 
@@ -1460,18 +1460,21 @@ RegisterNetEvent('mdt:server:sendCallResponse', function(message, time, callid)
 	-- end)
 end)
 
-RegisterNetEvent('mdt:server:setRadio', function(cid, newcallsign)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job.isPolice or result.job.name == 'ambulance' or result.job.name == 'doj' then
-				local tgtPlayer = exports['echorp']:GetPlayerFromCid(cid)
-				if tgtPlayer then
-					TriggerClientEvent('mdt:client:setRadio', tgtPlayer['source'], newcallsign, result['fullname'])
-					TriggerClientEvent("QBCore:Notify", source, 'Radio updated.', 'success')
-				end
-			end
+RegisterNetEvent('mdt:server:setRadio', function(cid, newRadio)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player.PlayerData.citizenid ~= cid then
+		TriggerClientEvent("QBCore:Notify", src, 'You can only change your radio!', 'error')
+		return
+	else
+		local radio = Player.Functions.GetItemByName("phone")
+		if radio ~= nil then
+			TriggerClientEvent('mdt:client:setRadio', src, newRadio)
+		else
+			TriggerClientEvent("QBCore:Notify", src, 'You do not have a radio!', 'error')
 		end
-	end)
+	end
+
 end)
 
 local function isRequestVehicle(vehId)

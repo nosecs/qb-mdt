@@ -257,36 +257,11 @@ end
 
 Config.LogPerms = {
 	['ambulance'] = {
-		[7] = true,
-		[8] = true,
-		[15] = true,
-		[16] = true
-	},
-	['bcso'] = {
-		[6] = true,
-		[7] = true,
-		[8] = true,
-	},
-	['doc'] = {
-		[8] = true,
-		[9] = true,
-	},
-	['doj'] = {
-		[11] = true,
+		[4] = true,
 	},
 	['police'] = {
-		[6] = true,
-		[7] = true,
-		[8] = true,
-	},
-	['sast'] = {
-		[5] = true,
-		[6] = true,
-	},
-	['sapr'] = {
 		[4] = true,
-		[5] = true,
-	}
+	},
 }
 
 Config.ColorNames = {

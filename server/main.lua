@@ -1447,10 +1447,11 @@ RegisterNetEvent('mdt:server:sendCallResponse', function(message, time, callid)
 	-- 		if result.job and (result.job.isPolice or (result.job.name == 'ambulance')) then
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
+	local name = Player.PlayerData.charinfo.firstname.. " "..Player.PlayerData.charinfo.lastname
 	if IsPolice(Player.PlayerData.job.name) then
 		TriggerEvent('dispatch:sendCallResponse', src, callid, message, time, function(isGood)
 			if isGood then
-				TriggerClientEvent('mdt:client:sendCallResponse', -1, message, time, callid, result['fullname'])
+				TriggerClientEvent('mdt:client:sendCallResponse', -1, message, time, callid, name)
 			end
 		end)
 	end

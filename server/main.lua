@@ -1429,28 +1429,34 @@ RegisterNetEvent('mdt:server:refreshDispatchMsgs', function()
 end)
 
 RegisterNetEvent('mdt:server:getCallResponses', function(callid)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or (result.job.name == 'ambulance')) then
-				local calls = exports['qb-dispatch']:GetDispatchCalls()
-				TriggerClientEvent('mdt:client:getCallResponses', result.source, calls[callid]['responses'], callid)
-			end
-		end
-	end)
+	-- TriggerEvent('echorp:getplayerfromid', source, function(result)
+	-- 	if result then
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if IsPolice(Player.PlayerData.job.name) then
+		local calls = exports['qb-dispatch']:GetDispatchCalls()
+		TriggerClientEvent('mdt:client:getCallResponses', src, calls[callid]['responses'], callid)
+	end
+	-- 	end
+	-- end)
 end)
 
 RegisterNetEvent('mdt:server:sendCallResponse', function(message, time, callid)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or (result.job.name == 'ambulance')) then
-				TriggerEvent('dispatch:sendCallResponse', result, callid, message, time, function(isGood)
-					if isGood then
-						TriggerClientEvent('mdt:client:sendCallResponse', -1, message, time, callid, result['fullname'])
-					end
-				end)
+	-- TriggerEvent('echorp:getplayerfromid', source, function(result)
+	-- 	if result then
+	-- 		if result.job and (result.job.isPolice or (result.job.name == 'ambulance')) then
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if IsPolice(Player.PlayerData.job.name) then
+		TriggerEvent('dispatch:sendCallResponse', src, callid, message, time, function(isGood)
+			if isGood then
+				TriggerClientEvent('mdt:client:sendCallResponse', -1, message, time, callid, result['fullname'])
 			end
-		end
-	end)
+		end)
+	end
+	-- 		end
+	-- 	end
+	-- end)
 end)
 
 RegisterNetEvent('mdt:server:setRadio', function(cid, newcallsign)

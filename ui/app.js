@@ -181,7 +181,7 @@ $(document).ready(() => {
 
     const { vehicles, tags, gallery, convictions, properties } = result
 
-    $(".licences-holder").empty();
+    $(".licenses-holder").empty();
     $(".tags-holder").empty();
     $(".vehs-holder").empty();
     $(".gallery-inner-container").empty();
@@ -202,7 +202,7 @@ $(document).ready(() => {
         for (const [lic, hasLic] of licenses) {
   
           let tagColour = hasLic == true ? "green-tag" : "red-tag";
-          licencesHTML += `<span class="license-tag ${tagColour} ${lic}" data-type="${lic}">${lic}</span>`;
+          licencesHTML += `<span class="license-tag ${tagColour} ${lic}" data-type="${lic}">${titleCase(lic)}</span>`;
         }
       if (vehicles && vehicles.length > 0) {
 
@@ -220,7 +220,7 @@ $(document).ready(() => {
       if (properties && properties.length > 0) {
         propertyHTML = '';
         properties.forEach(value => {
-          propertyHTML += `<div class="white-tag" data-location="${value.coords.x}===${value.coords.y}">${value.label} </div>`;
+          propertyHTML += `<div class="white-tag" data-location="${value.coords}">${value.label} </div>`;
         })
       }
     }
@@ -325,24 +325,26 @@ $(document).ready(() => {
           icon: "fas fa-times",
           text: "Remove Item",
           info: $(this).data("id"),
-          status: "",
+          status: $(this).data("title"),
         },
       ];
       openContextMenu(e, args);
     }
   );
   $(".contextmenu").on("click", ".remove-bulletin", function () {
-    let BulletinId = $(this).data("info");
+    let id = $(this).data("info");
+    let title = $(this).data("status")
     $(".bulletin-items-continer")
-      .find("[data-id='" + BulletinId + "']")
+      .find("[data-id='" + id + "']")
       .remove();
     $.post(
       `https://${GetParentResourceName()}/deleteBulletin`,
       JSON.stringify({
-        id: BulletinId,
+        id: id,
+        title: title
       })
     );
-    if (canCreateBulletin == BulletinId) {
+    if (canCreateBulletin == id) {
       canCreateBulletin = 0;
     }
     if ($(".bulletin-add-btn").hasClass("fa-minus")) {
@@ -417,6 +419,7 @@ $(document).ready(() => {
       setTimeout(() => {
         let tags = new Array();
         let gallery = new Array();
+        let licenses = {};
         
         $(".tags-holder")
           .find("div")
@@ -444,6 +447,18 @@ $(document).ready(() => {
         let description = $(".manage-profile-info").val();
         let fingerprint = $(".manage-profile-fingerprint").val();
         let id = $(".manage-profile-citizenid-input").val();
+        
+        $(".licenses-holder")
+        .find("span")
+        .each(function(){
+          let type = $(this).data("type")
+          if ($(this).attr('class').includes('green-tag')){
+            licenses[type] = true
+          }
+          else{
+            licenses[type] = false
+          }
+        })
 
         const fName = $(".manage-profile-name-input-1").val();
         const sName = $(".manage-profile-name-input-2").val();
@@ -458,7 +473,8 @@ $(document).ready(() => {
             sName: sName,
             tags: tags,
             gallery: gallery,
-            fingerprint: fingerprint
+            fingerprint: fingerprint,
+            licenses: licenses
           })
         );
         $(".manage-profile-pic").attr("src", newpfp);
@@ -580,8 +596,6 @@ $(document).ready(() => {
               }
             });
 
-          console.log($(".associated-incidents-user-holder").children("div"))
-
           associated.push({
             Cid: $(this).data("id"),
             Warrant: warrant,
@@ -603,8 +617,6 @@ $(document).ready(() => {
               .val(),
           });
         });
-
-        console.log(associated)
 
         $.post(
           `https://${GetParentResourceName()}/saveIncident`,
@@ -823,8 +835,8 @@ $(document).ready(() => {
     }
   );
 
-  $(".licences-holder").on("contextmenu", ".license-tag", function (e) {
-    const fuckyou = $(this).data("type");
+  $(".licenses-holder").on("contextmenu", ".license-tag", function (e) {
+    const status = $(this).data("type");
     let type = $(this).html();
 
     if (type == "Theory") {
@@ -852,7 +864,7 @@ $(document).ready(() => {
           icon: "fas fa-times",
           text: "Revoke License",
           info: info,
-          status: fuckyou,
+          status: status,
         },
       ]);
     } else if ($(this).hasClass("red-tag")) {
@@ -862,21 +874,21 @@ $(document).ready(() => {
           icon: "fas fa-check",
           text: "Give License",
           info: info,
-          status: fuckyou,
+          status: status,
         },
       ]);
     }
   });
 
   $(".contextmenu").on("click", ".revoke-licence", function () {
-    $.post(
-      `https://${GetParentResourceName()}/updateLicence`,
-      JSON.stringify({
-        cid: $(".manage-profile-citizenid-input").val(),
-        type: $(this).data("info"),
-        status: "revoke",
-      })
-    );
+    // $.post(
+    //   `https://${GetParentResourceName()}/updateLicence`,
+    //   JSON.stringify({
+    //     cid: $(".manage-profile-citizenid-input").val(),
+    //     type: $(this).data("status"),
+    //     status: "revoke",
+    //   })
+    // );
 
     const Elem = $(this).data("status");
     $(".license-tag")
@@ -888,14 +900,14 @@ $(document).ready(() => {
   });
 
   $(".contextmenu").on("click", ".give-licence", function () {
-    $.post(
-      `https://${GetParentResourceName()}/updateLicence`,
-      JSON.stringify({
-        cid: $(".manage-profile-citizenid-input").val(),
-        type: $(this).data("info"),
-        status: "give",
-      })
-    );
+    // $.post(
+    //   `https://${GetParentResourceName()}/updateLicence`,
+    //   JSON.stringify({
+    //     cid: $(".manage-profile-citizenid-input").val(),
+    //     type: $(this).data("status"),
+    //     status: "give",
+    //   })
+    // );
 
     const Elem = $(this).data("status");
     $(".license-tag")
@@ -937,88 +949,7 @@ $(document).ready(() => {
           })
         );
 
-        canSearchForProfiles = true;
-        $(".profile-items").empty();
-
-        if (result.length < 1) {
-          $(".profile-items").html(
-            `
-                            <div class="profile-item" data-id="0">
-
-                                <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                                <div style="display: flex; flex-direction: column;">
-                                    <div class="profile-item-title">No Users Matching that search</div>
-                                    </div>
-                                    <div class="profile-bottom-info">
-                                    </div>
-                                </div>
-                            </div>
-                    `
-          );
-          return true;
-        }
-
-        let profileHTML = "";
-
-        result.forEach((value) => {
-          let charinfo = value.charinfo;
-          let metadata = value.metadata;
-
-          if (typeof value.charinfo == "string") {
-            charinfo = JSON.parse(charinfo);
-          }
-
-          if (typeof value.metadata == "string") {
-            metadata = JSON.parse(metadata);
-          }
-
-          let name = charinfo.firstname + " " + charinfo.lastname;
-          let warrant = "red-tag";
-          let convictions = "red-tag";
-
-          let licences = "";
-          let licArr = Object.entries(metadata.licences);
-
-          if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
-            for (const [lic, hasLic] of licArr) {
-              let tagColour =
-                hasLic == true ? "green-tag" : "red-tag";
-              licences += `<span class="license-tag ${tagColour}">${lic}</span>`;
-            }
-          }
-
-          if (value.warrant == true) {
-            warrant = "green-tag";
-          }
-
-          if (value.convictions < 5) {
-            convictions = "green-tag";
-          } else if (
-            value.convictions > 4 &&
-            value.convictions < 15
-          ) {
-            convictions = "orange-tag";
-          }
-
-          profileHTML += `
-                        <div class="profile-item" data-id="${value.citizenid}">
-                            <img src="${value.pp}" class="profile-image">
-                            <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
-                            <div style="display: flex; flex-direction: column;">
-                                <div class="profile-item-title">${name}</div>
-                                    <div class="profile-tags">
-                                        ${licences}
-                                    </div>
-                                </div>
-                                <div class="profile-bottom-info">
-                                    <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
-                                </div>
-                            </div>
-                        </div>
-                    `;
-        });
-
-        $(".profile-items").html(profileHTML);
+        searchProfilesResults(result);
       }
     }
   });
@@ -1081,39 +1012,22 @@ $(document).ready(() => {
       })
     );
   });
-  $(".manage-incidents-civilians-holder").on(
-    "click",
-    ".manage-incidents-civilians",
-    function () {
+  $(".manage-incidents-civilians-holder").on("click", ".manage-incidents-civilians", async function () {
       const name = $(this).text();
       fidgetSpinner(".profile-page-container");
       currentTab = ".profile-page-container";
-      setTimeout(() => {
-        $(".profile-search-input").slideDown(250);
-        $(".profile-search-input").css("display", "block");
-        setTimeout(() => {
-          $("#profile-search-input:text").val(name);
-          canSearchForProfiles = false;
-          $.post(
-            `https://${GetParentResourceName()}/searchProfiles`,
-            JSON.stringify({
-              name: name,
-            })
-          );
-          $(".profile-items").empty();
-          $(".profile-items").prepend(
-            `<div class="profile-loader"></div>`
-          );
-          setTimeout(() => {
-            $.post(
-              `https://${GetParentResourceName()}/getProfileData`,
-              JSON.stringify({
-                id: name,
-              })
-            );
-          }, 250);
-        }, 250);
-      }, 250);
+      $(".profile-search-input").slideDown(250);
+      $(".profile-search-input").css("display", "block");
+      $("#profile-search-input:text").val(name);
+      canSearchForProfiles = false;
+      let result = await $.post(
+        `https://${GetParentResourceName()}/searchProfiles`,
+        JSON.stringify({
+          name: name,
+        })
+      );
+
+      searchProfilesResults(result);
     }
   );
   document.onkeyup = function (data) {
@@ -3075,36 +2989,22 @@ $(document).ready(() => {
     }
   });
 
-  $(".contextmenu").on("click", ".view-profile", function () {
+  $(".contextmenu").on("click", ".view-profile", async function () {
     const cid = $(this).data("info");
     fidgetSpinner(".profile-page-container");
     currentTab = ".profile-page-container";
-    setTimeout(() => {
-      $(".profile-search-input").slideDown(250);
-      $(".profile-search-input").css("display", "block");
-      setTimeout(() => {
-        $("#profile-search-input:text").val(cid.toString());
-        canSearchForProfiles = false;
-        $.post(
-          `https://${GetParentResourceName()}/searchProfiles`,
-          JSON.stringify({
-            name: cid.toString(),
-          })
-        );
-        $(".profile-items").empty();
-        $(".profile-items").prepend(
-          `<div class="profile-loader"></div>`
-        );
-        setTimeout(() => {
-          $.post(
-            `https://${GetParentResourceName()}/getProfileData`,
-            JSON.stringify({
-              id: cid.toString(),
-            })
-          );
-        }, 250);
-      }, 250);
-    }, 250);
+    $(".profile-search-input").slideDown(250);
+    $(".profile-search-input").css("display", "block");
+    $("#profile-search-input:text").val(cid.toString());
+    canSearchForProfiles = false;
+    let result = await $.post(
+      `https://${GetParentResourceName()}/searchProfiles`,
+      JSON.stringify({
+        name: cid,
+      })
+    );
+
+    searchProfilesResults(result);
   });
 
   $(".contextmenu").on("click", ".view-incident", function () {
@@ -3677,6 +3577,14 @@ $(document).ready(() => {
           "--color-8",
           "#2554cc"
         );
+        document.documentElement.style.setProperty(
+          "--color-9",
+          "#6E707C"
+        );
+        document.documentElement.style.setProperty(
+          "--color-10",
+          "#8f741b"
+        );
         $(".badge-logo").attr("src", "img/sasp_badge.png");
         $(".header-title").html("SAN ANDREAS STATE POLICE");
         $(".bolo-nav-item").html("BOLOs");
@@ -3892,7 +3800,7 @@ $(document).ready(() => {
       $.each(eventData.bulletin, function (index, value) {
         $(
           ".bulletin-items-continer"
-        ).prepend(`<div class="bulletin-item" data-id=${value.id}>
+        ).prepend(`<div class="bulletin-item" data-id=${value.id} data-title=${value.title}>
                 <div class="bulletin-item-title">${value.title}</div>
                 <div class="bulletin-item-info">${value.desc}</div>
                 <div class="bulletin-bottom-info">
@@ -3934,23 +3842,20 @@ $(document).ready(() => {
         .find("[data-id='" + eventData.data + "']")
         .remove();
     } else if (eventData.type == "warrants") {
-      const value = eventData.data;
-      if (value.firsttime) {
-        $(".warrants-items").empty();
-      }
-      $(".warrants-items").prepend(`<div class="warrants-item" data-cid=${value.cid
-        } data-id=${value.linkedincident
-        }><div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 0.75vh; width: 100%;">
-                <div style="display: flex; flex-direction: column;">
-                    <div class="warrant-title">${value.name}</div>
-                    <div class="warrant-item-info">${value.reporttitle
-        } - ${timeAgo(Number(value.time))}</div>
-                </div>
-                <div class="warrant-bottom-info">
-                    <div class="warrant-id">ID: ${value.linkedincident}</div>
-                    <div class="warrant-expiry-date">Expires in TODO days</div>
-                </div>
-            </div></div>`);
+      // const value = eventData.data;
+      // console.log(JSON.stringify(value));
+      // console.log(value[0]["name"])
+      $(".warrants-items").empty();
+      $.each(eventData.data, function (index, value) {
+        $('.warrants-items').prepend(`<div class="warrants-item" data-cid=${value.cid} data-id=${value.linkedincident}><div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 0.75vh; width: 100%;">
+            <div style="display: flex; flex-direction: column;">
+                <div class="warrant-title">${value.name}</div>
+            </div>
+            <div class="warrant-bottom-info">
+                <div class="warrant-id">Incident ID: ${value.linkedincident}</div>
+            </div>
+        </div></div>`)
+    })
     } else if (eventData.type == "dispatchmessages") {
       const table = eventData.data;
       LastName = "";
@@ -4819,13 +4724,12 @@ $(document).ready(() => {
         let radio = unit.radio ? unit.radio : "0";
         let callSign = unit.callSign ? unit.callSign : "000";
         let activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
-
         if (unit.duty == 1) {
-          if (unit.unitType == "Police") {
+          if (unit.unitType == "police") {
             policeCount++;
           }
-          if (unit.unitType == "EMS") {
-            activeInfoJob = `<div class="unit-job active-info-job-ambulance">AMBALAMCE</div>`
+          if (unit.unitType == "ambulance") {
+            activeInfoJob = `<div class="unit-job active-info-job-ambulance">Ambulance</div>`
             emsCount++;
           }
           if (unit.unitType == "Fire") {
@@ -4861,6 +4765,9 @@ $(document).ready(() => {
 function fidgetSpinner(page) {
   $(".close-all").fadeOut(0);
   $(".container-load").fadeIn(0);
+  if (page == ".dashboard-page-container"){
+    $.post(`https://${GetParentResourceName()}/getAllDashboardData`, JSON.stringify({}));
+  }
   if (page == ".bolos-page-container") {
     $.post(`https://${GetParentResourceName()}/getAllBolos`, JSON.stringify({}));
   }
@@ -4980,6 +4887,98 @@ function hideIcidentsMenu() {
 function onMouseDownIcidents(e) {
   hideIcidentsMenu();
   document.removeEventListener("mouseup", onMouseDownIcidents);
+}
+
+function titleCase(str) {
+  return str
+    .split(' ')
+    .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+function searchProfilesResults(result) {
+  canSearchForProfiles = true;
+  $(".profile-items").empty();
+
+  if (result.length < 1) {
+    $(".profile-items").html(
+      `
+                      <div class="profile-item" data-id="0">
+
+                          <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                          <div style="display: flex; flex-direction: column;">
+                              <div class="profile-item-title">No Users Matching that search</div>
+                              </div>
+                              <div class="profile-bottom-info">
+                              </div>
+                          </div>
+                      </div>
+              `
+    );
+    return true;
+  }
+
+  let profileHTML = "";
+
+  result.forEach((value) => {
+    let charinfo = value.charinfo;
+    let metadata = value.licences;
+
+    if (typeof value.charinfo == "string") {
+      charinfo = JSON.parse(charinfo);
+    }
+
+    if (typeof value.metadata == "string") {
+      metadata = JSON.parse(metadata);
+    }
+
+    let name = charinfo.firstname + " " + charinfo.lastname;
+    let warrant = "red-tag";
+    let convictions = "red-tag";
+
+    let licences = "";
+    let licArr = Object.entries(value.licences);
+
+    if (licArr.length > 0 && (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined)) {
+      for (const [lic, hasLic] of licArr) {
+        let tagColour =
+          hasLic == true ? "green-tag" : "red-tag";
+        licences += `<span class="license-tag ${tagColour}">${titleCase(lic)}</span>`;
+      }
+    }
+
+    if (value.warrant == true) {
+      warrant = "green-tag";
+    }
+
+    if (value.convictions < 5) {
+      convictions = "green-tag";
+    } else if (
+      value.convictions > 4 &&
+      value.convictions < 15
+    ) {
+      convictions = "orange-tag";
+    }
+
+    profileHTML += `
+                  <div class="profile-item" data-id="${value.citizenid}">
+                      <img src="${value.pp}" class="profile-image">
+                      <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
+                      <div style="display: flex; flex-direction: column;">
+                          <div class="profile-item-title">${name}</div>
+                              <div class="profile-tags">
+                                  ${licences}
+                              </div>
+                          </div>
+                          <div class="profile-bottom-info">
+                              <div class="profile-id">ID: ${value.citizenid}</div>&nbsp;
+                          </div>
+                      </div>
+                  </div>
+              `;
+  });
+
+  $(".profile-items").html(profileHTML);
 }
 
 window.addEventListener("load", function () {

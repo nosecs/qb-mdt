@@ -132,7 +132,7 @@ end, false)
 
 RegisterNUICallback("deleteBulletin", function(data, cb)
     local id = data.id
-    TriggerServerEvent('mdt:server:deleteBulletin', id)
+    TriggerServerEvent('mdt:server:deleteBulletin', id, data.title)
     cb(true)
 end)
 
@@ -153,9 +153,20 @@ RegisterNetEvent('mdt:client:dashboardbulletin', function(sentData)
     SendNUIMessage({ type = "bulletin", data = sentData })
 end)
 
-RegisterNetEvent('mdt:client:dashboardWarrants', function(sentData)
-    SendNUIMessage({ type = "warrants", data = sentData })
+RegisterNetEvent('mdt:client:dashboardWarrants', function()
+    QBCore.Functions.TriggerCallback("mdt:server:getWarrants", function(data)
+        if data then
+            SendNUIMessage({ type = "warrants", data = data })
+        end
+    end)
+    -- SendNUIMessage({ type = "warrants",})
 end)
+
+RegisterNUICallback("getAllDashboardData", function(data, cb)
+    TriggerEvent("mdt:client:dashboardWarrants")
+    cb(true)
+end)
+
 
 RegisterNetEvent('mdt:client:dashboardReports', function(sentData)
     SendNUIMessage({ type = "reports", data = sentData })
@@ -201,6 +212,7 @@ RegisterNetEvent('mdt:client:open', function(bulletin)
     -- local grade = PlayerData.job.grade.name
 
     SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.grade.name..' '..PlayerData.charinfo.lastname, location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname, bulletin = bulletin })
+    TriggerEvent("mdt:client:dashboardWarrants")
 end)
 
 RegisterNetEvent('mdt:client:exitMDT', function()
@@ -214,23 +226,15 @@ end)
 --====================================================================================
 
 RegisterNUICallback("searchProfiles", function(data, cb)
-    local name = data.name
-    local p = nil
+    local p = promise.new()
 
-    local searchProfilePromise = function(data)
-        if p then return end
-        p = promise.new()
+    QBCore.Functions.TriggerCallback('mdt:server:SearchProfile', function(result)
+        p:resolve(result)
+    end, data.name)
 
-        QBCore.Functions.TriggerCallback('mdt:server:SearchProfile', function(result)
-            p:resolve(result)
-        end, data)
+    local data = Citizen.Await(p)
 
-        return Citizen.Await(p)
-    end
-
-    local result = searchProfilePromise(name)
-    p = nil
-    return cb(result)
+    cb(data)
 end)
 
 
@@ -239,7 +243,6 @@ RegisterNetEvent('mdt:client:searchProfile', function(sentData, isLimited)
 end)
 
 RegisterNUICallback("saveProfile", function(data, cb)
-    print(json.encode(data))
     local profilepic = data.pfp
     local information = data.description
     local cid = data.id
@@ -248,8 +251,9 @@ RegisterNUICallback("saveProfile", function(data, cb)
     local tags = data.tags
     local gallery = data.gallery
     local fingerprint = data.fingerprint
-    print(cid, fName, sName, tags, gallery, fingerprint)
-    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery, fingerprint)
+    local licenses = data.licenses
+
+    TriggerServerEvent("mdt:server:saveProfile", profilepic, information, cid, fName, sName, tags, gallery, fingerprint, licenses)
     cb(true)
 end)
 
@@ -372,7 +376,11 @@ end)
 
 
 RegisterNUICallback('SetHouseLocation', function(data, cb)
-    SetNewWaypoint(data.coord[1], data.coord[2])
+    local coords = {}
+    for word in data.coord[1]:gmatch('[^,%s]+') do
+        coords[#coords+1] = tonumber(word)
+    end
+    SetNewWaypoint(coords[1], coords[2])
     QBCore.Functions.Notify('GPS has been set!', 'success')
 end)
 
@@ -509,24 +517,14 @@ end)
 ------------------------------------------
 --====================================================================================
 RegisterNUICallback("searchVehicles", function(data, cb)
-    local plate = data.name
-    local p = nil
 
-    -- TriggerServerEvent('mdt:server:searchVehicles', name, GetHashKey(name))
+    local p = promise.new()
 
-    local searchVehiclesPromise = function(data)
-        if p then return end
-        p = promise.new()
+    QBCore.Functions.TriggerCallback('mdt:server:SearchVehicles', function(result)
+        p:resolve(result)
+    end, data.name)
 
-        QBCore.Functions.TriggerCallback('mdt:server:SearchVehicles', function(result)
-            p:resolve(result)
-        end, data)
-
-        return Citizen.Await(p)
-    end
-
-    local result = searchVehiclesPromise(plate)
-
+    local result = Citizen.Await(p)
     for i=1, #result do
         local vehicle = result[i]
         local mods = json.decode(result[i].mods)
@@ -535,8 +533,8 @@ RegisterNUICallback("searchVehicles", function(data, cb)
         result[i]['colorName'] = Config.ColorNames[mods['color1']]
         result[i]['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehicle['vehicle']))
     end
+    cb(result)
 
-    return cb(result)
 end)
 
 RegisterNUICallback("getVehicleData", function(data, cb)
@@ -629,16 +627,13 @@ RegisterNetEvent('mdt:client:GetActiveUnits', function(activeUnits)
     SendNUIMessage({type  = NUI_FUNCS.GET_ACTIVE_UNITS, activeUnits = activeUnits})
 end)
 
-RegisterNetEvent('mdt:client:setRadio', function(radio, name)
-    if radio then
-        -- Replace with your inventory check
-        --[[if (not exports["erp-inventory"]:hasEnoughOfItem('radio',1,false)) then
-            exports['erp_notifications']:SendAlert('inform', 'Missing radio, '..name..' tried to set your radio frequency.', 7500)
-            return
-        end]]
+RegisterNetEvent('mdt:client:setRadio', function(radio)
+    if type(tonumber(radio)) == "number" then
         exports["pma-voice"]:setVoiceProperty("radioEnabled", true)
         exports["pma-voice"]:setRadioChannel(tonumber(radio))
-        exports['erp_notifications']:SendAlert('inform', 'Your radio frequency was set to: '.. radio .. ' MHz, by '..name..'', 7500)
+        QBCore.Functions.Notify("You have set your radio frequency to "..radio..".", "success")
+    else
+        QBCore.Functions.Notify("Invalid Station(Please enter a number)", "error")
     end
 end)
 

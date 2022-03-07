@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `mdt_data` (
   `information` MEDIUMTEXT DEFAULT NULL,
   `tags` TEXT NOT NULL,
   `gallery` TEXT NOT NULL,
-  `jobtype` VARCHAR(255) DEFAULT 'police',
+  `jobtype` VARCHAR(25) DEFAULT 'police',
   `pfp` TEXT DEFAULT NULL,
   `fingerprint` VARCHAR(50) DEFAULT NULL,
   PRIMARY KEY (`cid`),
@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS `mdt_bulletin` (
   `title` TEXT NOT NULL,
   `desc` TEXT NOT NULL,
   `author` varchar(50) NOT NULL,
-  `time` varchar(255)  NOT NULL,
-  `jobtype` VARCHAR(255) DEFAULT 'police',
+  `time` varchar(20)  NOT NULL,
+  `jobtype` VARCHAR(25) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS `mdt_reports` (
   `officersinvolved` text DEFAULT NULL,
   `civsinvolved` text DEFAULT NULL,
   `gallery` text DEFAULT NULL,
-  `time` varchar(50) DEFAULT NULL,
-  `jobtype` varchar(255) DEFAULT 'police',
+  `time` varchar(20) DEFAULT NULL,
+  `jobtype` varchar(25) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS `mdt_bolos` (
   `tags` text DEFAULT NULL,
   `gallery` text DEFAULT NULL,
   `officersinvolved` text DEFAULT NULL,
-  `time` varchar(255) DEFAULT NULL,
+  `time` varchar(20) DEFAULT NULL,
+  `jobtype` varchar(25) NOT NULL DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -64,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `mdt_convictions` (
   `sentence` int(11) DEFAULT 0,
   `recfine` int(11) DEFAULT 0,
   `recsentence` int(11) DEFAULT 0,
-  `time` varchar(255) DEFAULT NULL,
+  `time` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -77,16 +78,16 @@ CREATE TABLE IF NOT EXISTS `mdt_incidents` (
   `officersinvolved` text NOT NULL,
   `civsinvolved` text NOT NULL,
   `evidence` text NOT NULL,
-  `time` varchar(255) DEFAULT NULL,
-  `jobtype` varchar(50) NOT NULL DEFAULT 'police',
+  `time` varchar(20) DEFAULT NULL,
+  `jobtype` varchar(25) NOT NULL DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `mdt_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `text` text NOT NULL,
-  `time` varchar(255) DEFAULT NULL,
-  `jobtype` varchar(255) DEFAULT 'police',
+  `time` varchar(20) DEFAULT NULL,
+  `jobtype` varchar(25) DEFAULT 'police',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

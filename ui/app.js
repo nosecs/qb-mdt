@@ -3629,46 +3629,46 @@ $(document).ready(() => {
         $("#home-reports-container").fadeIn(0);
         document.documentElement.style.setProperty(
           "--color-1",
-          "#00a3d0"
+          "#5F2121"
         );
         document.documentElement.style.setProperty(
           "--color-2",
-          "#017190"
+          "#7B2C2C"
         );
         document.documentElement.style.setProperty(
           "--color-3",
-          "#017190"
+          "#4A1C1C"
         );
         document.documentElement.style.setProperty(
           "--color-4",
-          "#025269"
+          "#5E2323"
         );
         document.documentElement.style.setProperty(
           "--color-5",
-          "#023f50"
+          "#381515"
         );
         document.documentElement.style.setProperty(
           "--color-6",
-          "#023f50"
+          "#2C1212"
         );
         document.documentElement.style.setProperty(
           "--color-7",
-          "rgb(2, 63, 80)"
+          "#521C1C"
         );
         document.documentElement.style.setProperty(
           "--color-8",
-          "#00a3d0"
+          "#CC2525"
         );
         document.documentElement.style.setProperty(
           "--color-9",
-          "#eaeaea"
+          "#8A8D91"
         );
         document.documentElement.style.setProperty(
           "--color-10",
           "#444444"
         );
         $(".badge-logo").attr("src", "img/ems_badge.png");
-        $(".header-title").html("MOUNT ZONAH MEDICAL CENTER");
+        $(".header-title").html("PILLBOX HILL MEDICAL CENTER");
         $(".quote-span").html(
           "The simplest explanation is almost always somebody screwed up."
         );
@@ -3763,8 +3763,8 @@ $(document).ready(() => {
     if (eventData.type == "show") {
       if (eventData.enable == true) {
         rosterLink = eventData.rosterLink;
-        JobColors(eventData.job);
         playerJob = eventData.job;
+        JobColors(playerJob);
         if (PoliceJobs[playerJob] !== undefined || DojJobs[playerJob] !== undefined) {
           $(".manage-profile-licenses-container").removeClass("display_hidden");
           $(".manage-convictions-container").removeClass("display_hidden");
@@ -4958,6 +4958,10 @@ function searchProfilesResults(result) {
       value.convictions < 15
     ) {
       convictions = "orange-tag";
+    }
+   
+    if (value.pp == '') {
+      value.pp = 'img/not-found.jpg'
     }
 
     profileHTML += `

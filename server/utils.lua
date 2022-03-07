@@ -17,13 +17,10 @@ function UnpackJob(data)
 	return job, grade
 end
 
--- Do Perm Check
 function PermCheck(src, PlayerData)
 	local result = true
 
-	-- if job is not in config
 	if not Config.AllowedJobs[PlayerData.job.name] then
-		-- idk if you have better log system or a notify system
 		print(("UserId: %s(%d) tried to access the mdt even though they are not authorised (server direct)"):format(GetPlayerName(src), src))
 		result = false
 	end
@@ -31,14 +28,12 @@ function PermCheck(src, PlayerData)
 	return result
 end
 
--- Get Profile Pic for Gender?
 function ProfPic(gender, profilepic)
 	if profilepic then return profilepic end;
 	if gender == "f" then return "img/female.png" end;
 	return "img/male.png"
 end
 
--- There is probably a better way but mehhhhhhh
 function GetJobType(job)
 	if Config.PoliceJobs[job] then
 		return 'police'

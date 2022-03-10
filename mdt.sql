@@ -100,5 +100,3 @@ CREATE TABLE IF NOT EXISTS `mdt_vehicleinfo` (
   `image` text NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-ALTER TABLE `player_vehicles` ADD COLUMN `image` text NULL DEFAULT NULL AFTER `garage`;

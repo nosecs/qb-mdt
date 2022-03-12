@@ -1,5 +1,5 @@
 local QBCore = exports['qb-core']:GetCoreObject()
-local PlayerData = QBCore.Functions.GetPlayerData()
+local PlayerData = {}
 local CurrentCops = 0
 local isOpen = false
 local callSign = ""
@@ -16,7 +16,6 @@ local tabletRot = vector3(10.0, 160.0, 0.0)
 local NUI_FUNCS = {
     ['GET_ACTIVE_UNITS'] = "getActiveUnits"
 }
-
 
 -- Events from qbcore
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
@@ -211,7 +210,7 @@ RegisterNetEvent('mdt:client:open', function(bulletin)
 
     -- local grade = PlayerData.job.grade.name
 
-    SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.grade.name..' '..PlayerData.charinfo.lastname, location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname, bulletin = bulletin })
+    SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.grade.name..' '..PlayerData.charinfo.lastname:sub(1,1):upper()..PlayerData.charinfo.lastname:sub(2), location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname, bulletin = bulletin })
     TriggerEvent("mdt:client:dashboardWarrants")
 end)
 

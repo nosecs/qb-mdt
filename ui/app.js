@@ -2588,13 +2588,14 @@ $(document).ready(() => {
         let vehicleHTML = "";
 
         result.forEach((value) => {
+          console.log(value)
           let paint = value.color;
           let impound = "red-tag";
           let bolo = "red-tag";
           let codefive = "red-tag";
           let stolen = "red-tag";
 
-          if (value.impound) {
+          if (value.state == 'Impounded') {
             impound = "green-tag";
           }
 

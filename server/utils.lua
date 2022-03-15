@@ -34,18 +34,6 @@ function ProfPic(gender, profilepic)
 	return "img/male.png"
 end
 
-function GetJobType(job)
-	if Config.PoliceJobs[job] then
-		return 'police'
-	elseif Config.AmbulanceJobs[job] then
-		return 'ambulance'
-	elseif Config.DojJobs[job] then
-		return 'doj'
-	else
-		return nil
-	end
-end
-
 function IsJobAllowedToMDT(job)
 	if Config.PoliceJobs[job] then
 		return true

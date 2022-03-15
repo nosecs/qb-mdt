@@ -848,7 +848,7 @@ QBCore.Functions.CreateCallback('mdt:server:SearchVehicles', function(source, cb
 	local Player = QBCore.Functions.GetPlayer(src)
 	if Player then
 		if GetJobType(Player.PlayerData.job.name) == 'police' then
-			local vehicles = MySQL.query.await("SELECT pv.id, pv.citizenid, pv.plate, pv.vehicle, pv.mods, p.charinfo FROM `player_vehicles` pv LEFT JOIN players p ON pv.citizenid = p.citizenid WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :query LIMIT 25", {
+			local vehicles = MySQL.query.await("SELECT pv.id, pv.citizenid, pv.plate, pv.vehicle, pv.mods, pv.state, p.charinfo FROM `player_vehicles` pv LEFT JOIN players p ON pv.citizenid = p.citizenid WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :query LIMIT 25", {
 				query = string.lower('%'..sentData..'%')
 			})
 
@@ -901,7 +901,7 @@ RegisterNetEvent('mdt:server:getVehicleData', function(plate)
 				local vehicle = MySQL.Sync.fetchAll("select pv.*, p.charinfo from player_vehicles pv LEFT JOIN players p ON pv.citizenid = p.citizenid where pv.plate = :plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
 				if vehicle and vehicle[1] then
 					vehicle[1]['impound'] = false
-					if vehicle.state == 2 then
+					if vehicle[1].state == 2 then
 						vehicle[1]['impound'] = true
 					end
 
@@ -1416,44 +1416,46 @@ end
 exports('isRequestVehicle', isRequestVehicle) -- exports['erp_mdt']:isRequestVehicle()
 
 RegisterNetEvent('mdt:server:impoundVehicle', function(sentInfo, sentVehicle)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			if player.job.isPolice then
-				if sentInfo and type(sentInfo) == 'table' then
-					local plate, linkedreport, fee, time = sentInfo['plate'], sentInfo['linkedreport'], sentInfo['fee'], sentInfo['time']
-					if (plate and linkedreport and fee and time) then
-						MySQL.scalar("SELECT id, plate FROM `owned_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")}, function(vehicle)
-							if vehicle and vehicle[1] then
-								local data = vehicle[1]
-								MySQL.insert('INSERT INTO `impound` (`vehicleid`, `linkedreport`, `fee`, `time`) VALUES (:vehicleid, :linkedreport, :fee, :time)', {
-									vehicleid = data['id'],
-									linkedreport = linkedreport,
-									fee = fee,
-									time = os.time() + (time * 60)
-								}, function(res)
-									-- notify?
-									local data = {
-										vehicleid = data['id'],
-										plate = plate,
-										beingcollected = 0,
-										vehicle = sentVehicle,
-										officer = player['fullname'],
-										number = player['phone_number'],
-										time = os.time() * 1000,
-										src = player['source']
-									}
-									local vehicle = NetworkGetEntityFromNetworkId(sentVehicle)
-									FreezeEntityPosition(vehicle, true)
-									impound[#impound+1] = data
-									TriggerClientEvent('mdt:client:notifyMechanics', -1, data)
-								end)
-							end
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			if sentInfo and type(sentInfo) == 'table' then
+				local plate, linkedreport, fee, time = sentInfo['plate'], sentInfo['linkedreport'], sentInfo['fee'], sentInfo['time']
+				if (plate and linkedreport and fee and time) then
+				local vehicle = MySQL.Sync.fetchAll("SELECT id, plate FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1") })
+					if vehicle and vehicle[1] then
+						local data = vehicle[1]
+						MySQL.insert('INSERT INTO `mdt_impound` (`vehicleid`, `linkedreport`, `fee`, `time`) VALUES (:vehicleid, :linkedreport, :fee, :time)', {
+							vehicleid = data['id'],
+							linkedreport = linkedreport,
+							fee = fee,
+							time = os.time() + (time * 60)
+						}, function(res)
+							-- notify?
+							local data = {
+								vehicleid = data['id'],
+								plate = plate,
+								beingcollected = 0,
+								vehicle = sentVehicle,
+								officer = Player.PlayerData.charinfo.firstname.. " "..Player.PlayerData.charinfo.lastname,
+								number = Player.PlayerData.charinfo.phone,
+								time = os.time() * 1000,
+								src = src,
+							}
+							local vehicle = NetworkGetEntityFromNetworkId(sentVehicle)
+							FreezeEntityPosition(vehicle, true)
+							impound[#impound+1] = data
+							--TriggerClientEvent('mdt:client:notifyMechanics', -1, data)
+
+							--TriggerClientEvent("police:client:ImpoundVehicle", src, false, tonumber(args[1]))
+							TriggerClientEvent("police:client:ImpoundVehicle", src, true, fee)
 						end)
 					end
 				end
 			end
 		end
-	end)
+	end
 end)
 
 -- mdt:server:getImpoundVehicles
@@ -1491,36 +1493,36 @@ RegisterNetEvent('mdt:server:collectVehicle', function(sentId)
 	end)
 end)
 
-RegisterNetEvent('mdt:server:removeImpound', function(plate)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			if player.job.isPolice then
-				local vehicle = MySQL.query.await("SELECT id, plate FROM `owned_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
-				if vehicle and vehicle[1] then
-					local data = vehicle[1]
-					MySQL.Sync.execute("DELETE FROM `impound` WHERE vehicleid=:vehicleid", { vehicleid = data['id'] })
-				end
+RegisterNetEvent('mdt:server:removeImpound', function(plate, currentSelection)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			local result = MySQL.single.await("SELECT id FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
+			if result and result[1] then
+				local data = result[1]
+				MySQL.Sync.execute("DELETE FROM `mdt_impound` WHERE vehicleid=:vehicleid", { vehicleid = data['id'] })
+				TriggerClientEvent('police:client:TakeOutImpound', src, currentSelection)
 			end
 		end
-	end)
+	end
 end)
 
 RegisterNetEvent('mdt:server:statusImpound', function(plate)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			if player.job.isPolice then
-				local vehicle = MySQL.query.await("SELECT id, plate FROM `owned_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
-				if vehicle and vehicle[1] then
-					local data = vehicle[1]
-					MySQL.Sync.fetchAll("SELECT * FROM `impound` WHERE vehicleid=:vehicleid LIMIT 1", { vehicleid = data['id'] }, function(impoundinfo)
-						if impoundinfo and impoundinfo[1] then
-							TriggerClientEvent('mdt:client:statusImpound', player['source'], impoundinfo[1], plate)
-						end
-					end)
+	local src = source
+	local Player = QBCore.Functions.GetPlayer(src)
+	if Player then
+		if GetJobType(Player.PlayerData.job.name) == 'police' then
+			local vehicle = MySQL.Sync.fetchAll("SELECT id, plate FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
+			if vehicle and vehicle[1] then
+				local data = vehicle[1]
+				local impoundinfo = MySQL.Sync.fetchAll("SELECT * FROM `mdt_impound` WHERE vehicleid=:vehicleid LIMIT 1", { vehicleid = data['id'] })
+				if impoundinfo and impoundinfo[1] then
+					TriggerClientEvent('mdt:client:statusImpound', src, impoundinfo[1], plate)
 				end
 			end
 		end
-	end)
+	end
 end)
 
 function GetBoloStatus(plate)

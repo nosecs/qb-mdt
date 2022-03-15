@@ -104,7 +104,6 @@ local function CurrentDuty(duty)
 end
 
 local function EnableGUI(enable)
-    print("MDT Enable GUI", enable)
     SetNuiFocus(enable, enable)
     SendNUIMessage({ type = "show", enable = enable, job = PlayerData.job.name, rosterLink = Config.RosterLink[PlayerData.job.name] })
     isOpen = enable
@@ -742,33 +741,45 @@ RegisterNUICallback("sendCallResponse", function(data, cb)
 end)
 
 RegisterNUICallback("impoundVehicle", function(data, cb)
-    local found = 0
-    local plate = string.upper(string.gsub(data['plate'], "^%s*(.-)%s*$", "%1"))
-    local vehicles = GetGamePool('CVehicle')
+    local JobType = GetJobType(PlayerData.job.name)
+    if JobType == 'police' then
+        local found = 0
+        local plate = string.upper(string.gsub(data['plate'], "^%s*(.-)%s*$", "%1"))
+        local vehicles = GetGamePool('CVehicle')
 
-    for k,v in pairs(vehicles) do
-        local plt = string.upper(string.gsub(GetVehicleNumberPlateText(v), "^%s*(.-)%s*$", "%1"))
-        if plt == plate then
-            local dist = #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(v))
-            if dist < 10.0 then
-                found = VehToNet(v)
+        for k,v in pairs(vehicles) do
+            local plt = string.upper(string.gsub(GetVehicleNumberPlateText(v), "^%s*(.-)%s*$", "%1"))
+            if plt == plate then
+                local dist = #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(v))
+                if dist < 5.0 then
+                    found = VehToNet(v)
+                end
+                break
             end
-            break
         end
-    end
 
-    if found == 0 then
-        -- notif system here.
-        return
-    end
+        if found == 0 then
+            QBCore.Functions.Notify('Vehicle not found!', 'error')
+            return
+        end
 
-    SendNUIMessage({ type = "greenShit" })
-    TriggerServerEvent('mdt:server:impoundVehicle', data, found)
-    cb('okbb')
+        SendNUIMessage({ type = "greenShit" })
+        TriggerServerEvent('mdt:server:impoundVehicle', data, found)
+        cb('ok')
+    end
 end)
 
 RegisterNUICallback("removeImpound", function(data, cb)
-	TriggerServerEvent('mdt:server:removeImpound', data['plate'])
+    local ped = PlayerPedId()
+    local playerPos = GetEntityCoords(ped)
+    for k, v in pairs(Config.ImpoundLocations) do
+        if (#(playerPos - vector3(v.x, v.y, v.z)) < 20.0) then
+            TriggerServerEvent('mdt:server:removeImpound', data['plate'], k)
+            break
+        end
+    end
+    --police:client:TakeOutImpound
+	
 	cb('ok')
 end)
 

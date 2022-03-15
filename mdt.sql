@@ -100,3 +100,12 @@ CREATE TABLE IF NOT EXISTS `mdt_vehicleinfo` (
   `image` text NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `mdt_impound` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `vehicleid` int(11) NOT NULL,
+  `linkedreport` int(11) NOT NULL,
+  `fee` int(11) DEFAULT NULL,
+  `time` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

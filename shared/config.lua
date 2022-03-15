@@ -612,3 +612,20 @@ Config.ClassList = {
     [20] = "Commercial",
     [21] = "Train"
 }
+
+function GetJobType(job)
+	if Config.PoliceJobs[job] then
+		return 'police'
+	elseif Config.AmbulanceJobs[job] then
+		return 'ambulance'
+	elseif Config.DojJobs[job] then
+		return 'doj'
+	else
+		return nil
+	end
+end
+
+Config.ImpoundLocations = {
+    [1] = vector4(436.68, -1007.42, 27.32, 180.0),
+    [2] = vector4(-436.14, 5982.63, 31.34, 136.0),
+}

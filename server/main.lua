@@ -323,7 +323,7 @@ RegisterNetEvent("mdt:server:newTag", function(cid, tag)
 		if result then
 			if result.job and (result.job.isPolice or result.job.name == 'doj') then
 				local function UpdateTags(id, tags)
-					MySQL.Async.update("UPDATE policemdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tags) })
+					MySQL.update("UPDATE policemdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tags) })
 					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." was added a new tag with the text ("..tag..") by "..result.fullname)
 				end
 
@@ -341,7 +341,7 @@ RegisterNetEvent("mdt:server:newTag", function(cid, tag)
 				end
 			elseif result.job and (result.job.name == 'ambulance') then
 				local function UpdateTags(id, tags)
-					MySQL.Async.update("UPDATE emsmdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tags) })
+					MySQL.update("UPDATE emsmdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tags) })
 					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." was added a new tag with the text ("..tag..") by "..result.fullname)
 				end
 
@@ -368,7 +368,7 @@ RegisterNetEvent("mdt:server:removeProfileTag", function(cid, tagtext)
 			if result.job and (result.job.isPolice or result.job.name == 'doj') then
 
 				local function UpdateTags(id, tag)
-					MySQL.Async.update("UPDATE policemdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tag)})
+					MySQL.update("UPDATE policemdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tag)})
 					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." was removed of a tag with the text ("..tagtext..") by "..result.fullname)
 				end
 
@@ -389,7 +389,7 @@ RegisterNetEvent("mdt:server:removeProfileTag", function(cid, tagtext)
 			elseif result.job and (result.job.name == 'ambulance') then
 
 				local function UpdateTags(id, tag)
-					MySQL.Async.update("UPDATE emsmdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tag) })
+					MySQL.update("UPDATE emsmdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tag) })
 					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." was removed of a tag with the text ("..tagtext..") by "..result.fullname)
 				end
 
@@ -428,7 +428,7 @@ RegisterNetEvent("mdt:server:addGalleryImg", function(cid, img)
 	if Player then
 		if GetJobType(Player.PlayerData.job.name) == 'police' then
 			local function UpdateGallery(id, gallery)
-				MySQL.Async.update("UPDATE policemdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
+				MySQL.update("UPDATE policemdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
 				TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." had their gallery updated (+) by "..result.fullname)
 			end
 
@@ -454,7 +454,7 @@ RegisterNetEvent("mdt:server:removeGalleryImg", function(cid, img)
 			if result.job and (result.job.isPolice or result.job.name == 'doj') then
 
 				local function UpdateGallery(id, gallery)
-					MySQL.Async.update("UPDATE policemdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
+					MySQL.update("UPDATE policemdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
 					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." had their gallery updated (-) by "..result.fullname)
 				end
 
@@ -477,7 +477,7 @@ RegisterNetEvent("mdt:server:removeGalleryImg", function(cid, img)
 			elseif result.job and (result.job.name == 'ambulance') then
 
 				local function UpdateGallery(id, gallery)
-					MySQL.Async.update("UPDATE emsmdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
+					MySQL.update("UPDATE emsmdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
 					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." had their gallery updated (-) by "..result.fullname)
 				end
 
@@ -810,7 +810,7 @@ RegisterNetEvent('mdt:server:newReport', function(existing, id, title, reporttyp
 				end
 
 				local function UpdateReport()
-					MySQL.Async.update("UPDATE `mdt_reports` SET `title` = :title, type = :type, details = :details, tags = :tags, gallery = :gallery, officersinvolved = :officersinvolved, civsinvolved = :civsinvolved, jobtype = :jobtype WHERE `id` = :id LIMIT 1", {
+					MySQL.update("UPDATE `mdt_reports` SET `title` = :title, type = :type, details = :details, tags = :tags, gallery = :gallery, officersinvolved = :officersinvolved, civsinvolved = :civsinvolved, jobtype = :jobtype WHERE `id` = :id LIMIT 1", {
 						title = title,
 						type = reporttype,
 						details = details,
@@ -958,7 +958,7 @@ RegisterNetEvent('mdt:server:saveVehicleInfo', function(dbid, plate, imageurl, n
 						end
 					end)
 				elseif tonumber(dbid) > 0 then
-					MySQL.Async.update("UPDATE mdt_vehicleinfo SET `information`= :information, `image`= :image, `code5`= :code5, `stolen`= :stolen WHERE `plate`= :plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), information = notes, image = imageurl, code5 = code5, stolen = stolen })
+					MySQL.update("UPDATE mdt_vehicleinfo SET `information`= :information, `image`= :image, `code5`= :code5, `stolen`= :stolen WHERE `plate`= :plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), information = notes, image = imageurl, code5 = code5, stolen = stolen })
 				end
 			end
 		end
@@ -973,16 +973,16 @@ RegisterNetEvent('mdt:server:knownInformation', function(dbid, type, status, pla
 					if dbid == nil then dbid = 0 end;
 
 					if type == 'code5' and status == true then
-						MySQL.Async.update("UPDATE owned_vehicles SET `code`=:code WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), code = 5 })
+						MySQL.update("UPDATE owned_vehicles SET `code`=:code WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), code = 5 })
 						TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") was set to CODE 5 by "..result['fullname'])
 					elseif type == 'code5' and not status then
-						MySQL.Async.update("UPDATE owned_vehicles SET `code`=:code WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), code = 0 })
+						MySQL.update("UPDATE owned_vehicles SET `code`=:code WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), code = 0 })
 						TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") had it's CODE 5 status removed by "..result['fullname'])
 					elseif type == 'stolen' and status then
-						MySQL.Async.update("UPDATE owned_vehicles SET `stolen`=:stolen WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), stolen = 1 })
+						MySQL.update("UPDATE owned_vehicles SET `stolen`=:stolen WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), stolen = 1 })
 						TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") was set to STOLEN by "..result['fullname'])
 					elseif type == 'stolen' and not status then
-						MySQL.Async.update("UPDATE owned_vehicles SET `stolen`=:stolen WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), stolen = 0 })
+						MySQL.update("UPDATE owned_vehicles SET `stolen`=:stolen WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), stolen = 0 })
 						TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") had it's STOLEN status removed by "..result['fullname'])
 					end
 
@@ -1069,7 +1069,7 @@ RegisterNetEvent('mdt:server:toggleDuty', function(cid, status)
 				local isPolice = false
 				if policeJobs[player.job.name] then isPolice = true end;
 				exports['echorp']:SetPlayerData(player.source, 'job', {name = player.job.name, grade = player.job.grade, duty = status, isPolice = isPolice})
-				MySQL.Async.update("UPDATE users SET duty=:duty WHERE id=:cid", { duty = status, cid = cid})
+				MySQL.update("UPDATE users SET duty=:duty WHERE id=:cid", { duty = status, cid = cid})
 				if status == 0 then
 					TriggerEvent('mdt:server:AddLog', result['fullname'].." set "..player['fullname']..'\'s duty to 10-7')
 				else
@@ -1126,7 +1126,7 @@ RegisterNetEvent('mdt:server:saveIncident', function(id, title, information, tag
 					end
 				end)
 			elseif id > 0 then
-				MySQL.Async.update("UPDATE mdt_incidents SET title=:title, details=:details, civsinvolved=:civsinvolved, tags=:tags, officersinvolved=:officersinvolved, evidence=:evidence WHERE id=:id", {
+				MySQL.update("UPDATE mdt_incidents SET title=:title, details=:details, civsinvolved=:civsinvolved, tags=:tags, officersinvolved=:officersinvolved, evidence=:evidence WHERE id=:id", {
 					title = title,
 					details = information,
 					tags = json.encode(tags),
@@ -1149,7 +1149,7 @@ RegisterNetEvent('mdt:server:handleExistingConvictions', function(data, incident
 		linkedincident = incidentid
 	}, function(convictionRes)
 		if convictionRes and convictionRes[1] and convictionRes[1]['id'] then
-			MySQL.Async.update('UPDATE mdt_convictions SET cid=:cid, linkedincident=:linkedincident, warrant=:warrant, guilty=:guilty, processed=:processed, associated=:associated, charges=:charges, fine=:fine, sentence=:sentence, recfine=:recfine, recsentence=:recsentence WHERE cid=:cid AND linkedincident=:linkedincident', {
+			MySQL.update('UPDATE mdt_convictions SET cid=:cid, linkedincident=:linkedincident, warrant=:warrant, guilty=:guilty, processed=:processed, associated=:associated, charges=:charges, fine=:fine, sentence=:sentence, recfine=:recfine, recsentence=:recsentence WHERE cid=:cid AND linkedincident=:linkedincident', {
 				cid = data['Cid'],
 				linkedincident = incidentid,
 				warrant = data['Warrant'],

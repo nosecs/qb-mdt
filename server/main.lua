@@ -101,7 +101,7 @@ QBCore.Functions.CreateCallback("mdt:server:getWarrants", function(source, cb)
     local data = MySQL.query.await("SELECT * FROM mdt_convictions", {})
     for _, value in pairs(data) do
         if value.warrant == "1" then
-			WarrantData[#WarrantData0+1] = {
+			WarrantData[#WarrantData+1] = {
                 cid = value.cid,
                 linkedincident = value.linkedincident,
                 name = GetNameFromId(value.cid),

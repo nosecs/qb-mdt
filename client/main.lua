@@ -3,7 +3,6 @@ local PlayerData = {}
 local CurrentCops = 0
 local isOpen = false
 local callSign = ""
-local PlayerData = {}
 
 local tablet = 0
 local tabletDict = "amb@code_human_in_bus_passenger_idles@female@tablet@base"
@@ -21,10 +20,6 @@ local NUI_FUNCS = {
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerData = QBCore.Functions.GetPlayerData()
     callSign = PlayerData.metadata.callsign
-end)
-
-RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
-    PlayerData = {}
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
@@ -548,7 +543,46 @@ RegisterNUICallback("saveVehicleInfo", function(data, cb)
     local notes = data.notes
     local stolen = data.stolen
     local code5 = data.code5
-    TriggerServerEvent('mdt:server:saveVehicleInfo', dbid, plate, imageurl, notes, stolen, code5)
+    local impound = data.impound
+    local JobType = GetJobType(PlayerData.job.name)
+    if JobType == 'police' and impound.impoundChanged == true then
+        if impound.inpoundActive then
+            local found = 0
+            local plate = string.upper(string.gsub(data['plate'], "^%s*(.-)%s*$", "%1"))
+            local vehicles = GetGamePool('CVehicle')
+
+            for k,v in pairs(vehicles) do
+                local plt = string.upper(string.gsub(GetVehicleNumberPlateText(v), "^%s*(.-)%s*$", "%1"))
+                if plt == plate then
+                    local dist = #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(v))
+                    if dist < 5.0 then
+                        found = VehToNet(v)
+                        SendNUIMessage({ type = "greenImpound" })
+                    end
+                    break
+                end
+            end
+
+            if found == 0 then
+                QBCore.Functions.Notify('Vehicle not found!', 'error')
+                SendNUIMessage({ type = "redImpound" })
+            end
+            --TriggerServerEvent('mdt:server:impoundVehicle', data, found)
+            --cb('ok')
+        else
+            local ped = PlayerPedId()
+            local playerPos = GetEntityCoords(ped)
+            for k, v in pairs(Config.ImpoundLocations) do
+                if (#(playerPos - vector3(v.x, v.y, v.z)) < 20.0) then
+                    --TriggerServerEvent('mdt:server:removeImpound', data['plate'], k)
+                    impound.CurrentSelection = k
+                    break
+                end
+            end
+        end
+    end
+
+    TriggerServerEvent('mdt:server:saveVehicleInfo', dbid, plate, imageurl, notes, stolen, code5, impound)
     cb(true)
 end)
 
@@ -740,7 +774,7 @@ RegisterNUICallback("sendCallResponse", function(data, cb)
     cb(true)
 end)
 
-RegisterNUICallback("impoundVehicle", function(data, cb)
+--[[ RegisterNUICallback("impoundVehicle", function(data, cb)
     local JobType = GetJobType(PlayerData.job.name)
     if JobType == 'police' then
         local found = 0
@@ -767,7 +801,7 @@ RegisterNUICallback("impoundVehicle", function(data, cb)
         TriggerServerEvent('mdt:server:impoundVehicle', data, found)
         cb('ok')
     end
-end)
+end) ]]
 
 RegisterNUICallback("removeImpound", function(data, cb)
     local ped = PlayerPedId()
@@ -778,8 +812,6 @@ RegisterNUICallback("removeImpound", function(data, cb)
             break
         end
     end
-    --police:client:TakeOutImpound
-	
 	cb('ok')
 end)
 

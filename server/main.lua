@@ -645,7 +645,7 @@ RegisterNetEvent('mdt:server:newBolo', function(existing, id, title, plate, owne
 			end
 
 			local function UpdateBolo()
-				MySQL.Sync.execute("UPDATE mdt_bolos SET `title`=:title, plate=:plate, owner=:owner, individual=:individual, detail=:detail, tags=:tags, gallery=:gallery, officersinvolved=:officersinvolved WHERE `id`=:id AND jobtype = :jobtype LIMIT 1", {
+				MySQL.update.await("UPDATE mdt_bolos SET `title`=:title, plate=:plate, owner=:owner, individual=:individual, detail=:detail, tags=:tags, gallery=:gallery, officersinvolved=:officersinvolved WHERE `id`=:id AND jobtype = :jobtype LIMIT 1", {
 					title = title,
 					plate = plate,
 					owner = owner,
@@ -680,7 +680,7 @@ RegisterNetEvent('mdt:server:deleteBolo', function(id)
 		local JobType = GetJobType(Player.PlayerData.job.name)
 		if JobType == 'police' then
 			local fullname = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
-			MySQL.Sync.execute("DELETE FROM `mdt_bolos` WHERE id=:id", { id = id, jobtype = JobType })
+			MySQL.update("DELETE FROM `mdt_bolos` WHERE id=:id", { id = id, jobtype = JobType })
 			TriggerEvent('mdt:server:AddLog', "A BOLO was deleted by "..fullname.." with the ID ("..id..")")
 		end
 	end
@@ -693,7 +693,7 @@ RegisterNetEvent('mdt:server:deleteICU', function(id)
 		local JobType = GetJobType(Player.PlayerData.job.name)
 		if JobType == 'ambulance' then
 			local fullname = Player.PlayerData.charinfo.firstname .. ' ' .. Player.PlayerData.charinfo.lastname
-			MySQL.Sync.execute("DELETE FROM `mdt_bolos` WHERE id=:id", { id = id, jobtype = JobType })
+			MySQL.update("DELETE FROM `mdt_bolos` WHERE id=:id", { id = id, jobtype = JobType })
 			TriggerEvent('mdt:server:AddLog', "A ICU Check-in was deleted by "..fullname.." with the ID ("..id..")")
 		end
 	end
@@ -941,7 +941,7 @@ RegisterNetEvent('mdt:server:getVehicleData', function(plate)
 	end
 end)
 
-RegisterNetEvent('mdt:server:saveVehicleInfo', function(dbid, plate, imageurl, notes, stolen, code5)
+RegisterNetEvent('mdt:server:saveVehicleInfo', function(dbid, plate, imageurl, notes, stolen, code5, impound)
 	if plate then
 		local src = source
 		local Player = QBCore.Functions.GetPlayer(src)
@@ -959,6 +959,52 @@ RegisterNetEvent('mdt:server:saveVehicleInfo', function(dbid, plate, imageurl, n
 					end)
 				elseif tonumber(dbid) > 0 then
 					MySQL.update("UPDATE mdt_vehicleinfo SET `information`= :information, `image`= :image, `code5`= :code5, `stolen`= :stolen WHERE `plate`= :plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), information = notes, image = imageurl, code5 = code5, stolen = stolen })
+				end
+
+				if impound.impoundChanged then
+					local vehicle = MySQL.single.await("SELECT p.id, p.plate, i.vehicleid AS impoundid FROM `player_vehicles` p LEFT JOIN `mdt_impound` i ON i.vehicleid = p.id WHERE plate=:plate", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1") })
+					if impound.impoundActive then
+						local plate, linkedreport, fee, time = impound['plate'], impound['linkedreport'], impound['fee'], impound['time']
+						if (plate and linkedreport and fee and time) then
+							if vehicle.impoundid == nil then
+								local data = vehicle
+								MySQL.insert('INSERT INTO `mdt_impound` (`vehicleid`, `linkedreport`, `fee`, `time`) VALUES (:vehicleid, :linkedreport, :fee, :time)', {
+									vehicleid = data['id'],
+									linkedreport = linkedreport,
+									fee = fee,
+									time = os.time() + (time * 60)
+								}, function(res)
+									-- notify?
+									local data = {
+										vehicleid = data['id'],
+										plate = plate,
+										beingcollected = 0,
+										vehicle = sentVehicle,
+										officer = Player.PlayerData.charinfo.firstname.. " "..Player.PlayerData.charinfo.lastname,
+										number = Player.PlayerData.charinfo.phone,
+										time = os.time() * 1000,
+										src = src,
+									}
+									local vehicle = NetworkGetEntityFromNetworkId(sentVehicle)
+									FreezeEntityPosition(vehicle, true)
+									impound[#impound+1] = data --what does inputting into this table do?
+
+									--TriggerClientEvent("police:client:ImpoundVehicle", src, false, tonumber(args[1]))
+									TriggerClientEvent("police:client:ImpoundVehicle", src, true, fee)
+								end)
+							end
+						end
+					else
+						if vehicle.impoundid ~= nil then
+							local data = vehicle
+							MySQL.update("DELETE FROM `mdt_impound` WHERE id=:vehicleid", { vehicleid = data['impoundid'] })
+							local data = {
+								currentSelection = impound.currentSelection,
+								plate = plate
+							}
+							TriggerClientEvent('police:client:TakeOutImpound', src, data)
+						end
+					end
 				end
 			end
 		end
@@ -1182,7 +1228,7 @@ RegisterNetEvent('mdt:server:handleExistingConvictions', function(data, incident
 end)
 
 RegisterNetEvent('mdt:server:removeIncidentCriminal', function(cid, incident)
-	MySQL.Sync.execute('DELETE FROM mdt_convictions WHERE cid=:cid AND linkedincident=:linkedincident', {
+	MySQL.update('DELETE FROM mdt_convictions WHERE cid=:cid AND linkedincident=:linkedincident', {
 		cid = cid,
 		linkedincident = incident
 	})
@@ -1446,7 +1492,6 @@ RegisterNetEvent('mdt:server:impoundVehicle', function(sentInfo, sentVehicle)
 							local vehicle = NetworkGetEntityFromNetworkId(sentVehicle)
 							FreezeEntityPosition(vehicle, true)
 							impound[#impound+1] = data
-							--TriggerClientEvent('mdt:client:notifyMechanics', -1, data)
 
 							--TriggerClientEvent("police:client:ImpoundVehicle", src, false, tonumber(args[1]))
 							TriggerClientEvent("police:client:ImpoundVehicle", src, true, fee)
@@ -1501,7 +1546,7 @@ RegisterNetEvent('mdt:server:removeImpound', function(plate, currentSelection)
 			local result = MySQL.single.await("SELECT id FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
 			if result and result[1] then
 				local data = result[1]
-				MySQL.Sync.execute("DELETE FROM `mdt_impound` WHERE vehicleid=:vehicleid", { vehicleid = data['id'] })
+				MySQL.update("DELETE FROM `mdt_impound` WHERE vehicleid=:vehicleid", { vehicleid = data['id'] })
 				TriggerClientEvent('police:client:TakeOutImpound', src, currentSelection)
 			end
 		end

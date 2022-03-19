@@ -3720,6 +3720,10 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
     background-color: #FFEAB9;
 }
 
+.active-info-job-unk {
+    background-color: #6E707C;
+}
+
 .dispatch-item-message {
     float:left;
     font-size: 14px;

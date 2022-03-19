@@ -22,6 +22,7 @@ var DispatchNum = 0;
 var playerJob = "";
 let rosterLink  = "";
 
+let impoundChanged = false;
 
 // TEMP CONFIG OF JOBS
 const PoliceJobs = {
@@ -752,7 +753,6 @@ $(document).ready(() => {
           e.which = 13; // # Some key code value
           e.keyCode = 13
           $("#dmv-search-input").trigger(e);
-          //console.log(keydown)
         }, 250);
       }, 250);
     }, 250);
@@ -2588,7 +2588,6 @@ $(document).ready(() => {
         let vehicleHTML = "";
 
         result.forEach((value) => {
-          console.log(value)
           let paint = value.color;
           let impound = "red-tag";
           let bolo = "red-tag";
@@ -2692,6 +2691,20 @@ $(document).ready(() => {
             stolen = true
           }
 
+          let impoundInfo = {}
+          console.log(impoundChanged)
+          impoundInfo.impoundActive = $(".vehicle-tags").find(".impound-tag").hasClass("green-tag")
+          impoundInfo.impoundChanged = impoundChanged
+          //console.log($(".vehicle-tags").find(".impound-tag").hasClass("green-tag"))
+          if (impoundChanged === true) {
+            if (impoundInfo.impoundActive === true) {
+              impoundInfo.plate = $(".impound-plate").val();
+              impoundInfo.linkedreport = $(".impound-linkedreport").val();
+              impoundInfo.fee = $(".impound-fee").val();
+              impoundInfo.time = $(".impound-time").val();
+            }
+          }
+
           $.post(
             `https://${GetParentResourceName()}/saveVehicleInfo`,
             JSON.stringify({
@@ -2701,9 +2714,11 @@ $(document).ready(() => {
               notes: notes,
               stolen: stolen,
               code5: code5,
+              impound: impoundInfo,
             })
           );
 
+          impoundChanged = false;
           $(".vehicle-info-image").attr("src", newImageurl);
         }, 250);
       }
@@ -2898,7 +2913,7 @@ $(document).ready(() => {
       return;
     }
 
-    $.post(
+    /* $.post(
       `https://${GetParentResourceName()}/impoundVehicle`,
       JSON.stringify({
         plate: plate,
@@ -2906,16 +2921,19 @@ $(document).ready(() => {
         fee: fee,
         time: time,
       })
-    );
+    ); */
 
-    $(".impound-plate").val("");
-    $(".impound-linkedreport").val("");
-    $(".impound-fee").val("");
-    $(".impound-time").val("");
-    $(".impound-fee").css("color", "white");
+    //$(".impound-plate").val("");
+    //$(".impound-linkedreport").val("");
+    //$(".impound-fee").val("");
+    //$(".impound-time").val("");
+    //$(".impound-fee").css("color", "white");
+
+    $(".vehicle-tags").find(".impound-tag").addClass("green-tag").removeClass("red-tag");
 
     $(".impound-form").slideUp(250);
     $(".impound-form").fadeOut(250);
+    impoundChanged = true;
   });
 
   $(".impound-cancel").click(function () {
@@ -2931,12 +2949,17 @@ $(document).ready(() => {
 
   $(".contextmenu").on("click", ".remove-impound", function () {
     const plate = $(this).data("info");
-    $.post(
+    /* $.post(
       `https://${GetParentResourceName()}/removeImpound`,
       JSON.stringify({
         plate: plate,
       })
-    );
+    ); */
+    $(".impound-plate").val("");
+    $(".impound-linkedreport").val("");
+    $(".impound-fee").val("");
+    $(".impound-time").val("");
+    impoundChanged = true;
 
     $(".vehicle-tags")
       .find(".impound-tag")
@@ -3843,9 +3866,6 @@ $(document).ready(() => {
         .find("[data-id='" + eventData.data + "']")
         .remove();
     } else if (eventData.type == "warrants") {
-      // const value = eventData.data;
-      // console.log(JSON.stringify(value));
-      // console.log(value[0]["name"])
       $(".warrants-items").empty();
       $.each(eventData.data, function (index, value) {
         $('.warrants-items').prepend(`<div class="warrants-item" data-cid=${value.cid} data-id=${value.linkedincident}><div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 0.75vh; width: 100%;">
@@ -4559,6 +4579,8 @@ $(document).ready(() => {
     } else if (eventData.type == "searchedVehicles") {
 
     } else if (eventData.type == "getVehicleData") {
+      impoundChanged = false;
+      console.log(impoundChanged)
       let table = eventData.data;
 
       $(".vehicle-information-title-holder").data(
@@ -4701,11 +4723,16 @@ $(document).ready(() => {
       $(".impound-submit").fadeOut(250);
       $(".impound-form").slideDown(250);
       $(".impound-form").fadeIn(250);
-    } else if (eventData.type == "greenShit") {
+    } else if (eventData.type == "greenImpound") {
       $(".vehicle-tags")
         .find(".impound-tag")
         .addClass("green-tag")
         .removeClass("red-tag");
+    } else if (eventData.type == "redImpound") {
+      $(".vehicle-tags")
+        .find(".impound-tag")
+        .removeClass("green-tag")
+        .addClass("red-tag");
     } else if (eventData.type == "getActiveUnits") {
 
       let policeCount = 0;
@@ -4724,24 +4751,24 @@ $(document).ready(() => {
         let radioBack = unit.sig100 ? "#7b2c2c" : "var(--color-3)";
         let radio = unit.radio ? unit.radio : "0";
         let callSign = unit.callSign ? unit.callSign : "000";
-        let activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
-        if (unit.duty == 1) {
-          if (unit.unitType == "police") {
-            policeCount++;
-          }
-          if (unit.unitType == "ambulance") {
-            activeInfoJob = `<div class="unit-job active-info-job-ambulance">Ambulance</div>`
-            emsCount++;
-          }
-          if (unit.unitType == "Fire") {
-            activeInfoJob = `<div class="unit-job active-info-job-fire">FIRE</div>`
-            fireCount++;
-          }
-          if (unit.unitType == "DOJ") {
-            activeInfoJob = `<div class="unit-job active-info-job-doj">DACAS</div>`
-            dojCount++;
-          }
+        let activeInfoJob = `<div class="unit-job active-info-job-unk">UNKOWN</div>`;
+        if (unit.unitType == "police") {
+          policeCount++;
+          activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
         }
+        if (unit.unitType == "ambulance") {
+          activeInfoJob = `<div class="unit-job active-info-job-ambulance">Ambulance</div>`
+          emsCount++;
+        }
+        if (unit.unitType == "Fire") {
+          activeInfoJob = `<div class="unit-job active-info-job-fire">FIRE</div>`
+          fireCount++;
+        }
+        if (unit.unitType == "DOJ") {
+          activeInfoJob = `<div class="unit-job active-info-job-doj">DACAS</div>`
+          dojCount++;
+        }
+
         unitListHTML += `
                     <div class="active-unit-item" data-id="${unit.cid}">
                         <div class="unit-status ${statusColor}">${status}</div>

@@ -4745,7 +4745,7 @@ $(document).ready(() => {
         unitListHTML += `
                     <div class="active-unit-item" data-id="${unit.cid}">
                         <div class="unit-status ${statusColor}">${status}</div>
-                        <div class="unit-job active-info-job-lspd">LSPD</div>
+                        ${activeInfoJob}
                         <div class="unit-name">(${callSign}) ${unit.firstName} ${unit.lastName}</div>
                         <div class="unit-radio" style="background-color: ${radioBack};">${radio}</div>
                     </div>

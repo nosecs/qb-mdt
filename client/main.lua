@@ -306,20 +306,6 @@ RegisterNUICallback("updateLicence", function(data, cb)
     cb(true)
 end)
 
-RegisterNUICallback("addGalleryImg", function(data, cb)
-    local cid = data.cid
-    local url = data.URL
-    TriggerServerEvent('mdt:server:addGalleryImg', cid, url)
-    cb(true)
-end)
-
-RegisterNUICallback("removeGalleryImg", function(data, cb)
-    local cid = data.cid
-    local url = data.URL
-    TriggerServerEvent('mdt:server:removeGalleryImg', cid, url)
-    cb(true)
-end)
-
 RegisterNUICallback("searchIncidents", function(data, cb)
     local incident = data.incident
     TriggerServerEvent('mdt:server:searchIncidents', incident)
@@ -583,15 +569,6 @@ RegisterNUICallback("saveVehicleInfo", function(data, cb)
     end
 
     TriggerServerEvent('mdt:server:saveVehicleInfo', dbid, plate, imageurl, notes, stolen, code5, impound)
-    cb(true)
-end)
-
-RegisterNUICallback("knownInformation", function(data, cb)
-    local dbid = data.dbid
-    local type = data.type
-    local status = data.status
-    local plate = data.plate
-    TriggerServerEvent('mdt:server:knownInformation', dbid, type, status, plate)
     cb(true)
 end)
 

@@ -240,7 +240,9 @@ Config.AmbulanceJobs = {
     ['doctor'] = true
 }
 
-Config.DojJobs = {}
+Config.DojJobs = {
+    ['lawyer'] = true,
+}
 
 -- Leave my hacky code alone ya goblins
 Config.AllowedJobs = {}

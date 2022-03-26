@@ -261,12 +261,13 @@ RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName
 	local Player = QBCore.Functions.GetPlayer(src)
 	ManageLicenses(cid, licenses)
 	if Player then
-		local incJobType = GetJobType(Player.PlayerData.job.name)
+		local JobType = GetJobType(Player.PlayerData.job.name)
+		if JobType == 'doj' then JobType = 'police' end
 		MySQL.Async.insert('INSERT INTO mdt_data (cid, information, pfp, jobtype, tags, gallery, fingerprint) VALUES (:cid, :information, :pfp, :jobtype, :tags, :gallery, :fingerprint) ON DUPLICATE KEY UPDATE cid = :cid, information = :information, pfp = :pfp, tags = :tags, gallery = :gallery, fingerprint = :fingerprint', {
 			cid = cid,
 			information = information,
 			pfp = pfp,
-			jobtype = incJobType,
+			jobtype = JobType,
 			tags = json.encode(tags),
 			gallery = json.encode(gallery),
 			fingerprint = fingerprint,
@@ -422,86 +423,6 @@ RegisterNetEvent("mdt:server:updateLicense", function(cid, type, status)
 	end
 end)
 
-RegisterNetEvent("mdt:server:addGalleryImg", function(cid, img)
-	local src = source
-	local Player = QBCore.Functions.GetPlayer(src)
-	if Player then
-		if GetJobType(Player.PlayerData.job.name) == 'police' then
-			local function UpdateGallery(id, gallery)
-				MySQL.update("UPDATE policemdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
-				TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." had their gallery updated (+) by "..result.fullname)
-			end
-
-			local user = MySQL.query.await('SELECT id, gallery FROM policemdtdata WHERE cid=:cid LIMIT 1', { cid = cid })
-			if user and user[1] then
-				local imgs = json.decode(user[1]['gallery'])
-				imgs[#imgs+1] = img
-				UpdateGallery(user[1]['id'], imgs)
-			else
-				CreateUser(cid, 'policemdtdata', function(result)
-					local imgs = {}
-					imgs[#imgs+1] = img
-					UpdateGallery(result, imgs)
-				end)
-			end
-		end
-	end
-end)
-
-RegisterNetEvent("mdt:server:removeGalleryImg", function(cid, img)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or result.job.name == 'doj') then
-
-				local function UpdateGallery(id, gallery)
-					MySQL.update("UPDATE policemdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." had their gallery updated (-) by "..result.fullname)
-				end
-
-				local user = MySQL.query.await('SELECT id, gallery FROM policemdtdata WHERE cid=:cid LIMIT 1', { cid = cid })
-				if user and user[1] then
-					local imgs = json.decode(user[1]['gallery'])
-					for i=1, #imgs do
-						if imgs[i] == img then
-							table.remove(imgs, i)
-						end
-					end
-
-					UpdateGallery(user[1]['id'], imgs)
-				else
-					CreateUser(cid, 'policemdtdata', function(result)
-						local imgs = {}
-						UpdateGallery(result, imgs)
-					end)
-				end
-			elseif result.job and (result.job.name == 'ambulance') then
-
-				local function UpdateGallery(id, gallery)
-					MySQL.update("UPDATE emsmdtdata SET `gallery`=:gallery WHERE `id`=:id LIMIT 1", { id = id, gallery = json.encode(gallery) })
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." had their gallery updated (-) by "..result.fullname)
-				end
-
-				local user = MySQL.query.await('SELECT id, gallery FROM emsmdtdata WHERE cid=:cid LIMIT 1', { cid = cid })
-				if user and user[1] then
-					local imgs = json.decode(user[1]['gallery'])
-					for i=1, #imgs do
-						if imgs[i] == img then
-							table.remove(imgs, i)
-						end
-					end
-
-					UpdateGallery(user[1]['id'], imgs)
-				else
-					CreateUser(cid, 'emsmdtdata', function(result)
-						local imgs = {}
-						UpdateGallery(result, imgs)
-					end)
-				end
-			end
-		end
-	end)
-end)
-
 -- Incidents
 
 
@@ -509,8 +430,9 @@ RegisterNetEvent('mdt:server:getAllIncidents', function()
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	if Player then
-		if GetJobType(Player.PlayerData.job.name) == 'police' then
-			local matches = MySQL.Sync.fetchAll("SELECT * FROM `mdt_incidents` ORDER BY `id` DESC LIMIT 30", {})
+		local JobType = GetJobType(Player.PlayerData.job.name)
+		if JobType == 'police' or JobType == 'doj' then
+			local matches = MySQL.query.await("SELECT * FROM `mdt_incidents` ORDER BY `id` DESC LIMIT 30", {})
 
 			TriggerClientEvent('mdt:client:getAllIncidents', src, matches)
 		end
@@ -522,8 +444,9 @@ RegisterNetEvent('mdt:server:searchIncidents', function(query)
 		local src = source
 		local Player = QBCore.Functions.GetPlayer(src)
 		if Player then
-			if GetJobType(Player.PlayerData.job.name) == 'police' then
-				local matches = MySQL.Sync.fetchAll("SELECT * FROM `mdt_incidents` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR LOWER(`author`) LIKE :query OR LOWER(`details`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`civsinvolved`) LIKE :query OR LOWER(`author`) LIKE :query ORDER BY `id` DESC LIMIT 50", {
+			local JobType = GetJobType(Player.PlayerData.job.name)
+			if JobType == 'police' or JobType == 'doj' then
+				local matches = MySQL.query.await("SELECT * FROM `mdt_incidents` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR LOWER(`author`) LIKE :query OR LOWER(`details`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`civsinvolved`) LIKE :query OR LOWER(`author`) LIKE :query ORDER BY `id` DESC LIMIT 50", {
 					query = string.lower('%'..query..'%') -- % wildcard, needed to search for all alike results
 				})
 				
@@ -538,8 +461,9 @@ RegisterNetEvent('mdt:server:getIncidentData', function(sentId)
 		local src = source
 		local Player = QBCore.Functions.GetPlayer(src)
 		if Player then
-			if GetJobType(Player.PlayerData.job.name) == 'police' then
-				local matches = MySQL.Sync.fetchAll("SELECT * FROM `mdt_incidents` WHERE `id` = :id", {
+			local JobType = GetJobType(Player.PlayerData.job.name)
+			if JobType == 'police' or JobType == 'doj' then
+				local matches = MySQL.query.await("SELECT * FROM `mdt_incidents` WHERE `id` = :id", {
 					id = sentId
 				})
 				local data = matches[1]
@@ -549,17 +473,19 @@ RegisterNetEvent('mdt:server:getIncidentData', function(sentId)
 				data['evidence'] = json.decode(data['evidence'])
 
 
-				local convictions = MySQL.Sync.fetchAll("SELECT * FROM `mdt_convictions` WHERE `linkedincident` = :id", {
+				local convictions = MySQL.query.await("SELECT * FROM `mdt_convictions` WHERE `linkedincident` = :id", {
 					id = sentId
 				})
-				for i=1, #convictions do
-					local res = GetNameFromId(convictions[i]['cid'])
-					if res ~= nil then
-						convictions[i]['name'] = res
-					else
-						convictions[i]['name'] = "Unknown"
+				if convictions ~= nil then
+					for i=1, #convictions do
+						local res = GetNameFromId(convictions[i]['cid'])
+						if res ~= nil then
+							convictions[i]['name'] = res
+						else
+							convictions[i]['name'] = "Unknown"
+						end
+						convictions[i]['charges'] = json.decode(convictions[i]['charges'])
 					end
-					convictions[i]['charges'] = json.decode(convictions[i]['charges'])
 				end
 				TriggerClientEvent('mdt:client:getIncidentData', src, data, convictions)
 			end
@@ -572,7 +498,7 @@ RegisterNetEvent('mdt:server:getAllBolos', function()
 	local Player = QBCore.Functions.GetPlayer(src)
 	local JobType = GetJobType(Player.PlayerData.job.name)
 	if JobType == 'police' or JobType == 'ambulance' then
-		MySQL.Sync.fetchAll("SELECT * FROM `mdt_bolos` WHERE jobtype = :jobtype", {
+		MySQL.query.await("SELECT * FROM `mdt_bolos` WHERE jobtype = :jobtype", {
 			jobtype = JobType
 		}, function(matches)
 			TriggerClientEvent('mdt:client:getAllBolos', src, matches)
@@ -586,7 +512,7 @@ RegisterNetEvent('mdt:server:searchBolos', function(sentSearch)
 		local Player = QBCore.Functions.GetPlayer(src)
 		local JobType = GetJobType(Player.PlayerData.job.name)
 		if JobType == 'police' or JobType == 'ambulance' then
-			local matches = MySQL.Sync.fetchAll("SELECT * FROM `mdt_bolos` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR `plate` LIKE :query OR LOWER(`owner`) LIKE :query OR LOWER(`individual`) LIKE :query OR LOWER(`detail`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`author`) LIKE :query AND jobtype = :jobtype", {
+			local matches = MySQL.query.await("SELECT * FROM `mdt_bolos` WHERE `id` LIKE :query OR LOWER(`title`) LIKE :query OR `plate` LIKE :query OR LOWER(`owner`) LIKE :query OR LOWER(`individual`) LIKE :query OR LOWER(`detail`) LIKE :query OR LOWER(`officersinvolved`) LIKE :query OR LOWER(`tags`) LIKE :query OR LOWER(`author`) LIKE :query AND jobtype = :jobtype", {
 				query = string.lower('%'..sentSearch..'%'), -- % wildcard, needed to search for all alike results
 				jobtype = JobType
 			})
@@ -601,7 +527,7 @@ RegisterNetEvent('mdt:server:getBoloData', function(sentId)
 		local Player = QBCore.Functions.GetPlayer(src)
 		local JobType = GetJobType(Player.PlayerData.job.name)
 		if JobType == 'police' or JobType == 'ambulance' then
-			local matches = MySQL.Sync.fetchAll("SELECT * FROM `mdt_bolos` WHERE `id` = :id AND jobtype = :jobtype LIMIT 1", {
+			local matches = MySQL.query.await("SELECT * FROM `mdt_bolos` WHERE `id` = :id AND jobtype = :jobtype LIMIT 1", {
 				id = sentId,
 				jobtype = JobType
 			})
@@ -732,8 +658,9 @@ RegisterNetEvent('mdt:server:getAllReports', function()
 	local Player = QBCore.Functions.GetPlayer(src)
 	if Player then
 		local JobType = GetJobType(Player.PlayerData.job.name)
-		if JobType == 'police' or JobType == 'ambulance' then
-			local matches = MySQL.Sync.fetchAll("SELECT * FROM `mdt_reports` WHERE jobtype = :jobtype ORDER BY `id` DESC LIMIT 30", {
+		if JobType == 'police' or JobType == 'doj' or JobType == 'ambulance' then
+			if JobType == 'doj' then JobType = 'police' end
+			local matches = MySQL.query.await("SELECT * FROM `mdt_reports` WHERE jobtype = :jobtype ORDER BY `id` DESC LIMIT 30", {
 				jobtype = JobType
 			})
 			TriggerClientEvent('mdt:client:getAllReports', src, matches)
@@ -747,8 +674,9 @@ RegisterNetEvent('mdt:server:getReportData', function(sentId)
 		local Player = QBCore.Functions.GetPlayer(src)
 		if Player then
 			local JobType = GetJobType(Player.PlayerData.job.name)
-			if JobType == 'police' or JobType == 'ambulance' then
-				local matches = MySQL.Sync.fetchAll("SELECT * FROM `mdt_reports` WHERE `id` = :id AND `jobtype` = :jobtype LIMIT 1", {
+			if JobType == 'police' or JobType == 'doj' or JobType == 'ambulance' then
+				if JobType == 'doj' then JobType = 'police' end
+				local matches = MySQL.query.await("SELECT * FROM `mdt_reports` WHERE `id` = :id AND `jobtype` = :jobtype LIMIT 1", {
 					id = sentId,
 					jobtype = JobType
 				})
@@ -769,8 +697,9 @@ RegisterNetEvent('mdt:server:searchReports', function(sentSearch)
 		local Player = QBCore.Functions.GetPlayer(src)
 		if Player then
 			local JobType = GetJobType(Player.PlayerData.job.name)
-			if JobType == 'police' or JobType == 'ambulance' then
-				local matches = MySQL.Sync.fetchAll("SELECT * FROM `mdt_reports` WHERE `id` LIKE :query OR LOWER(`author`) LIKE :query OR LOWER(`title`) LIKE :query OR LOWER(`type`) LIKE :query OR LOWER(`details`) LIKE :query OR LOWER(`tags`) LIKE :query AND `jobtype` = :jobtype ORDER BY `id` DESC LIMIT 50", {
+			if JobType == 'police' or JobType == 'doj' or JobType == 'ambulance' then
+				if JobType == 'doj' then JobType = 'police' end
+				local matches = MySQL.query.await("SELECT * FROM `mdt_reports` WHERE `id` LIKE :query OR LOWER(`author`) LIKE :query OR LOWER(`title`) LIKE :query OR LOWER(`type`) LIKE :query OR LOWER(`details`) LIKE :query OR LOWER(`tags`) LIKE :query AND `jobtype` = :jobtype ORDER BY `id` DESC LIMIT 50", {
 					query = string.lower('%'..sentSearch..'%'), -- % wildcard, needed to search for all alike results
 					jobtype = JobType
 				})
@@ -847,7 +776,8 @@ QBCore.Functions.CreateCallback('mdt:server:SearchVehicles', function(source, cb
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	if Player then
-		if GetJobType(Player.PlayerData.job.name) == 'police' then
+		local JobType = GetJobType(Player.PlayerData.job.name)
+		if JobType == 'police' or JobType == 'doj' then
 			local vehicles = MySQL.query.await("SELECT pv.id, pv.citizenid, pv.plate, pv.vehicle, pv.mods, pv.state, p.charinfo FROM `player_vehicles` pv LEFT JOIN players p ON pv.citizenid = p.citizenid WHERE LOWER(`plate`) LIKE :query OR LOWER(`vehicle`) LIKE :query LIMIT 25", {
 				query = string.lower('%'..sentData..'%')
 			})
@@ -897,8 +827,9 @@ RegisterNetEvent('mdt:server:getVehicleData', function(plate)
 		local src = source
 		local Player = QBCore.Functions.GetPlayer(src)
 		if Player then
-			if GetJobType(Player.PlayerData.job.name) == 'police' then
-				local vehicle = MySQL.Sync.fetchAll("select pv.*, p.charinfo from player_vehicles pv LEFT JOIN players p ON pv.citizenid = p.citizenid where pv.plate = :plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
+			local JobType = GetJobType(Player.PlayerData.job.name)
+			if JobType == 'police' or JobType == 'doj' then
+				local vehicle = MySQL.query.await("select pv.*, p.charinfo from player_vehicles pv LEFT JOIN players p ON pv.citizenid = p.citizenid where pv.plate = :plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
 				if vehicle and vehicle[1] then
 					vehicle[1]['impound'] = false
 					if vehicle[1].state == 2 then
@@ -1011,42 +942,6 @@ RegisterNetEvent('mdt:server:saveVehicleInfo', function(dbid, plate, imageurl, n
 	end
 end)
 
-RegisterNetEvent('mdt:server:knownInformation', function(dbid, type, status, plate)
-	if plate then
-		TriggerEvent('echorp:getplayerfromid', source, function(result)
-			if result then
-				if result.job and (result.job.isPolice or result.job.name == 'doj') then
-					if dbid == nil then dbid = 0 end;
-
-					if type == 'code5' and status == true then
-						MySQL.update("UPDATE owned_vehicles SET `code`=:code WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), code = 5 })
-						TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") was set to CODE 5 by "..result['fullname'])
-					elseif type == 'code5' and not status then
-						MySQL.update("UPDATE owned_vehicles SET `code`=:code WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), code = 0 })
-						TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") had it's CODE 5 status removed by "..result['fullname'])
-					elseif type == 'stolen' and status then
-						MySQL.update("UPDATE owned_vehicles SET `stolen`=:stolen WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), stolen = 1 })
-						TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") was set to STOLEN by "..result['fullname'])
-					elseif type == 'stolen' and not status then
-						MySQL.update("UPDATE owned_vehicles SET `stolen`=:stolen WHERE `plate`=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1"), stolen = 0 })
-						TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") had it's STOLEN status removed by "..result['fullname'])
-					end
-
-					if tonumber(dbid) == 0 then
-						MySQL.insert('INSERT INTO `pd_vehicleinfo` (`plate`) VALUES (:plate)', { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1") }, function(infoResult)
-							if infoResult then
-								TriggerClientEvent('mdt:client:updateVehicleDbId', result.source, infoResult)
-								TriggerEvent('mdt:server:AddLog', "A vehicle with the plate ("..plate..") was added to the vehicle information database by "..result['fullname'])
-							end
-						end)
-					end
-				end
-			end
-		end)
-	end
-end)
-
-
 RegisterNetEvent('mdt:server:getAllLogs', function()
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
@@ -1054,7 +949,7 @@ RegisterNetEvent('mdt:server:getAllLogs', function()
 		if Config.LogPerms[Player.PlayerData.job.name] then
 			if Config.LogPerms[Player.PlayerData.job.name][Player.PlayerData.job.grade.level] then
 				local JobType = GetJobType(Player.PlayerData.job.name)
-				local infoResult = MySQL.Sync.fetchAll('SELECT * FROM mdt_logs WHERE `jobtype` = :jobtype ORDER BY `id` DESC LIMIT 250', {jobtype = JobType})
+				local infoResult = MySQL.query.await('SELECT * FROM mdt_logs WHERE `jobtype` = :jobtype ORDER BY `id` DESC LIMIT 250', {jobtype = JobType})
 
 				TriggerLatentClientEvent('mdt:client:getAllLogs', src, 30000, infoResult)
 			end
@@ -1190,7 +1085,7 @@ RegisterNetEvent('mdt:server:saveIncident', function(id, title, information, tag
 end)
 
 RegisterNetEvent('mdt:server:handleExistingConvictions', function(data, incidentid, time)
-	MySQL.Sync.fetchAll('SELECT * FROM mdt_convictions WHERE cid=:cid AND linkedincident=:linkedincident', {
+	MySQL.query.await('SELECT * FROM mdt_convictions WHERE cid=:cid AND linkedincident=:linkedincident', {
 		cid = data['Cid'],
 		linkedincident = incidentid
 	}, function(convictionRes)
@@ -1469,7 +1364,7 @@ RegisterNetEvent('mdt:server:impoundVehicle', function(sentInfo, sentVehicle)
 			if sentInfo and type(sentInfo) == 'table' then
 				local plate, linkedreport, fee, time = sentInfo['plate'], sentInfo['linkedreport'], sentInfo['fee'], sentInfo['time']
 				if (plate and linkedreport and fee and time) then
-				local vehicle = MySQL.Sync.fetchAll("SELECT id, plate FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1") })
+				local vehicle = MySQL.query.await("SELECT id, plate FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1") })
 					if vehicle and vehicle[1] then
 						local data = vehicle[1]
 						MySQL.insert('INSERT INTO `mdt_impound` (`vehicleid`, `linkedreport`, `fee`, `time`) VALUES (:vehicleid, :linkedreport, :fee, :time)', {
@@ -1558,10 +1453,10 @@ RegisterNetEvent('mdt:server:statusImpound', function(plate)
 	local Player = QBCore.Functions.GetPlayer(src)
 	if Player then
 		if GetJobType(Player.PlayerData.job.name) == 'police' then
-			local vehicle = MySQL.Sync.fetchAll("SELECT id, plate FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
+			local vehicle = MySQL.query.await("SELECT id, plate FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
 			if vehicle and vehicle[1] then
 				local data = vehicle[1]
-				local impoundinfo = MySQL.Sync.fetchAll("SELECT * FROM `mdt_impound` WHERE vehicleid=:vehicleid LIMIT 1", { vehicleid = data['id'] })
+				local impoundinfo = MySQL.query.await("SELECT * FROM `mdt_impound` WHERE vehicleid=:vehicleid LIMIT 1", { vehicleid = data['id'] })
 				if impoundinfo and impoundinfo[1] then
 					TriggerClientEvent('mdt:client:statusImpound', src, impoundinfo[1], plate)
 				end
@@ -1571,7 +1466,7 @@ RegisterNetEvent('mdt:server:statusImpound', function(plate)
 end)
 
 function GetBoloStatus(plate)
-    MySQL.Sync.fetchAll("SELECT * FROM mdt_bolos where plate = ?", {plate}, function(bolo)
+    MySQL.query.await("SELECT * FROM mdt_bolos where plate = ?", {plate}, function(bolo)
 		if bolo and bolo[1] then
 			return true
 		else
@@ -1581,7 +1476,7 @@ function GetBoloStatus(plate)
 end
 
 function GetVehicleInformation(plate)
-	local result = MySQL.Sync.fetchAll('SELECT * FROM mdt_vehicleinfo WHERE plate = @plate', {['@plate'] = plate})
+	local result = MySQL.query.await('SELECT * FROM mdt_vehicleinfo WHERE plate = @plate', {['@plate'] = plate})
     if result[1] then
         return result[1]
     else

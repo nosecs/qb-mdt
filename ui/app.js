@@ -34,7 +34,7 @@ const AmbulanceJobs = {
 }
 
 const DojJobs = {
-  ['doj']: true
+  ['lawyer']: true
 }
 
 const MONTH_NAMES = [
@@ -383,16 +383,6 @@ $(document).ready(() => {
         $(".gallery-inner-container").prepend(
           `<img src="${URL}" class="gallery-img ${randomNum}" onerror="this.src='img/not-found.jpg'">`
         );
-        setTimeout(() => {
-          URL = $("." + randomNum).attr("src");
-          /* $.post(
-            `https://${GetParentResourceName()}/addGalleryImg`,
-            JSON.stringify({
-              cid: cid,
-              URL: URL,
-            })
-          ); */
-        }, 250);
         $("#gallery-upload-input").val("");
         $(".gallery-upload-input").slideUp(250);
         setTimeout(() => {
@@ -2692,7 +2682,6 @@ $(document).ready(() => {
           }
 
           let impoundInfo = {}
-          console.log(impoundChanged)
           impoundInfo.impoundActive = $(".vehicle-tags").find(".impound-tag").hasClass("green-tag")
           impoundInfo.impoundChanged = impoundChanged
           //console.log($(".vehicle-tags").find(".impound-tag").hasClass("green-tag"))
@@ -2729,15 +2718,6 @@ $(document).ready(() => {
     let tag = $(".vehicle-tags").find(".code5-tag");
     if (tag.hasClass("red-tag")) {
       tag.removeClass("red-tag").addClass("green-tag");
-      /* $.post(
-        `https://${GetParentResourceName()}/knownInformation`,
-        JSON.stringify({
-          dbid: $(".vehicle-information-title-holder").data("dbid"),
-          type: "code5",
-          status: true,
-          plate: $(this).data("info"),
-        })
-      ); */
     }
   });
 
@@ -2745,15 +2725,6 @@ $(document).ready(() => {
     let tag = $(".vehicle-tags").find(".code5-tag");
     if (tag.hasClass("green-tag")) {
       tag.removeClass("green-tag").addClass("red-tag");
-      /* $.post(
-        `https://${GetParentResourceName()}/knownInformation`,
-        JSON.stringify({
-          dbid: $(".vehicle-information-title-holder").data("dbid"),
-          type: "code5",
-          status: false,
-          plate: $(this).data("info"),
-        })
-      ); */
     }
   });
 
@@ -2791,15 +2762,6 @@ $(document).ready(() => {
     let tag = $(".vehicle-tags").find(".stolen-tag");
     if (tag.hasClass("red-tag")) {
       tag.removeClass("red-tag").addClass("green-tag");
-      /* $.post(
-        `https://${GetParentResourceName()}/knownInformation`,
-        JSON.stringify({
-          dbid: $(".vehicle-information-title-holder").data("dbid"),
-          type: "stolen",
-          status: true,
-          plate: $(this).data("info"),
-        })
-      ); */
     }
   });
 
@@ -2807,15 +2769,6 @@ $(document).ready(() => {
     let tag = $(".vehicle-tags").find(".stolen-tag");
     if (tag.hasClass("green-tag")) {
       tag.removeClass("green-tag").addClass("red-tag");
-      /* $.post(
-        `https://${GetParentResourceName()}/knownInformation`,
-        JSON.stringify({
-          dbid: $(".vehicle-information-title-holder").data("dbid"),
-          type: "stolen",
-          status: false,
-          plate: $(this).data("info"),
-        })
-      ); */
     }
   });
 
@@ -3560,15 +3513,7 @@ $(document).ready(() => {
 
   function JobColors(sentJob) {
     if (sentJob) {
-      if (
-        sentJob == "police" ||
-        sentJob == "bcso" ||
-        sentJob == "sast" ||
-        sentJob == "sasp" ||
-        sentJob == "doc" ||
-        sentJob == "sapr" ||
-        sentJob == "pa"
-      ) {
+      if (sentJob == "police") {
         document.documentElement.style.setProperty(
           "--color-1",
           "#1E3955"
@@ -3648,7 +3593,19 @@ $(document).ready(() => {
           "Officers Involved"
         );
         $(".roster-iframe").attr("src", rosterLink);
-      } else if (sentJob == "ambulance") {
+
+        $(".manage-profile-save").css("display", "block");
+        $(".manage-profile-editing-title").css("display", "block");
+        $(".manage-incidents-create").css("display", "block");
+        $(".manage-incidents-save").css("display", "block");
+        $(".manage-incidents-editing-title").css("display", "block");
+        $(".manage-reports-new").css("display", "block");
+        $(".manage-reports-save").css("display", "block");
+        $(".manage-reports-editing-title").css("display", "block");
+        $(".vehicle-information-save").css("display", "block");
+        $(".vehicle-information-title").css("margin-right", "0px").css("width", "81%");
+        $(".manage-incidents-title ").css("margin-right", "0px")
+      } else if (PoliceJobs[sentJob] !== undefined) {
         $("#home-warrants-container").fadeOut(0);
         $("#home-reports-container").fadeIn(0);
         document.documentElement.style.setProperty(
@@ -3733,7 +3690,19 @@ $(document).ready(() => {
         $(".manage-profile-name-input-1").attr("readonly", true);
         $(".manage-profile-name-input-2").attr("readonly", true);
         $(".roster-iframe").attr("src", rosterLink);
-      } else if (sentJob == "doj") {
+
+        $(".manage-profile-save").css("display", "block");
+        $(".manage-profile-editing-title").css("display", "block");
+        $(".manage-incidents-create").css("display", "block");
+        $(".manage-incidents-save").css("display", "block");
+        $(".manage-incidents-editing-title").css("display", "block");
+        $(".manage-reports-new").css("display", "block");
+        $(".manage-reports-save").css("display", "block");
+        $(".manage-reports-editing-title").css("display", "block");
+        $(".vehicle-information-save").css("display", "block");
+        $(".vehicle-information-title").css("margin-right", "0px").css("width", "81%");
+        $(".manage-incidents-title ").css("margin-right", "0px")
+      } else if (DojJobs[sentJob] !== undefined) {
         document.documentElement.style.setProperty(
           "--color-1",
           "#553a1e"
@@ -3769,7 +3738,7 @@ $(document).ready(() => {
         $(".badge-logo").attr("src", "img/court.png");
         $(".header-title").html("DEPARTMENT OF JUSTICE");
         $(".quote-span").html("Actually useless.");
-        $(".dmv-nav-item").hide();
+        //$(".dmv-nav-item").hide();
         $(".bolo-nav-item").hide();
         $(".dispatch-title-ofsomesort").html("Message Board");
         $(".dispatch-comms-container").fadeOut(0);
@@ -3777,6 +3746,20 @@ $(document).ready(() => {
         $(".manage-profile-name-input-2").attr("readonly", false);
         $("#home-warrants-container").css("height", "98%");
         $(".roster-iframe").attr("src", rosterLink);
+
+        $(".manage-profile-save").css("display", "none");
+        $(".manage-profile-editing-title").css("display", "none");
+        $(".manage-incidents-create").css("display", "none");
+        $(".manage-incidents-title").css("margin-right", "auto");
+        $(".manage-incidents-title").css("width", "95%");
+        $(".manage-incidents-save").css("display", "none");
+        $(".manage-incidents-editing-title").css("display", "none");
+        $(".manage-reports-new").css("display", "none");
+        $(".manage-reports-save").css("display", "none");
+        $(".manage-reports-editing-title").css("display", "none");
+        $(".vehicle-information-save").css("display", "none");
+        $(".vehicle-information-title").css("margin-right", "auto").css("width", "95%");
+        $(".manage-incidents-title ").css("margin-right", "auto")
       }
     }
   }
@@ -3795,6 +3778,27 @@ $(document).ready(() => {
           $(".manage-profile-vehs-container").removeClass("display_hidden");
           $(".manage-profile-houses-container").removeClass("display_hidden");
         }
+
+        /* if (PoliceJobs[playerJob] !== undefined || AmbulanceJobs[playerJob] !== undefined) {
+          $(".manage-profile-save").css("display", "block");
+          $(".manage-profile-editing-title").css("display", "block");
+          $(".manage-incidents-create").css("display", "block");
+          $(".manage-incidents-save").css("display", "block");
+          $(".manage-incidents-editing-title").css("display", "block");
+          $(".manage-reports-new").css("display", "block");
+          $(".manage-reports-save").css("display", "block");
+          $(".manage-reports-editing-title").css("display", "block");
+        } else if (DojJobs[playerJob] !== undefined) {
+          $(".manage-profile-save").css("display", "none");
+          $(".manage-profile-editing-title").css("display", "none");
+          $(".manage-incidents-create").css("display", "none");
+          $(".manage-incidents-save").css("display", "none");
+          $(".manage-incidents-editing-title").css("display", "none");
+          $(".manage-reports-new").css("display", "none");
+          $(".manage-reports-save").css("display", "none");
+          $(".manage-reports-editing-title").css("display", "none");
+        } */
+
         $("body").fadeIn(0);
         $(".close-all").css("filter", "none");
         $(".close-all").fadeOut(0);
@@ -4292,16 +4296,25 @@ $(document).ready(() => {
       });
 
       $(".manage-incidents-title-holder").empty();
-      $(".manage-incidents-title-holder").prepend(
-        `
-                <div class="manage-incidents-title">Manage Incident</div>
-                <div class="manage-incidents-create"> <span class="fas fa-plus" style="margin-top: 3.5px;"></span></div>
-                <div class="manage-incidents-save"><span class="fas fa-save" style="margin-top: 3.5px;"></span></div>
-                `
-      );
-      $(".manage-incidents-title").css("width", "66%");
-      $(".manage-incidents-create").css("margin-right", "0px");
-
+      if (PoliceJobs[playerJob] !== undefined || AmbulanceJobs[playerJob] !== undefined) {
+        $(".manage-incidents-title-holder").prepend(
+          `
+            <div class="manage-incidents-title">Manage Incident</div>
+            <div class="manage-incidents-create"> <span class="fas fa-plus" style="margin-top: 3.5px;"></span></div>
+            <div class="manage-incidents-save"><span class="fas fa-save" style="margin-top: 3.5px;"></span></div>
+            `
+        );
+        $(".manage-incidents-title").css("width", "66%");
+        $(".manage-incidents-create").css("margin-right", "0px");
+      } else if (DojJobs[playerJob] !== undefined) {
+        $(".manage-incidents-title-holder").prepend(
+          `
+            <div class="manage-incidents-title">Manage Incident</div>
+            `
+        );
+        $(".manage-incidents-title").css("width", "95%");
+      }
+      
       let associateddata = eventData.convictions;
       $.each(associateddata, function (index, value) {
         $(".associated-incidents-tags-holder").prepend(
@@ -4580,7 +4593,6 @@ $(document).ready(() => {
 
     } else if (eventData.type == "getVehicleData") {
       impoundChanged = false;
-      console.log(impoundChanged)
       let table = eventData.data;
 
       $(".vehicle-information-title-holder").data(
@@ -4751,21 +4763,18 @@ $(document).ready(() => {
         let radioBack = unit.sig100 ? "#7b2c2c" : "var(--color-3)";
         let radio = unit.radio ? unit.radio : "0";
         let callSign = unit.callSign ? unit.callSign : "000";
-        let activeInfoJob = `<div class="unit-job active-info-job-unk">UNKOWN</div>`;
-        if (unit.unitType == "police") {
+        let activeInfoJob = `<div class="unit-job active-info-job-unk">UNKNOWN</div>`;
+        if (PoliceJobs[playerJob] !== undefined) {
           policeCount++;
           activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
-        }
-        if (unit.unitType == "ambulance") {
+        } else if (AmbulanceJobs[unit.unitType] !== undefined) {
           activeInfoJob = `<div class="unit-job active-info-job-ambulance">Ambulance</div>`
           emsCount++;
-        }
-        if (unit.unitType == "Fire") {
+        /* } else if  (DojJobs[unit.unitType] !== undefined) {
           activeInfoJob = `<div class="unit-job active-info-job-fire">FIRE</div>`
-          fireCount++;
-        }
-        if (unit.unitType == "DOJ") {
-          activeInfoJob = `<div class="unit-job active-info-job-doj">DACAS</div>`
+          fireCount++; */
+        } else if (DojJobs[unit.unitType] !== undefined) {
+          activeInfoJob = `<div class="unit-job active-info-job-doj">DOJ</div>`
           dojCount++;
         }
 
@@ -4893,13 +4902,6 @@ function removeImage(url) {
   $(".gallery-inner-container img")
     .filter("[src='" + url + "']")
     .remove();
-  $.post(
-    `https://${GetParentResourceName()}/removeGalleryImg`,
-    JSON.stringify({
-      cid: cid,
-      URL: url,
-    })
-  );
 }
 
 function hideIcidentsMenu() {

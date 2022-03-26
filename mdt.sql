@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `mdt_incidents` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author` varchar(50) NOT NULL DEFAULT '',
   `title` varchar(50) NOT NULL DEFAULT '0',
-  `details` text CHARACTER SET utf8mb4 NOT NULL,
+  `details` text NOT NULL,
   `tags` text NOT NULL,
   `officersinvolved` text NOT NULL,
   `civsinvolved` text NOT NULL,

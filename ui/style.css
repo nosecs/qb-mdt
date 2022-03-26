@@ -565,6 +565,10 @@ span.bulletin-item-info[contenteditable]:empty::before {
     background-color: #950909;
 }
 
+#doj-count {
+    background-color: #525252;
+}
+
 #doc-count {
     background-color: #7b25cc;
 }
@@ -987,7 +991,7 @@ a {
     flex-direction: column;
     height: 74.7vh;
     width: 50vh;
-     margin-top: 10px;
+    margin-top: 10px;
     margin-left: 10px;
 }
 
@@ -1000,7 +1004,7 @@ a {
     padding-bottom: 5px;
     text-align: center;
     margin: auto;
-     margin-top: 10px;
+    margin-top: 10px;
     margin-bottom: 0px;
     width: 95%;
     align-items: center;
@@ -1016,12 +1020,13 @@ a {
     padding-bottom: 5px;
     text-align: center;
     margin: auto;
-     margin-top: 10px;
+    margin-top: 10px;
     margin-bottom: 0px;
     margin-right: 0px;
     width: 80%;
     align-items: center;
     user-select: none;
+    display: block;
 }
 
 .manage-profile-save {
@@ -1033,11 +1038,12 @@ a {
     background-color: #1b8f25;
     margin: auto;
     margin-left: 5px;
-     margin-top: 10px;
+    margin-top: 10px;
     margin-bottom: 0px;
     color: white;
     text-align: center;
     user-select: none;
+    display: block;
 }
 
 .manage-profile-save:hover {
@@ -1920,7 +1926,7 @@ span.tag-input[contenteditable]:empty::before {
     margin: auto;
     margin-top: 10px;
     margin-bottom: 0px;
-    margin-right: 0px;
+    margin-right: auto;
     width: 80%;
     /* width: 66%; */
     align-items: center;
@@ -1947,6 +1953,7 @@ span.tag-input[contenteditable]:empty::before {
     color: white;
     text-align: center;
     user-select: none;
+    display: block;
 }
 
 .manage-incidents-create:hover {
@@ -1967,6 +1974,7 @@ span.tag-input[contenteditable]:empty::before {
     color: white;
     text-align: center;
     user-select: none;
+    display: block;
 }
 
 .manage-incidents-save:hover {
@@ -3717,7 +3725,7 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
 }
 
 .active-info-job-doj {
-    background-color: #FFEAB9;
+    background-color: #525252;
 }
 
 .active-info-job-unk {
@@ -3851,9 +3859,9 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
     margin: auto;
     margin-top: 10px;
     margin-bottom: 0px;
-    margin-right: 0px;
+    margin-right: auto;
     margin-left: 10px;
-    width: 66%;
+    width: 80%;
     /* width: 66%; */
     align-items: center;
     user-select: none;
@@ -4022,6 +4030,7 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
     color: white;
     text-align: center;
     user-select: none;
+    display: block;
 }
 
 .manage-reports-save:hover {
@@ -4042,6 +4051,7 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
     color: white;
     text-align: center;
     user-select: none;
+    display: block;
 }
 
 .manage-reports-new:hover {
@@ -4080,6 +4090,7 @@ span.officer-tag-bolo-input[contenteditable]:empty::before {
     width: 95%;
     align-items: center;
     user-select: none;
+    display: block;
 }
 
 .manage-reports-reports-content {
@@ -4557,6 +4568,7 @@ span.civilian-tag-reports-input[contenteditable]:empty::before {
     color: white;
     text-align: center;
     user-select: none;
+    display: block;
 }
 
 .vehicle-information-save:hover {

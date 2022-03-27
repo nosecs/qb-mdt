@@ -2684,7 +2684,6 @@ $(document).ready(() => {
           let impoundInfo = {}
           impoundInfo.impoundActive = $(".vehicle-tags").find(".impound-tag").hasClass("green-tag")
           impoundInfo.impoundChanged = impoundChanged
-          //console.log($(".vehicle-tags").find(".impound-tag").hasClass("green-tag"))
           if (impoundChanged === true) {
             if (impoundInfo.impoundActive === true) {
               impoundInfo.plate = $(".impound-plate").val();
@@ -3837,6 +3836,55 @@ $(document).ready(() => {
                 </div>
                 </div>`);
       });
+      
+      let policeCount = 0;
+      let emsCount = 0;
+      let dojCount = 0;
+      let fireCount = 0;
+
+      let activeUnits = eventData.activeUnits;
+      $(".active-unit-list").html(' ');
+      let unitListHTML = '';
+
+      activeUnits = Object.values(activeUnits)
+      activeUnits.forEach((unit) => {
+        let status = unit.duty == 1 ? "10-8" : '10-7';
+        let statusColor = unit.duty == 1 ? "green-status" : 'yellow-status';
+        let radioBack = unit.sig100 ? "#7b2c2c" : "var(--color-3)";
+        let radio = unit.radio ? unit.radio : "0";
+        let callSign = unit.callSign ? unit.callSign : "000";
+        let activeInfoJob = `<div class="unit-job active-info-job-unk">UNKNOWN</div>`;
+        if (PoliceJobs[playerJob] !== undefined) {
+          policeCount++;
+          activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
+        } else if (AmbulanceJobs[unit.unitType] !== undefined) {
+          activeInfoJob = `<div class="unit-job active-info-job-ambulance">Ambulance</div>`
+          emsCount++;
+        /* } else if  (DojJobs[unit.unitType] !== undefined) {
+          activeInfoJob = `<div class="unit-job active-info-job-fire">FIRE</div>`
+          fireCount++; */
+        } else if (DojJobs[unit.unitType] !== undefined) {
+          activeInfoJob = `<div class="unit-job active-info-job-doj">DOJ</div>`
+          dojCount++;
+        }
+
+        unitListHTML += `
+                    <div class="active-unit-item" data-id="${unit.cid}">
+                        <div class="unit-status ${statusColor}">${status}</div>
+                        ${activeInfoJob}
+                        <div class="unit-name">(${callSign}) ${unit.firstName} ${unit.lastName}</div>
+                        <div class="unit-radio" style="background-color: ${radioBack};">${radio}</div>
+                    </div>
+                `;
+      });
+
+      $(".active-unit-list").html(unitListHTML)
+
+
+      $("#police-count").html(policeCount);
+      $("#ems-count").html(emsCount);
+      $("#doj-count").html(dojCount);
+      $("#fire-count").html(fireCount);
     /* } else if (eventData.type == "bulletin") {
       $(".bulletin-items-continer").empty();
       $.each(eventData.data, function (index, value) {
@@ -4745,56 +4793,6 @@ $(document).ready(() => {
         .find(".impound-tag")
         .removeClass("green-tag")
         .addClass("red-tag");
-    } else if (eventData.type == "getActiveUnits") {
-
-      let policeCount = 0;
-      let emsCount = 0;
-      let dojCount = 0;
-      let fireCount = 0;
-
-      let { activeUnits } = eventData;
-      $(".active-unit-list").html(' ');
-      let unitListHTML = '';
-
-      activeUnits = Object.values(activeUnits)
-      activeUnits.forEach((unit) => {
-        let status = unit.duty == 1 ? "10-8" : '10-7';
-        let statusColor = unit.duty == 1 ? "green-status" : 'yellow-status';
-        let radioBack = unit.sig100 ? "#7b2c2c" : "var(--color-3)";
-        let radio = unit.radio ? unit.radio : "0";
-        let callSign = unit.callSign ? unit.callSign : "000";
-        let activeInfoJob = `<div class="unit-job active-info-job-unk">UNKNOWN</div>`;
-        if (PoliceJobs[playerJob] !== undefined) {
-          policeCount++;
-          activeInfoJob = `<div class="unit-job active-info-job-lspd">LSPD</div>`;
-        } else if (AmbulanceJobs[unit.unitType] !== undefined) {
-          activeInfoJob = `<div class="unit-job active-info-job-ambulance">Ambulance</div>`
-          emsCount++;
-        /* } else if  (DojJobs[unit.unitType] !== undefined) {
-          activeInfoJob = `<div class="unit-job active-info-job-fire">FIRE</div>`
-          fireCount++; */
-        } else if (DojJobs[unit.unitType] !== undefined) {
-          activeInfoJob = `<div class="unit-job active-info-job-doj">DOJ</div>`
-          dojCount++;
-        }
-
-        unitListHTML += `
-                    <div class="active-unit-item" data-id="${unit.cid}">
-                        <div class="unit-status ${statusColor}">${status}</div>
-                        ${activeInfoJob}
-                        <div class="unit-name">(${callSign}) ${unit.firstName} ${unit.lastName}</div>
-                        <div class="unit-radio" style="background-color: ${radioBack};">${radio}</div>
-                    </div>
-                `;
-      });
-
-      $(".active-unit-list").html(unitListHTML)
-
-
-      $("#police-count").html(policeCount);
-      $("#ems-count").html(emsCount);
-      $("#doj-count").html(dojCount);
-      $("#fire-count").html(fireCount);
     }
   });
 });

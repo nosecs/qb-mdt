@@ -12,10 +12,6 @@ local tabletBone = 60309
 local tabletOffset = vector3(0.03, 0.002, -0.0)
 local tabletRot = vector3(10.0, 160.0, 0.0)
 
-local NUI_FUNCS = {
-    ['GET_ACTIVE_UNITS'] = "getActiveUnits"
-}
-
 -- Events from qbcore
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerData = QBCore.Functions.GetPlayerData()
@@ -51,6 +47,17 @@ end)
 ------------------------------------------
 --====================================================================================\
 
+RegisterKeyMapping('mdt', 'Open Police MDT', 'keyboard', 'k')
+
+RegisterCommand('mdt', function()
+    if GetJobType(PlayerData.job.name) ~= nil then
+        TriggerServerEvent('mdt:server:openMDT')
+    end
+end, false)
+
+Citizen.CreateThread(function()
+    TriggerEvent('chat:addSuggestion', '/mdt', 'Open the emergency services MDT', {})
+end)
 
 local function doAnimation()
     if not isOpen then return end
@@ -64,12 +71,6 @@ local function doAnimation()
     local plyPed = PlayerPedId()
     local tabletObj = CreateObject(tabletProp, 0.0, 0.0, 0.0, true, true, false)
     local tabletBoneIndex = GetPedBoneIndex(plyPed, tabletBone)
-
-
-
-    -- Set statebag inventory is in use
-    TriggerEvent('actionbar:setEmptyHanded')
-
 
     AttachEntityToEntity(tabletObj, plyPed, tabletBoneIndex, tabletOffset.x, tabletOffset.y, tabletOffset.z, tabletRot.x, tabletRot.y, tabletRot.z, true, false, false, false, 2, true)
     SetModelAsNoLongerNeeded(tabletProp)
@@ -185,7 +186,7 @@ RegisterNetEvent('mdt:client:deleteBulletin', function(ignoreId, sentData, job)
     end
 end)
 
-RegisterNetEvent('mdt:client:open', function(bulletin)
+RegisterNetEvent('mdt:client:open', function(bulletin, activeUnits)
     EnableGUI(true)
     local x, y, z = table.unpack(GetEntityCoords(PlayerPedId()))
 
@@ -204,7 +205,7 @@ RegisterNetEvent('mdt:client:open', function(bulletin)
 
     -- local grade = PlayerData.job.grade.name
 
-    SendNUIMessage({ type = "data", name = "Welcome, " ..PlayerData.job.grade.name..' '..PlayerData.charinfo.lastname:sub(1,1):upper()..PlayerData.charinfo.lastname:sub(2), location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname, bulletin = bulletin })
+    SendNUIMessage({ type = "data", activeUnits = activeUnits, name = "Welcome, " ..PlayerData.job.grade.name..' '..PlayerData.charinfo.lastname:sub(1,1):upper()..PlayerData.charinfo.lastname:sub(2), location = playerStreetsLocation, fullname = PlayerData.charinfo.firstname..' '..PlayerData.charinfo.lastname, bulletin = bulletin })
     TriggerEvent("mdt:client:dashboardWarrants")
 end)
 
@@ -632,10 +633,6 @@ RegisterNetEvent('mdt:client:getPenalCode', function(titles, penalcode)
     SendNUIMessage({ type = "getPenalCode", titles = titles, penalcode = penalcode })
 end)
 
-RegisterNetEvent('mdt:client:GetActiveUnits', function(activeUnits)
-    SendNUIMessage({type  = NUI_FUNCS.GET_ACTIVE_UNITS, activeUnits = activeUnits})
-end)
-
 RegisterNetEvent('mdt:client:setRadio', function(radio)
     if type(tonumber(radio)) == "number" then
         exports["pma-voice"]:setVoiceProperty("radioEnabled", true)
@@ -814,10 +811,6 @@ RegisterNetEvent('mdt:client:callAttach', function(callid, sentData)
     if job == "police" or job == 'ambulance' then
         SendNUIMessage({ type = "callAttach", callid = callid, data = tonumber(sentData) })
     end
-end)
-
-RegisterNetEvent('dispatch:clNotify', function(sNotificationData, sNotificationId)
-    SendNUIMessage({ type = "call", data = sNotificationData })
 end)
 
 RegisterNetEvent('mdt:client:setWaypoint:unit', function(sentData)

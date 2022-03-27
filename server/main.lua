@@ -25,7 +25,8 @@ AddEventHandler("onResourceStart", function(resourceName)
     end
 end)
 
-local function openMDT(src)
+RegisterNetEvent('mdt:server:openMDT', function()
+	local src = source
 	local PlayerData = GetPlayerData(src)
 	if not PermCheck(src, PlayerData) then return end
 	local Radio = Player(src).state.radioChannel or 0
@@ -47,13 +48,8 @@ local function openMDT(src)
 	local bulletin = GetBulletins(JobType)
 
 	--TriggerClientEvent('mdt:client:dashboardbulletin', src, bulletin)
-	TriggerClientEvent('mdt:client:open', src, bulletin)
-	TriggerClientEvent('mdt:client:GetActiveUnits', src, activeUnits)
-end
-
-QBCore.Commands.Add("mdt", "Opens the mdt", {}, false, function(source)
-    local src = source
-	openMDT(src)
+	TriggerClientEvent('mdt:client:open', src, bulletin, activeUnits)
+	--TriggerClientEvent('mdt:client:GetActiveUnits', src, activeUnits)
 end)
 
 QBCore.Functions.CreateCallback('mdt:server:SearchProfile', function(source, cb, sentData)
@@ -200,7 +196,6 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 		end
 		local vehicles = GetPlayerVehicles(person.cid)
 		
-		
 		if vehicles then
 			person.vehicles = vehicles
 		end
@@ -235,27 +230,6 @@ QBCore.Functions.CreateCallback('mdt:server:GetProfileData', function(source, cb
 	return cb(person)
 end)
 
---[[ RegisterNetEvent('mdt:server:SaveProfile', function(pfp, information, cid, fName, sName)
-	local src = source
-	local PlayerData = GetPlayerData(src)
-	if not PermCheck(src) then return cb({}) end
-	local JobType = GetJobType(PlayerData.job.name)
-	local target = GetPlayerDataById(sendId)
-	local JobName = PlayerData.job.name
-
-	local UglyFunc = function (id, pfp, desc, job)
-		-- exports.oxmysql:executeSync("UPDATE policemdtdata SET `information`=:information WHERE `id`=:id LIMIT 1", { id = id, information = information })
-		-- exports.oxmysql:executeSync("UPDATE users SET `profilepic`=:profilepic WHERE `id`=:id LIMIT 1", { id = cid, profilepic = pfp })
-		MySQL.update.await('UPDATE `mdt_data` SET information = ? where cid = ? LIMIT 1', {id, desc})
-		AddLog(("A user with the Citizen ID "..cid.." was updated by %s %s"):format(PlayerData.charinfo.firstname, PlayerData.charinfo.lastname))
-	end
-
-	local person = MySQL.single.await('SELECT id from mdtdata WHERE cid = ? AND type = ?', {cid, JobType})
-	if not person then
-		return cb({})
-	end
-end) ]]
-
 RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName, tags, gallery, fingerprint, licenses)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
@@ -273,144 +247,6 @@ RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName
 			fingerprint = fingerprint,
 		})
 	end
-end)
-
---[[ RegisterNetEvent("mdt:server:saveProfile", function(pfp, information, cid, fName, sName)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			if player.job and (player.job.isPolice or player.job.name == 'doj') then
-				local function UpdateInfo(id, pfp, desc)
-					exports.oxmysql:executeSync("UPDATE policemdtdata SET `information`=:information WHERE `id`=:id LIMIT 1", { id = id, information = information })
-					exports.oxmysql:executeSync("UPDATE users SET `profilepic`=:profilepic WHERE `id`=:id LIMIT 1", { id = cid, profilepic = pfp })
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..cid.." was updated by "..player.fullname)
-
-					if player.job.name == 'doj' then
-						exports.oxmysql:executeSync("UPDATE users SET `firstname`=:firstname, `lastname`=:lastname WHERE `id`=:id LIMIT 1", { firstname = fName, lastname = sName, id = cid })
-					end
-				end
-
-				exports.oxmysql:execute('SELECT id FROM policemdtdata WHERE cid=:cid LIMIT 1', { cid = cid }, function(user)
-					if user and user[1] then
-						UpdateInfo(user[1]['id'], pfp, information)
-					else
-						CreateUser(cid, 'policemdtdata', function(result)
-							UpdateInfo(result, pfp, information)
-						end)
-					end
-				end)
-			elseif player.job and (player.job.name == 'ambulance') then
-				local function UpdateInfo(id, pfp, desc)
-					exports.oxmysql:executeSync("UPDATE emsmdtdata SET `information`=:information WHERE `id`=:id LIMIT 1", { id = id, information = information })
-					exports.oxmysql:executeSync("UPDATE users SET `profilepic`=:profilepic WHERE `id`=:id LIMIT 1", { id = cid, profilepic = pfp })
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..cid.." was updated by "..player.fullname)
-				end
-
-				exports.oxmysql:execute('SELECT id FROM emsmdtdata WHERE cid=:cid LIMIT 1', { cid = cid }, function(user)
-					if user and user[1] then
-						UpdateInfo(user[1]['id'], pfp, information)
-					else
-						CreateUser(cid, 'emsmdtdata', function(result)
-							UpdateInfo(result, pfp, information)
-						end)
-					end
-				end)
-			end
-		end
-	end)
-end) ]]
-
-RegisterNetEvent("mdt:server:newTag", function(cid, tag)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or result.job.name == 'doj') then
-				local function UpdateTags(id, tags)
-					MySQL.update("UPDATE policemdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tags) })
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." was added a new tag with the text ("..tag..") by "..result.fullname)
-				end
-
-				local user = MySQL.query.await('SELECT id, tags FROM policemdtdata WHERE cid=:cid LIMIT 1', { cid = cid })
-				if user and user[1] then
-					local tags = json.decode(user[1]['tags'])
-					tags[#tags+1] = tag
-					UpdateTags(user[1]['id'], tags)
-				else
-					CreateUser(cid, 'policemdtdata', function(result)
-						local tags = {}
-						tags[#tags+1] = tag
-						UpdateTags(result, tags)
-					end)
-				end
-			elseif result.job and (result.job.name == 'ambulance') then
-				local function UpdateTags(id, tags)
-					MySQL.update("UPDATE emsmdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tags) })
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." was added a new tag with the text ("..tag..") by "..result.fullname)
-				end
-
-				local user = MySQL.query.await('SELECT id, tags FROM emsmdtdata WHERE cid=:cid LIMIT 1', { cid = cid })
-				if user and user[1] then
-					local tags = json.decode(user[1]['tags'])
-					tags[#tags+1] = tag
-					UpdateTags(user[1]['id'], tags)
-				else
-					CreateUser(cid, 'emsmdtdata', function(result)
-						local tags = {}
-						tags[#tags+1] = tag
-						UpdateTags(result, tags)
-					end)
-				end
-			end
-		end
-	end)
-end)
-
-RegisterNetEvent("mdt:server:removeProfileTag", function(cid, tagtext)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		if result then
-			if result.job and (result.job.isPolice or result.job.name == 'doj') then
-
-				local function UpdateTags(id, tag)
-					MySQL.update("UPDATE policemdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tag)})
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." was removed of a tag with the text ("..tagtext..") by "..result.fullname)
-				end
-
-				local user = MySQL.query.await('SELECT id, tags FROM policemdtdata WHERE cid=:cid LIMIT 1', { cid = cid })
-				if user and user[1] then
-					local tags = json.decode(user[1]['tags'])
-					for i=1, #tags do
-						if tags[i] == tagtext then
-							table.remove(tags, i)
-						end
-					end
-					UpdateTags(user[1]['id'], tags)
-				else
-					CreateUser(cid, 'policemdtdata', function(result)
-						UpdateTags(result, {})
-					end)
-				end
-			elseif result.job and (result.job.name == 'ambulance') then
-
-				local function UpdateTags(id, tag)
-					MySQL.update("UPDATE emsmdtdata SET `tags`=:tags WHERE `id`=:id LIMIT 1", { id = id, tags = json.encode(tag) })
-					TriggerEvent('mdt:server:AddLog', "A user with the Citizen ID "..id.." was removed of a tag with the text ("..tagtext..") by "..result.fullname)
-				end
-
-				local user = MySQL.query.await('SELECT id, tags FROM emsmdtdata WHERE cid=:cid LIMIT 1', { cid = cid })
-				if user and user[1] then
-					local tags = json.decode(user[1]['tags'])
-					for i=1, #tags do
-						if tags[i] == tagtext then
-							table.remove(tags, i)
-						end
-					end
-					UpdateTags(user[1]['id'], tags)
-				else
-					CreateUser(cid, 'emsmdtdata', function(result)
-						UpdateTags(result, {})
-					end)
-				end
-			end
-		end
-	end)
 end)
 
 RegisterNetEvent("mdt:server:updateLicense", function(cid, type, status)
@@ -998,29 +834,6 @@ RegisterNetEvent('mdt:server:getPenalCode', function()
 	TriggerClientEvent('mdt:client:getPenalCode', src, Config.PenalCodeTitles, Config.PenalCode)
 end)
 
-RegisterNetEvent('mdt:server:toggleDuty', function(cid, status)
-	TriggerEvent('echorp:getplayerfromid', source, function(result)
-		local player = exports['echorp']:GetPlayerFromCid(cid)
-		if player then
-			if player.job.name == "ambulance" and player.job.duty == 0 then
-                local mzDist = #(GetEntityCoords(GetPlayerPed(source)) - vector3(-475.15, -314.0, 62.15))
-                if mzDist > 100 then TriggerClientEvent('erp_notifications:client:SendAlert', source, { type = 'error', text = 'You must be at Mount Zonah to clock in!!', length = 5000 }) TriggerClientEvent('mdt:client:exitMDT',source) return end
-            end
-			if player.job.isPolice or player.job.name == 'ambulance' or player.job.name == 'doj' then
-				local isPolice = false
-				if policeJobs[player.job.name] then isPolice = true end;
-				exports['echorp']:SetPlayerData(player.source, 'job', {name = player.job.name, grade = player.job.grade, duty = status, isPolice = isPolice})
-				MySQL.update("UPDATE users SET duty=:duty WHERE id=:cid", { duty = status, cid = cid})
-				if status == 0 then
-					TriggerEvent('mdt:server:AddLog', result['fullname'].." set "..player['fullname']..'\'s duty to 10-7')
-				else
-					TriggerEvent('mdt:server:AddLog', result['fullname'].." set "..player['fullname']..'\'s duty to 10-8')
-				end
-			end
-		end
-	end)
-end)
-
 RegisterNetEvent('mdt:server:setCallsign', function(cid, newcallsign)
 	local Player = QBCore.Functions.GetPlayerByCitizenId(cid)
 	Player.Functions.SetMetaData("callsign", newcallsign)
@@ -1295,22 +1108,15 @@ RegisterNetEvent('mdt:server:refreshDispatchMsgs', function()
 end)
 
 RegisterNetEvent('mdt:server:getCallResponses', function(callid)
-	-- TriggerEvent('echorp:getplayerfromid', source, function(result)
-	-- 	if result then
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	if IsPolice(Player.PlayerData.job.name) then
 		local calls = exports['qb-dispatch']:GetDispatchCalls()
 		TriggerClientEvent('mdt:client:getCallResponses', src, calls[callid]['responses'], callid)
 	end
-	-- 	end
-	-- end)
 end)
 
 RegisterNetEvent('mdt:server:sendCallResponse', function(message, time, callid)
-	-- TriggerEvent('echorp:getplayerfromid', source, function(result)
-	-- 	if result then
-	-- 		if result.job and (result.job.isPolice or (result.job.name == 'ambulance')) then
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	local name = Player.PlayerData.charinfo.firstname.. " "..Player.PlayerData.charinfo.lastname
@@ -1321,9 +1127,6 @@ RegisterNetEvent('mdt:server:sendCallResponse', function(message, time, callid)
 			end
 		end)
 	end
-	-- 		end
-	-- 	end
-	-- end)
 end)
 
 RegisterNetEvent('mdt:server:setRadio', function(cid, newRadio)
@@ -1398,39 +1201,8 @@ RegisterNetEvent('mdt:server:impoundVehicle', function(sentInfo, sentVehicle)
 	end
 end)
 
--- mdt:server:getImpoundVehicles
-
-
 RegisterNetEvent('mdt:server:getImpoundVehicles', function()
 	TriggerClientEvent('mdt:client:getImpoundVehicles', source, impound)
-end)
-
-RegisterNetEvent('mdt:server:collectVehicle', function(sentId)
-	TriggerEvent('echorp:getplayerfromid', source, function(player)
-		if player then
-			local source = source
-			for i=1, #impound do
-				local id = impound[i]['vehicleid']
-				if tostring(id) == tostring(sentId) then
-					local vehicle = NetworkGetEntityFromNetworkId(impound[i]['vehicle'])
-					if not DoesEntityExist(vehicle) then
-						TriggerClientEvent('erp_phone:sendNotification', source, {img = 'vehiclenotif.png', title = "Impound", content = "This vehicle has already been impounded.", time = 5000 })
-						impound[i] = nil
-						return
-					end
-					local collector = impound[i]['beingcollected']
-					if collector ~= 0 and GetPlayerPing(collector) >= 0 then
-						TriggerClientEvent('erp_phone:sendNotification', source, {img = 'vehiclenotif.png', title = "Impound", content = "This vehicle is being collected.", time = 5000 })
-						return
-					end
-					impound[i]['beingcollected'] = source
-					TriggerClientEvent('mdt:client:collectVehicle', source, GetEntityCoords(vehicle))
-					TriggerClientEvent('erp_phone:sendNotification', impound[i]['src'], {img = 'vehiclenotif.png', title = "Impound", content = player['fullname'].." is collecing the vehicle with plate "..impound[i]['plate'].."!", time = 5000 })
-					break
-				end
-			end
-		end
-	end)
 end)
 
 RegisterNetEvent('mdt:server:removeImpound', function(plate, currentSelection)

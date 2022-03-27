@@ -3604,6 +3604,7 @@ $(document).ready(() => {
         $(".vehicle-information-save").css("display", "block");
         $(".vehicle-information-title").css("margin-right", "0px").css("width", "81%");
         $(".manage-incidents-title ").css("margin-right", "0px")
+        $(".manage-reports-title").css("margin-right", "0px").css("width", "66%");
       } else if (PoliceJobs[sentJob] !== undefined) {
         $("#home-warrants-container").fadeOut(0);
         $("#home-reports-container").fadeIn(0);
@@ -3701,6 +3702,7 @@ $(document).ready(() => {
         $(".vehicle-information-save").css("display", "block");
         $(".vehicle-information-title").css("margin-right", "0px").css("width", "81%");
         $(".manage-incidents-title ").css("margin-right", "0px")
+        $(".manage-reports-title").css("margin-right", "0px").css("width", "66%");
       } else if (DojJobs[sentJob] !== undefined) {
         document.documentElement.style.setProperty(
           "--color-1",
@@ -3759,6 +3761,7 @@ $(document).ready(() => {
         $(".vehicle-information-save").css("display", "none");
         $(".vehicle-information-title").css("margin-right", "auto").css("width", "95%");
         $(".manage-incidents-title ").css("margin-right", "auto")
+        $(".manage-reports-title").css("margin-right", "auto").css("width", "95%");
       }
     }
   }

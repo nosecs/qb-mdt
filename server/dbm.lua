@@ -2,7 +2,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 
 -- (Start) Opening the MDT and sending data
 function AddLog(text)
-	print(text)
+	--print(text)
     return MySQL.insert.await('INSERT INTO `mdt_logs` (`text`, `time`) VALUES (?,?)', {text, os.time() * 1000})
 	-- return exports.oxmysql:execute('INSERT INTO `mdt_logs` (`text`, `time`) VALUES (:text, :time)', { text = text, time = os.time() * 1000 })
 end
@@ -10,9 +10,14 @@ end
 function GetNameFromId(cid)
 	-- Should be a scalar?
 	local result = MySQL.scalar.await('SELECT charinfo FROM players WHERE citizenid = @citizenid', { ['@citizenid'] = cid })
-	local charinfo = json.decode(result)
-	local fullname = charinfo['firstname']..' '..charinfo['lastname']
-	return fullname
+    if result ~= nil then
+        local charinfo = json.decode(result)
+        local fullname = charinfo['firstname']..' '..charinfo['lastname']
+        return fullname
+    else
+        --print('Player does not exist')
+        return nil
+    end
 	-- return exports.oxmysql:executeSync('SELECT firstname, lastname FROM `users` WHERE id = :id LIMIT 1', { id = cid })
 end
 

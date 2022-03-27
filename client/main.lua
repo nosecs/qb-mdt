@@ -584,7 +584,8 @@ RegisterNUICallback("getPenalCode", function(data, cb)
 end)
 
 RegisterNUICallback("toggleDuty", function(data, cb)
-    TriggerServerEvent('QBCore:ToggleDuty')
+    -- TriggerServerEvent('QBCore:ToggleDuty')
+    TriggerEvent("qb-policejob:ToggleDuty")
     cb(true)
 end)
 
@@ -670,6 +671,10 @@ end)
 --               DISPATCH PAGE          --
 ------------------------------------------
 --====================================================================================
+
+RegisterNetEvent('dispatch:clNotify', function(sNotificationData, sNotificationId)
+    SendNUIMessage({ type = "call", data = sNotificationData })
+end)
 
 RegisterNUICallback("setWaypoint", function(data, cb)
     TriggerServerEvent('mdt:server:setWaypoint', data.callid)

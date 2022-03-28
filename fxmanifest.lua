@@ -15,7 +15,10 @@ server_scripts {
     'server/dbm.lua',
     'server/main.lua'
 }
-client_script 'client/main.lua'
+client_scripts{
+    'client/main.lua',
+    'client/cl_impound.lua'
+} 
 
 ui_page 'ui/dashboard.html'
 

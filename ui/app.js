@@ -3512,7 +3512,7 @@ $(document).ready(() => {
 
   function JobColors(sentJob) {
     if (sentJob) {
-      if (sentJob == "police") {
+      if (PoliceJobs[sentJob] !== undefined) {
         document.documentElement.style.setProperty(
           "--color-1",
           "#1E3955"
@@ -3605,7 +3605,7 @@ $(document).ready(() => {
         $(".vehicle-information-title").css("margin-right", "0px").css("width", "81%");
         $(".manage-incidents-title ").css("margin-right", "0px")
         $(".manage-reports-title").css("margin-right", "0px").css("width", "66%");
-      } else if (PoliceJobs[sentJob] !== undefined) {
+      } else if (AmbulanceJobs[sentJob] !== undefined) {
         $("#home-warrants-container").fadeOut(0);
         $("#home-reports-container").fadeIn(0);
         document.documentElement.style.setProperty(

@@ -709,6 +709,7 @@ RegisterNetEvent('mdt:server:getVehicleData', function(plate)
 end)
 
 RegisterNetEvent('mdt:server:saveVehicleInfo', function(dbid, plate, imageurl, notes, stolen, code5, impound)
+	print(dbid, plate, imageurl, notes, stolen, code5, impound)
 	if plate then
 		local src = source
 		local Player = QBCore.Functions.GetPlayer(src)
@@ -764,12 +765,18 @@ RegisterNetEvent('mdt:server:saveVehicleInfo', function(dbid, plate, imageurl, n
 					else
 						if vehicle.impoundid ~= nil then
 							local data = vehicle
-							MySQL.update("DELETE FROM `mdt_impound` WHERE id=:vehicleid", { vehicleid = data['impoundid'] })
-							local data = {
-								currentSelection = impound.currentSelection,
-								plate = plate
-							}
-							TriggerClientEvent('police:client:TakeOutImpound', src, data)
+							local result = MySQL.single.await("SELECT id, vehicle, fuel, engine, body FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
+							if result then
+								print("comes here?")
+								local data = result
+								MySQL.update("DELETE FROM `mdt_impound` WHERE vehicleid=:vehicleid", { vehicleid = data['id'] })
+
+								result.currentSelection = impound.CurrentSelection
+								result.plate = plate
+								print(json.encode(result))
+								TriggerClientEvent('qb-mdt:client:TakeOutImpound', src, result)
+							end
+							
 						end
 					end
 				end
@@ -1206,11 +1213,12 @@ RegisterNetEvent('mdt:server:getImpoundVehicles', function()
 end)
 
 RegisterNetEvent('mdt:server:removeImpound', function(plate, currentSelection)
+	print("Removing impound", plate, currentSelection)
 	local src = source
 	local Player = QBCore.Functions.GetPlayer(src)
 	if Player then
 		if GetJobType(Player.PlayerData.job.name) == 'police' then
-			local result = MySQL.single.await("SELECT id FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
+			local result = MySQL.single.await("SELECT id, vehicle FROM `player_vehicles` WHERE plate=:plate LIMIT 1", { plate = string.gsub(plate, "^%s*(.-)%s*$", "%1")})
 			if result and result[1] then
 				local data = result[1]
 				MySQL.update("DELETE FROM `mdt_impound` WHERE vehicleid=:vehicleid", { vehicleid = data['id'] })

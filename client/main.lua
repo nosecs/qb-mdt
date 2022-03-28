@@ -1,4 +1,4 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+QBCore = exports['qb-core']:GetCoreObject()
 local PlayerData = {}
 local CurrentCops = 0
 local isOpen = false
@@ -568,7 +568,7 @@ RegisterNUICallback("saveVehicleInfo", function(data, cb)
             end
         end
     end
-
+    print(impound.CurrentSelection)
     TriggerServerEvent('mdt:server:saveVehicleInfo', dbid, plate, imageurl, notes, stolen, code5, impound)
     cb(true)
 end)
@@ -615,8 +615,8 @@ RegisterNetEvent('mdt:client:getVehicleData', function(sentData)
         local vehData = json.decode(vehicle['vehicle'])
         vehicle['color'] = Config.ColorInformation[vehicle['color1']]
         vehicle['colorName'] = Config.ColorNames[vehicle['color1']]
-        vehicle['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehicle['model']))
-        vehicle['class'] = Config.ClassList[GetVehicleClassFromName(vehicle['model'])]
+        vehicle['model'] = GetLabelText(GetDisplayNameFromVehicleModel(vehicle['vehicle']))
+        vehicle['class'] = Config.ClassList[GetVehicleClassFromName(vehicle['vehicle'])]
         vehicle['vehicle'] = nil
         SendNUIMessage({ type = "getVehicleData", data = vehicle })
     end

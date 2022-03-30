@@ -2555,7 +2555,6 @@ $(document).ready(() => {
             name: name,
           })
         );
-        console.log(result.length)
         if (result.length === 0) {
           $(".dmv-items").html(
             `

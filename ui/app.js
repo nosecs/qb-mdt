@@ -2555,14 +2555,15 @@ $(document).ready(() => {
             name: name,
           })
         );
-        if (result.length < 1) {
+        console.log(result.length)
+        if (result.length === 0) {
           $(".dmv-items").html(
             `
                             <div class="profile-item" data-id="0">
 
                                 <div style="display: flex; flex-direction: column; margin-top: 2.5px; margin-left: 5px; width: 100%; padding: 5px;">
                                 <div style="display: flex; flex-direction: column;">
-                                    <div class="profile-item-title">No Users Matching that search</div>
+                                    <div class="profile-item-title">No Vehicles Matching that search</div>
                                     </div>
                                     <div class="profile-bottom-info">
                                     </div>
@@ -2570,11 +2571,11 @@ $(document).ready(() => {
                             </div>
                     `
           );
+          canSearchForVehicles = true;
           return true;
         }
         $(".dmv-items").empty();
-        canSearchForVehicles = true;
-
+        
         let vehicleHTML = "";
 
         result.forEach((value) => {

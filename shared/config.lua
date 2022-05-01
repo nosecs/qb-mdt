@@ -7,6 +7,8 @@ Config.RosterLink = {
     ['doj'] = '',
 }
 
+Config.Fuel = "lj-fuel" -- "LegacyFuel", "lj-fuel"
+
 Config.PenalCodeTitles = {
     [1] = 'OFFENSES AGAINST PERSONS',
     [2] = 'OFFENSES INVOLVING THEFT',
@@ -240,7 +242,9 @@ Config.AmbulanceJobs = {
     ['doctor'] = true
 }
 
-Config.DojJobs = {}
+Config.DojJobs = {
+    ['lawyer'] = true,
+}
 
 -- Leave my hacky code alone ya goblins
 Config.AllowedJobs = {}
@@ -257,36 +261,11 @@ end
 
 Config.LogPerms = {
 	['ambulance'] = {
-		[7] = true,
-		[8] = true,
-		[15] = true,
-		[16] = true
-	},
-	['bcso'] = {
-		[6] = true,
-		[7] = true,
-		[8] = true,
-	},
-	['doc'] = {
-		[8] = true,
-		[9] = true,
-	},
-	['doj'] = {
-		[11] = true,
+		[4] = true,
 	},
 	['police'] = {
-		[6] = true,
-		[7] = true,
-		[8] = true,
-	},
-	['sast'] = {
-		[5] = true,
-		[6] = true,
-	},
-	['sapr'] = {
 		[4] = true,
-		[5] = true,
-	}
+	},
 }
 
 Config.ColorNames = {
@@ -636,4 +615,23 @@ Config.ClassList = {
     [19] = "Military",
     [20] = "Commercial",
     [21] = "Train"
+}
+
+function GetJobType(job)
+	if Config.PoliceJobs[job] then
+		return 'police'
+	elseif Config.AmbulanceJobs[job] then
+		return 'ambulance'
+	elseif Config.DojJobs[job] then
+		return 'doj'
+	else
+		return nil
+	end
+end
+
+-- this is a hack, because the qb-menu in qb-policejob populates an impound location and passed it through to the event.
+-- if this impound locations are changed in qb-policejob, they must also be changed here.
+Config.ImpoundLocations = { 
+    [1] = vector4(436.68, -1007.42, 27.32, 180.0),
+    [2] = vector4(-436.14, 5982.63, 31.34, 136.0),
 }

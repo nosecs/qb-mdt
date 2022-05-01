@@ -1,24 +1,8 @@
-# NOT YET WORKING
-
-I decided to push the half done server.lua this is purely as a back as my machine rolledback and I lost progress.
-
-## Whats done
-- Searching Profiles
-- Loading profile data
-- Active Duty List
-- Searching Vehicles
-
-## TODOS
-
-- Continue rewriting server.lua and remove the callback hell, keep function based but with promises.
-- actually get it working with new format
-- rewrite ui in react (later)
+# Beta Released
 
 ## EchoRP MDT QBCore Edit (WIP)
 
-EchoRP MDT Released by Flawws#9999 from Echo RP rewritten and restructured for QBCore.
-
-This is still a work in progress please wait for 1.0 release.
+EchoRP MDT Released by Flawws#9999 from Echo RP rewritten and restructured for QBCore. 
 
 ## Dependencies
 
